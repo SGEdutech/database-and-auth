@@ -9,7 +9,10 @@ const ContactSchema = new Schema({
 
 const ReviewsOwnedSchema = new Schema({
 	category: String,
-	outerId: { type: String, unique: true },
+	outerId: {
+		type: String,
+		unique: true
+	},
 	innerId: String
 });
 
@@ -19,9 +22,19 @@ const ImportantDateSchema = new Schema({
 });
 
 const ReviewSchema = new Schema({
-	likes: { type: Number, default: 0 },
-	rating: { type: Number, required: true },
-	owner: { type: String, unique: true, sparse: true },
+	likes: {
+		type: Number,
+		default: 0
+	},
+	rating: {
+		type: Number,
+		required: true
+	},
+	owner: {
+		type: String,
+		unique: true,
+		sparse: true
+	},
 	description: String
 });
 
@@ -60,7 +73,10 @@ const TimeAndDateSchema = new Schema({
 const ClaimSchema = new Schema({
 	category: String,
 	objectId: String,
-	isPromoted: Boolean,
+	isPromoted: {
+		type: Boolean,
+		default: false
+	},
 	expires: Date
 });
 

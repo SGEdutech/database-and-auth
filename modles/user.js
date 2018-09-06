@@ -10,7 +10,7 @@ const UserSchema = new Schema({
 	facebookId: String,
 	googleId: String,
 	password: { type: String, select: false },
-	claims: { ClaimSchema },
+	claims: [ ClaimSchema ],
 	reviewsOwned: [ReviewsOwnedSchema],
 	schoolsOwned: [String],
 	primaryRole: String, // Institute, student, parent
