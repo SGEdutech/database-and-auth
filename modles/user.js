@@ -2,16 +2,15 @@ const mongoose = require('mongoose');
 const arrayUniquePlugin = require('mongoose-unique-array');
 const Schema = mongoose.Schema;
 const secondarySchemas = require('../secondary-schemas');
-const ReviewsOwnedSchema = secondarySchemas.ReviewsOwnedSchema;
+const { ReviewsOwnedSchema } = secondarySchemas;
+const { ClaimSchema } = secondarySchemas;
 
 const UserSchema = new Schema({
 	about: String,
 	facebookId: String,
 	googleId: String,
 	password: { type: String, select: false },
-	blogsOwned: [String],
-	eventsOwned: [String],
-	tuitionsOwned: [{ type: String }],
+	claims: { ClaimSchema },
 	reviewsOwned: [ReviewsOwnedSchema],
 	schoolsOwned: [String],
 	primaryRole: String, // Institute, student, parent

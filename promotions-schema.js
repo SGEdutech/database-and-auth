@@ -7,8 +7,8 @@ exports = module.exports = {
 		type: Date,
 		default: Date.now()
 	}],
-	expieres: Date,
+	expires: Date,
 	userId: String,
 	category: String,
 	listingId: String
-}
+};

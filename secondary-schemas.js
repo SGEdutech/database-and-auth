@@ -57,6 +57,13 @@ const TimeAndDateSchema = new Schema({
 	toTime: String
 });
 
+const ClaimSchema = new Schema({
+	category: String,
+	objectId: String,
+	isPromoted: Boolean,
+	expires: Date
+});
+
 exports = module.exports = {
 	ContactSchema,
 	ReviewsOwnedSchema,
@@ -66,5 +73,6 @@ exports = module.exports = {
 	CourseSchema,
 	FacilitiesAndBraggingSchema,
 	TeamSchema,
-	TimeAndDateSchema
+	TimeAndDateSchema,
+	ClaimSchema
 };
