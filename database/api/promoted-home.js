@@ -1,7 +1,7 @@
 const route = require('express')
 	.Router();
 const promotedHome = require('../modles/promoted-home');
-const escapeRegex = require('../../eduatlas-backend/scripts/escape-regex');
+const escapeRegex = require('../../../eduatlas-backend/scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
 const promotedHomeDBFunctions = new DbAPIClass(promotedHome);
 

@@ -3,7 +3,7 @@ const route = require('express')
 const User = require('../modles/user');
 const DbAPIClass = require('../api-functions');
 const userDbFunctions = new DbAPIClass(User);
-const youShallNotPass = require('../../eduatlas-backend/scripts/login-check');
+const youShallNotPass = require('../../../eduatlas-backend/scripts/login-check');
 
 route.get('/info', (req, res) => res.send(req.user));
 

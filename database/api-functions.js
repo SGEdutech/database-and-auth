@@ -1,4 +1,4 @@
-const deleteThisShit = require('../eduatlas-backend/scripts/fsunlink');
+const deleteThisShit = require('../../eduatlas-backend/scripts/fsunlink');
 const path = require('path');
 
 class DatabaseAPI {

@@ -1,16 +1,21 @@
 const route = require('express')
 	.Router();
-const Event = require('../modles/event');
-const escapeRegex = require('../../eduatlas-backend/scripts/escape-regex');
+const promotedSearch = require('../modles/promoted-search');
+const escapeRegex = require('../../../eduatlas-backend/scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
-const eventDbFunctions = new DbAPIClass(Event);
+const promotedSearchDBFunctions = new DbAPIClass(promotedSearch);
 
 route.get('/all', (req, res) => {
 	const queryObject = req.query;
 	const skip = parseInt(queryObject.skip, 10) || 0;
 	const limit = parseInt(queryObject.limit, 10) || 0;
-	eventDbFunctions
-		.getAllData(queryObject.demands, skip, limit)
+	tuitionDbFunctions.getAllData(queryObject.demands, skip, limit)
+		.then(data => res.send(data))
+		.catch(err => console.error(err));
+});
+
+route.get('/', (req, res) => {
+	tuitionDbFunctions.getSpecificData(req.query, true)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
@@ -21,10 +26,12 @@ route.get('/search', (req, res) => {
 	const skip = parseInt(queryObject.skip, 10) || 0;
 	const limit = parseInt(queryObject.limit, 10) || 0;
 	const sortBy = queryObject.sortBy || undefined;
+
 	delete queryObject.demands;
 	delete queryObject.skip;
 	delete queryObject.limit;
 	delete queryObject.sortBy;
+
 	const searchCriteria = {};
 	const queryKeys = Object.keys(queryObject);
 	queryKeys.forEach(key => {
@@ -35,39 +42,27 @@ route.get('/search', (req, res) => {
 			searchCriteria[key] = new RegExp(escapeRegex(value.search), 'i');
 		}
 	});
-	eventDbFunctions
-		.getMultipleData(searchCriteria, demands, skip, limit, sortBy)
+	tuitionDbFunctions.getMultipleData(searchCriteria, demands, skip, limit, sortBy)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
-route.get('/', (req, res) => {
-	eventDbFunctions
-		.getSpecificData(req.query, true)
-		.then(data => res.send(data))
-		.catch(err => console.error(err));
-});
-
-route.post('/add/:arrayName/:_id', (req, res) => {
+// Todo: Fix routing
+route.post('/add/:_id/:arrayName', (req, res) => {
 	const elementToBePushed = req.body.string || req.body;
-	eventDbFunctions
-		.addElementToArray({
-			_id: req.params._id
-		}, req.params.arrayName, elementToBePushed)
+	tuitionDbFunctions.addElementToArray({ _id: req.params._id }, req.params.arrayName, elementToBePushed)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.post('/', (req, res) => {
-	if (req.file) req.body.coverPic = req.file.filename;
-	eventDbFunctions
-		.addCollection(req.body)
+	tuitionDbFunctions.addCollection(req.body)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.put('/update/:idOfCollection/:arrayName/:idOfNestedObject', (req, res) => {
-	eventDbFunctions
+	tuitionDbFunctions
 		.updateElementInArray({
 			_id: req.params.idOfCollection
 		}, req.params.arrayName, req.params.idOfNestedObject, req.body)
@@ -76,15 +71,14 @@ route.put('/update/:idOfCollection/:arrayName/:idOfNestedObject', (req, res) => 
 });
 
 route.put('/:_id', (req, res) => {
-	eventDbFunctions
-		.updateOneRow(req.params, req.body)
+	tuitionDbFunctions.updateOneRow(req.params, req.body)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
-route.delete('/delete/:arrayName/:_id', (req, res) => {
+route.delete('/delete/:_id/:arrayName', (req, res) => {
 	const identifier = req.body.string || req.body;
-	eventDbFunctions
+	tuitionDbFunctions
 		.deleteElementFromArray({
 			_id: req.params._id
 		}, req.params.arrayName, identifier)
@@ -93,15 +87,14 @@ route.delete('/delete/:arrayName/:_id', (req, res) => {
 });
 
 route.delete('/empty/:keyname', (req, res) => {
-	eventDbFunctions
-		.emptyKey(req.body, req.params.keyname)
+	tuitionDbFunctions.emptyKey(req.body, req.params.keyname)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.delete('/:_id', (req, res) => {
-	eventDbFunctions
-		.deleteOneRow(req.params)
+	// if (req.params._id.match(/^[0-9a-fA-F]{24}$/) === null) res.send('Not a valid id');
+	tuitionDbFunctions.deleteOneRow(req.params)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });

@@ -1,9 +1,9 @@
 const route = require('express')
 	.Router();
-const promotedRelated = require('../modles/promoted-related');
-const escapeRegex = require('../../eduatlas-backend/scripts/escape-regex');
+const Tuition = require('../modles/tuition');
+const escapeRegex = require('../../../eduatlas-backend/scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
-const promotedRelatedDBFunctions = new DbAPIClass(promotedRelated);
+const tuitionDbFunctions = new DbAPIClass(Tuition);
 
 route.get('/all', (req, res) => {
 	const queryObject = req.query;
@@ -11,6 +11,26 @@ route.get('/all', (req, res) => {
 	const limit = parseInt(queryObject.limit, 10) || 0;
 	tuitionDbFunctions.getAllData(queryObject.demands, skip, limit)
 		.then(data => res.send(data))
+		.catch(err => console.error(err));
+});
+
+route.get('/claimed', (req, res) => {
+	const queryObject = req.query;
+	const skip = parseInt(queryObject.skip, 10) || 0;
+	const limit = parseInt(queryObject.limit, 10) || 0;
+	tuitionDbFunctions.getAllData(queryObject.demands, skip, limit)
+		.then(data => {
+			const toReturn = [];
+			data.forEach(obj => {
+				const claimedBy = obj.claimedBy;
+				if (claimedBy === undefined || claimedBy === '') {
+					//do nothing
+				} else {
+					toReturn.push(obj);
+				}
+			});
+			res.send(toReturn);
+		})
 		.catch(err => console.error(err));
 });
 
@@ -48,7 +68,7 @@ route.get('/search', (req, res) => {
 });
 
 // Todo: Fix routing
-route.post('/add/:_id/:arrayName', (req, res) => {
+route.post('/add/:arrayName/:_id', (req, res) => {
 	const elementToBePushed = req.body.string || req.body;
 	tuitionDbFunctions.addElementToArray({ _id: req.params._id }, req.params.arrayName, elementToBePushed)
 		.then(data => res.send(data))

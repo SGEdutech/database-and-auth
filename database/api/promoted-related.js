@@ -1,9 +1,9 @@
 const route = require('express')
 	.Router();
-const promotedSearch = require('../modles/promoted-search');
-const escapeRegex = require('../../eduatlas-backend/scripts/escape-regex');
+const promotedRelated = require('../modles/promoted-related');
+const escapeRegex = require('../../../eduatlas-backend/scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
-const promotedSearchDBFunctions = new DbAPIClass(promotedSearch);
+const promotedRelatedDBFunctions = new DbAPIClass(promotedRelated);
 
 route.get('/all', (req, res) => {
 	const queryObject = req.query;

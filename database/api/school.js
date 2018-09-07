@@ -1,41 +1,16 @@
 const route = require('express')
 	.Router();
-const Tuition = require('../modles/tuition');
-const escapeRegex = require('../../eduatlas-backend/scripts/escape-regex');
+const School = require('../modles/school');
+const escapeRegex = require('../../../eduatlas-backend/scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
-const tuitionDbFunctions = new DbAPIClass(Tuition);
+const schoolDbFunctions = new DbAPIClass(School);
 
 route.get('/all', (req, res) => {
 	const queryObject = req.query;
 	const skip = parseInt(queryObject.skip, 10) || 0;
 	const limit = parseInt(queryObject.limit, 10) || 0;
-	tuitionDbFunctions.getAllData(queryObject.demands, skip, limit)
-		.then(data => res.send(data))
-		.catch(err => console.error(err));
-});
-
-route.get('/claimed', (req, res) => {
-	const queryObject = req.query;
-	const skip = parseInt(queryObject.skip, 10) || 0;
-	const limit = parseInt(queryObject.limit, 10) || 0;
-	tuitionDbFunctions.getAllData(queryObject.demands, skip, limit)
-		.then(data => {
-			const toReturn = [];
-			data.forEach(obj => {
-				const claimedBy = obj.claimedBy;
-				if (claimedBy === undefined || claimedBy === '') {
-					//do nothing
-				} else {
-					toReturn.push(obj);
-				}
-			});
-			res.send(toReturn);
-		})
-		.catch(err => console.error(err));
-});
-
-route.get('/', (req, res) => {
-	tuitionDbFunctions.getSpecificData(req.query, true)
+	schoolDbFunctions
+		.getAllData(queryObject.demands, skip, limit)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
@@ -46,12 +21,10 @@ route.get('/search', (req, res) => {
 	const skip = parseInt(queryObject.skip, 10) || 0;
 	const limit = parseInt(queryObject.limit, 10) || 0;
 	const sortBy = queryObject.sortBy || undefined;
-
 	delete queryObject.demands;
 	delete queryObject.skip;
 	delete queryObject.limit;
 	delete queryObject.sortBy;
-
 	const searchCriteria = {};
 	const queryKeys = Object.keys(queryObject);
 	queryKeys.forEach(key => {
@@ -62,27 +35,37 @@ route.get('/search', (req, res) => {
 			searchCriteria[key] = new RegExp(escapeRegex(value.search), 'i');
 		}
 	});
-	tuitionDbFunctions.getMultipleData(searchCriteria, demands, skip, limit, sortBy)
+	schoolDbFunctions
+		.getMultipleData(searchCriteria, demands, skip, limit, sortBy)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
-// Todo: Fix routing
+route.get('/', (req, res) => {
+	schoolDbFunctions
+		.getSpecificData(req.query, true)
+		.then(data => res.send(data))
+		.catch(err => console.error(err));
+});
+
 route.post('/add/:arrayName/:_id', (req, res) => {
 	const elementToBePushed = req.body.string || req.body;
-	tuitionDbFunctions.addElementToArray({ _id: req.params._id }, req.params.arrayName, elementToBePushed)
+	schoolDbFunctions
+		.addElementToArray({
+			_id: req.params._id
+		}, req.params.arrayName, elementToBePushed)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.post('/', (req, res) => {
-	tuitionDbFunctions.addCollection(req.body)
+	schoolDbFunctions
+		.addCollection(req.body)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
-
 route.put('/update/:idOfCollection/:arrayName/:idOfNestedObject', (req, res) => {
-	tuitionDbFunctions
+	schoolDbFunctions
 		.updateElementInArray({
 			_id: req.params.idOfCollection
 		}, req.params.arrayName, req.params.idOfNestedObject, req.body)
@@ -91,14 +74,15 @@ route.put('/update/:idOfCollection/:arrayName/:idOfNestedObject', (req, res) => 
 });
 
 route.put('/:_id', (req, res) => {
-	tuitionDbFunctions.updateOneRow(req.params, req.body)
+	schoolDbFunctions
+		.updateOneRow(req.params, req.body)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.delete('/delete/:_id/:arrayName', (req, res) => {
 	const identifier = req.body.string || req.body;
-	tuitionDbFunctions
+	schoolDbFunctions
 		.deleteElementFromArray({
 			_id: req.params._id
 		}, req.params.arrayName, identifier)
@@ -107,14 +91,15 @@ route.delete('/delete/:_id/:arrayName', (req, res) => {
 });
 
 route.delete('/empty/:keyname', (req, res) => {
-	tuitionDbFunctions.emptyKey(req.body, req.params.keyname)
+	schoolDbFunctions
+		.emptyKey(req.body, req.params.keyname)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.delete('/:_id', (req, res) => {
-	// if (req.params._id.match(/^[0-9a-fA-F]{24}$/) === null) res.send('Not a valid id');
-	tuitionDbFunctions.deleteOneRow(req.params)
+	schoolDbFunctions
+		.deleteOneRow(req.params)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
