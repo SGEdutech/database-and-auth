@@ -25,7 +25,6 @@ passport.deserializeUser((userid, done) => {
 });
 
 passport.use(new LocalStrategy((username, password, done) => {
-
     APIHelperFunctions.getSpecificData({'primaryEmail': username}, false, true)
         .then(user => {
             if (!user) {

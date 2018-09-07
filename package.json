@@ -19,6 +19,7 @@
   "homepage": "https://github.com/SGEdutech/database#readme",
   "dependencies": {
     "express": "^4.16.3",
+    "express-session": "^1.15.6",
     "memory-cache": "^0.2.0",
     "mongoose": "^5.2.12",
     "mongoose-unique-array": "^0.2.0",
