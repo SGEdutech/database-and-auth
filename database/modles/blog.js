@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 const arrayUniquePlugin = require('mongoose-unique-array');
 const Schema = mongoose.Schema;
+const ViewsOrHitsSchema = require('../views-or-hits-schema');
 
 const BlogSchema = new Schema({
 	blogId: String,
 	owner: String, //no owner
-	views: { type: Number, default: 0 },
-	hits: { type: Number, default: 0 },
+    views: ViewsOrHitsSchema,
+    hits: ViewsOrHitsSchema,
 	bookmarks: Number,
 	title: String,
 	authorName: String,

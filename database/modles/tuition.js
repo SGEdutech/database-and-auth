@@ -8,6 +8,7 @@ const CourseSchema = secondarySchemas.CourseSchema;
 const TeamSchema = secondarySchemas.TeamSchema;
 const FacilitiesAndBraggingSchema = secondarySchemas.FacilitiesAndBraggingSchema;
 const TimeAndDateSchema = secondarySchemas.TimeAndDateSchema;
+const ViewsOrHitsSchema = require('../views-or-hits-schema');
 
 const TuitionSchema = new Schema({
 	name: String,
@@ -39,8 +40,8 @@ const TuitionSchema = new Schema({
 	bragging: [FacilitiesAndBraggingSchema],
 	courses: [CourseSchema],
 	reviews: [ReviewSchema],
-	views: { type: Number, default: 0 },
-	hits: { type: Number, default: 0 },
+	views: ViewsOrHitsSchema,
+	hits: ViewsOrHitsSchema,
 	bookmarks: Number,
 	signedBy: String,
 	claimedBy: String,

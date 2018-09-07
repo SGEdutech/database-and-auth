@@ -1,14 +1,6 @@
 exports = module.exports = {
-	hits: [{
-		type: Date,
-		default: Date.now()
-	}],
-	views: [{
-		type: Date,
-		default: Date.now()
-	}],
-	expires: Date,
-	userId: String,
+	promotedBy: String, //UserID
 	category: String,
-	listingId: String
+	listingId: String,
+	expires: Date
 };

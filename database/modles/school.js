@@ -8,6 +8,7 @@ const ImportantDateSchema = secondarySchemas.ImportantDateSchema;
 const FacilitiesAndBraggingSchema = secondarySchemas.FacilitiesAndBraggingSchema;
 const TeamSchema = secondarySchemas.TeamSchema;
 const TimeAndDateSchema = secondarySchemas.TimeAndDateSchema;
+const ViewsOrHitsSchema = require('../views-or-hits-schema');
 
 const SchoolSchema = new Schema({
 	coverPic: String,
@@ -41,8 +42,8 @@ const SchoolSchema = new Schema({
 	startTime: Date,
 	endTime: Date,
 	importantDates: [ImportantDateSchema],
-	views: { type: Number, default: 0 },
-	hits: { type: Number, default: 0 },
+    views: ViewsOrHitsSchema,
+    hits: ViewsOrHitsSchema,
 	bookmarks: Number,
 	claimedBy: String,
 	contactPerson: String,

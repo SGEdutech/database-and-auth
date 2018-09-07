@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 
 const secondarySchemas = require('../secondary-schemas');
 const GallerySchema = secondarySchemas.GallerySchema;
+const ViewsOrHitsSchema = require('../views-or-hits-schema');
 
 const EventSchema = new Schema({
 	name: String,
@@ -32,8 +33,8 @@ const EventSchema = new Schema({
 	going: { Number, default: 0 },
 	notGoing: { Number, default: 0 },
 	mayBeGoing: { Number, default: 0 },
-	views: { type: Number, default: 0 },
-	hits: { type: Number, default: 0 },
+    views: ViewsOrHitsSchema,
+    hits: ViewsOrHitsSchema,
 	goingUsers: [String],
 	bookmarks: Number,
 	signedBy: String,
