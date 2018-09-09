@@ -13,7 +13,7 @@ const promotedRelatedDbFunctions = new DbAPIClass(PromotedRelated);
 
 function getPromotedDbFunAndDemandedAdvertisements(queryObj) {
     let promotedDbFunction;
-    let demandedAdvertisements;
+    let demandedAdvertisements = 0;
 
     if (queryObj.homeAdvertisement) {
         promotedDbFunction = promotedHomeDbFunctions;
@@ -25,6 +25,7 @@ function getPromotedDbFunAndDemandedAdvertisements(queryObj) {
         promotedDbFunction = promotedRelatedDbFunctions;
         demandedAdvertisements = queryObj.relatedAdvertisement;
     }
+    demandedAdvertisements = parseInt(demandedAdvertisements);
 
     return {promotedDbFunction, demandedAdvertisements};
 }
@@ -50,7 +51,7 @@ route.get('/all', (req, res) => {
         promotedDbFunction.getMultipleData({category: 'tuition'}, {limit: demandedAdvertisements}).then(promotedInfos => {
             const promotedListingIdArr = [];
             promotedInfos.forEach(promotedInfo => promotedListingIdArr.push(promotedInfo.listingId));
-            return tuitionDbFunctions.getDataFromMutipleIds(promotedListingIdArr, {queryObject})})
+            return tuitionDbFunctions.getDataFromMultipleIds(promotedListingIdArr, queryObject)})
             .then(data => resolve(data)).catch(err => reject(err)).catch(err => console.error(err));
     });
 

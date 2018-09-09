@@ -31,22 +31,24 @@ class DatabaseAPI {
         })
     }
 
-    getDataFromMutipleIds(idArray, opts = {}) {
-        const homeAdvertisement = opts.homeAdvertisment || false;
-        const searchAdvertisement = opts.searchAdvertisment || false;
-        const relatedAdvertisement = opts.relatedAdvertisment || false;
+    getDataFromMultipleIds(idArray, opts = {}) {
+        const homeAdvertisement = opts.homeAdvertisement || false;
+        const searchAdvertisement = opts.searchAdvertisement || false;
+        const relatedAdvertisement = opts.relatedAdvertisement || false;
 
         idArray.forEach((id, index) => idArray[index] = mongoose.Types.ObjectId(id));
 
         return new Promise((resolve, reject) => {
             this.model.find({_id: {$in: idArray}}).then(documents => {
                 resolve(documents);
-                if (document.hits) {
-                    if (homeAdvertisement) document.hits.homeAdvertisement.push(Date.now());
-                    if (searchAdvertisement) document.hits.searchAdvertisement.push(Date.now());
-                    if (relatedAdvertisement) document.hits.relatedAdvertisement.push(Date.now());
-                    document.save();
-                }
+                documents.forEach(document => {
+                    if (document.hits) {
+                        if (homeAdvertisement) document.hits.homeAdvertisement.push(Date.now());
+                        if (searchAdvertisement) document.hits.searchAdvertisement.push(Date.now());
+                        if (relatedAdvertisement) document.hits.relatedAdvertisement.push(Date.now());
+                        document.save();
+                    }
+                })
             }).catch(err => reject(err));
         });
 
