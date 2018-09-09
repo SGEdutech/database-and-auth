@@ -3,10 +3,10 @@ const arrayUniquePlugin = require('mongoose-unique-array');
 const Schema = mongoose.Schema;
 const promotionsSchema = require('../promotions-schema');
 
-const promotedSearchSchema = new Schema(promotionsSchema);
+const PromotedSearchSchema = new Schema(promotionsSchema);
 
-promotedSearchSchema.plugin(arrayUniquePlugin);
+PromotedSearchSchema.plugin(arrayUniquePlugin);
 
-const promotedSearch = mongoose.model('promotedSearch', promotedSearchSchema);
+const PromotedSearch = mongoose.model('promotedSearch', PromotedSearchSchema);
 
-module.exports = promotedSearch;
+module.exports = PromotedSearch;

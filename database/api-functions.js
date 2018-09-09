@@ -1,36 +1,90 @@
+const mongoose = require('mongoose');
 const deleteThisShit = require('../../eduatlas-backend/scripts/fsunlink');
 const path = require('path');
 
 class DatabaseAPI {
     constructor(model) {
+        if (model === undefined) throw new Error('No model provided!');
         this.model = model;
     }
 
-    getAllData(demands, skip, limit) {
-        return this.model.find({}, demands)
-            .skip(skip)
-            .limit(limit);
+    getAllData(opts = {}) {
+        if (typeof opts !== 'object') throw new Error('Options must be an object!');
+
+        const demands = opts.demands || '';
+        const skip = opts.skip || 0;
+        const limit = opts.limit || 0;
+        const incrementHits = opts.incrementHits || false;
+
+        if (incrementHits === false) return this.model.find({}, demands).skip(skip).limit(limit);
+
+        return new Promise((resolve, reject) => {
+            this.model.find({}, demands).skip(skip).limit(limit).then(documents => {
+                resolve(documents);
+                documents.forEach(document => {
+                    if (document.hits) {
+                        document.hits.total.push(Date.now());
+                        document.save();
+                    }
+                });
+            }).catch(err => reject(err));
+        })
     }
 
-    getMultipleData(searchParameters, demands, skip, limit, sortBy) {
+    getDataFromMutipleIds(idArray, opts = {}) {
+        const homeAdvertisement = opts.homeAdvertisment || false;
+        const searchAdvertisement = opts.searchAdvertisment || false;
+        const relatedAdvertisement = opts.relatedAdvertisment || false;
+
+        idArray.forEach((id, index) => idArray[index] = mongoose.Types.ObjectId(id));
+
+        return new Promise((resolve, reject) => {
+            this.model.find({_id: {$in: idArray}}).then(documents => {
+                resolve(documents);
+                if (document.hits) {
+                    if (homeAdvertisement) document.hits.homeAdvertisement.push(Date.now());
+                    if (searchAdvertisement) document.hits.searchAdvertisement.push(Date.now());
+                    if (relatedAdvertisement) document.hits.relatedAdvertisement.push(Date.now());
+                    document.save();
+                }
+            }).catch(err => reject(err));
+        });
+
+    }
+
+    getMultipleData(searchParameters, opts = {}) {
+        const demands = opts.demands || '';
+        const skip = opts.skip || 0;
+        const limit = opts.limit || 0;
         return this.model.find(searchParameters, demands)
             .skip(skip)
             .limit(limit)
-            .sort([
-                [sortBy, 'descending']
-            ]);
     }
 
-    getSpecificData(searchParameters, incrementView, returnPassword) {
+    getSpecificData(searchParameters, opts = {}) {
+        if (typeof opts !== 'object') throw new Error('Options needs to be an object!');
+
+        const returnPassword = opts.returnPassword || false;
+        const incrementView = opts.incrementView || false;
+        const homeAdvertisement = opts.homeAdvertisment || false;
+        const searchAdvertisement = opts.searchAdvertisment || false;
+        const relatedAdvertisement = opts.relatedAdvertisment || false;
+
         const select = returnPassword ? '+password' : '';
-        if (incrementView === undefined) return this.model.findOne(searchParameters);
+
+        if (incrementView === false) return this.model.findOne(searchParameters);
+
         return new Promise((resolve, reject) => {
             this.model.findOne(searchParameters)
                 .select(select)
                 .then(data => {
                     resolve(data);
-                    if (data.views) data.views += 1;
-                    if (data.hits) data.hits += 1;
+                    if (data.views){
+                        data.views.total.push(Date.now());
+                        if (homeAdvertisement) data.views.homeAdvertisement.push(Date.now());
+                        if (searchAdvertisement) data.views.searchAdvertisement.push(Date.now());
+                        if (relatedAdvertisement) data.views.relatedAdvertisement.push(Date.now());
+                    }
                     data.save();
                 })
                 .catch(err => reject(err));

@@ -1,6 +1,6 @@
 exports = module.exports = {
     total: [Date],
-    homeAdvertisment: [Date],
-    searchAdvertisment: [Date],
-    relatedAdvertisment: [Date]
+    homeAdvertisement: [Date],
+    searchAdvertisement: [Date],
+    relatedAdvertisement: [Date]
 };

@@ -36,7 +36,7 @@ route.get('/search', (req, res) => {
 		}
 	});
 	eventDbFunctions
-		.getMultipleData(searchCriteria, demands, skip, limit, sortBy)
+		.getMultipleData(searchCriteria, {demands, skip, limit, sortBy})
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });

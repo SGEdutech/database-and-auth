@@ -9,13 +9,13 @@ route.get('/all', (req, res) => {
 	const queryObject = req.query;
 	const skip = parseInt(queryObject.skip, 10) || 0;
 	const limit = parseInt(queryObject.limit, 10) || 0;
-	tuitionDbFunctions.getAllData(queryObject.demands, skip, limit)
+	promotedHomeDBFunctions.getAllData(queryObject.demands, skip, limit)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.get('/', (req, res) => {
-	tuitionDbFunctions.getSpecificData(req.query, true)
+	promotedHomeDBFunctions.getSpecificData(req.query, true)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
@@ -42,7 +42,7 @@ route.get('/search', (req, res) => {
 			searchCriteria[key] = new RegExp(escapeRegex(value.search), 'i');
 		}
 	});
-	tuitionDbFunctions.getMultipleData(searchCriteria, demands, skip, limit, sortBy)
+	promotedHomeDBFunctions.getMultipleData(searchCriteria, {demands, skip, limit, sortBy})
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
@@ -50,19 +50,19 @@ route.get('/search', (req, res) => {
 // Todo: Fix routing
 route.post('/add/:_id/:arrayName', (req, res) => {
 	const elementToBePushed = req.body.string || req.body;
-	tuitionDbFunctions.addElementToArray({ _id: req.params._id }, req.params.arrayName, elementToBePushed)
+	promotedHomeDBFunctions.addElementToArray({ _id: req.params._id }, req.params.arrayName, elementToBePushed)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.post('/', (req, res) => {
-	tuitionDbFunctions.addCollection(req.body)
+	promotedHomeDBFunctions.addCollection(req.body)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.put('/update/:idOfCollection/:arrayName/:idOfNestedObject', (req, res) => {
-	tuitionDbFunctions
+	promotedHomeDBFunctions
 		.updateElementInArray({
 			_id: req.params.idOfCollection
 		}, req.params.arrayName, req.params.idOfNestedObject, req.body)
@@ -71,14 +71,14 @@ route.put('/update/:idOfCollection/:arrayName/:idOfNestedObject', (req, res) => 
 });
 
 route.put('/:_id', (req, res) => {
-	tuitionDbFunctions.updateOneRow(req.params, req.body)
+	promotedHomeDBFunctions.updateOneRow(req.params, req.body)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.delete('/delete/:_id/:arrayName', (req, res) => {
 	const identifier = req.body.string || req.body;
-	tuitionDbFunctions
+	promotedHomeDBFunctions
 		.deleteElementFromArray({
 			_id: req.params._id
 		}, req.params.arrayName, identifier)
@@ -87,14 +87,14 @@ route.delete('/delete/:_id/:arrayName', (req, res) => {
 });
 
 route.delete('/empty/:keyname', (req, res) => {
-	tuitionDbFunctions.emptyKey(req.body, req.params.keyname)
+	promotedHomeDBFunctions.emptyKey(req.body, req.params.keyname)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.delete('/:_id', (req, res) => {
 	// if (req.params._id.match(/^[0-9a-fA-F]{24}$/) === null) res.send('Not a valid id');
-	tuitionDbFunctions.deleteOneRow(req.params)
+	promotedHomeDBFunctions.deleteOneRow(req.params)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });

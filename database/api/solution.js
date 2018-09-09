@@ -14,7 +14,7 @@ route.get('/all', (req, res) => {
 
 route.get('/search', (req, res) => {
 	const regex = new RegExp(escapeRegex(req.query.search), 'i');
-	solutionDbFunctions.getMultipleData({ name: regex }, 'name')
+	solutionDbFunctions.getMultipleData({ name: regex }, {demand: 'name'})
 		.then(data => res.send(data));
 });
 

@@ -24,9 +24,7 @@ route.get('/', (req, res) => {
 route.get('/search', (req, res) => {
 	const regex = new RegExp(escapeRegex(req.query.search), 'i');
 	blogDbFunctions
-		.getMultipleData({
-			name: regex
-		}, 'name')
+		.getMultipleData({name: regex}, {demands: 'name'})
 		.then(data => res.send(data));
 });
 

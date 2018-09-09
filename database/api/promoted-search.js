@@ -42,7 +42,7 @@ route.get('/search', (req, res) => {
 			searchCriteria[key] = new RegExp(escapeRegex(value.search), 'i');
 		}
 	});
-	tuitionDbFunctions.getMultipleData(searchCriteria, demands, skip, limit, sortBy)
+	tuitionDbFunctions.getMultipleData(searchCriteria, {demands, skip, limit, sortBy})
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });

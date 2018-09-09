@@ -1,6 +1,6 @@
 exports = module.exports = {
-	promotedBy: String, //UserID
-	category: String,
-	listingId: String,
-	expires: Date
+    promotedBy: String, //UserID
+    category: String,
+    listingId: String,
+    expires: Date
 };
