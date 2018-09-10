@@ -11,23 +11,39 @@ const promotedHomeDbFunctions = new DbAPIClass(PromotedHome);
 const promotedSearchDbFunctions = new DbAPIClass(PromotedSearch);
 const promotedRelatedDbFunctions = new DbAPIClass(PromotedRelated);
 
-function getPromotedDbFunAndDemandedAdvertisements(queryObj) {
+function getPromotedDbFunAndDemandedAdvertisements(queryObject) {
     let promotedDbFunction;
     let demandedAdvertisements = 0;
 
-    if (queryObj.homeAdvertisement) {
+    if (queryObject.homeAdvertisement) {
         promotedDbFunction = promotedHomeDbFunctions;
-        demandedAdvertisements = queryObj.homeAdvertisement;
-    } else if (queryObj.searchAdvertisement) {
+        demandedAdvertisements = queryObject.homeAdvertisement;
+    } else if (queryObject.searchAdvertisement) {
         promotedDbFunction = promotedSearchDbFunctions;
-        demandedAdvertisements = queryObj.searchAdvertisement;
-    } else if (queryObj.relatedAdvertisement) {
+        demandedAdvertisements = queryObject.searchAdvertisement;
+    } else if (queryObject.relatedAdvertisement) {
         promotedDbFunction = promotedRelatedDbFunctions;
-        demandedAdvertisements = queryObj.relatedAdvertisement;
+        demandedAdvertisements = queryObject.relatedAdvertisement;
     }
     demandedAdvertisements = parseInt(demandedAdvertisements);
 
     return {promotedDbFunction, demandedAdvertisements};
+}
+
+function getPromotedData(queryObject) {
+    const {promotedDbFunction, demandedAdvertisements} = getPromotedDbFunAndDemandedAdvertisements(queryObject);
+
+    return new Promise((resolve, reject) => {
+        promotedDbFunction.getMultipleData({category: 'tuition'}, {limit: demandedAdvertisements}).then(promotedInfos => {
+            const promotedListingIdArr = [];
+            promotedInfos.forEach(promotedInfo => promotedListingIdArr.push(promotedInfo.listingId));
+            return tuitionDbFunctions.getDataFromMultipleIds(promotedListingIdArr, queryObject)})
+            .then(data => resolve(data)).catch(err => reject(err));
+    });
+}
+
+function areAdvertisementsRequested(queryObject) {
+    return Boolean(queryObject.homeAdvertisement || queryObject.searchAdvertisement || queryObject.relatedAdvertisement);
 }
 
 route.get('/all', (req, res) => {
@@ -36,10 +52,9 @@ route.get('/all', (req, res) => {
     const limit = parseInt(queryObject.limit, 10) || 0;
     const incrementHits = queryObject.incrementHits || true;
     const demands = queryObject.demands || '';
+    const isAdvertisementRequested = areAdvertisementsRequested(queryObject);
 
-    const {promotedDbFunction, demandedAdvertisements} = getPromotedDbFunAndDemandedAdvertisements(queryObject);
-
-    if (demandedAdvertisements === 0) {
+    if (isAdvertisementRequested === false) {
         tuitionDbFunctions.getAllData({skip, limit, demands, incrementHits}).then(data => res.send(data))
             .catch(err => console.error(err));
         return;
@@ -47,13 +62,7 @@ route.get('/all', (req, res) => {
 
     const poorDataPromise = tuitionDbFunctions.getAllData({demands, skip, limit, incrementHits});
 
-    const promotedDataPromise = new Promise((resolve, reject) => {
-        promotedDbFunction.getMultipleData({category: 'tuition'}, {limit: demandedAdvertisements}).then(promotedInfos => {
-            const promotedListingIdArr = [];
-            promotedInfos.forEach(promotedInfo => promotedListingIdArr.push(promotedInfo.listingId));
-            return tuitionDbFunctions.getDataFromMultipleIds(promotedListingIdArr, queryObject)})
-            .then(data => resolve(data)).catch(err => reject(err)).catch(err => console.error(err));
-    });
+    const promotedDataPromise = getPromotedData(queryObject);
 
     Promise.all([promotedDataPromise, poorDataPromise]).then(dataArr => res.send(dataArr[0].concat(dataArr[1])))
         .catch(err => console.error(err));
@@ -85,12 +94,22 @@ route.get('/search', (req, res) => {
     const demands = queryObject.demands || '';
     const skip = parseInt(queryObject.skip, 10) || 0;
     const limit = parseInt(queryObject.limit, 10) || 0;
-    const sortBy = queryObject.sortBy || undefined;
+    const isAdvertisementRequested = areAdvertisementsRequested(queryObject);
+    const incrementHits = queryObject.incrementHits || true;
+    const advertisementInfoObject = {
+        homeAdvertisement: queryObject.homeAdvertisement,
+        searchAdvertisement: queryObject.searchAdvertisement,
+        relatedAdvertisement: queryObject.relatedAdvertisement,
+    };
 
     delete queryObject.demands;
     delete queryObject.skip;
     delete queryObject.limit;
     delete queryObject.sortBy;
+    delete queryObject.homeAdvertisement;
+    delete queryObject.searchAdvertisement;
+    delete queryObject.relatedAdvertisement;
+    delete queryObject.incrementHits;
 
     const searchCriteria = {};
     const queryKeys = Object.keys(queryObject);
@@ -100,8 +119,17 @@ route.get('/search', (req, res) => {
         const regexString = value.fullTextSearch ? `^${value.search}$` : value.search;
         searchCriteria[key] = new RegExp(regexString);
     });
-    tuitionDbFunctions.getMultipleData(searchCriteria, {demands, skip, limit, sortBy})
-        .then(data => res.send(data))
+
+    const poorDataPromise = tuitionDbFunctions.getMultipleData(searchCriteria, {demands, skip, limit, incrementHits});
+
+    if (isAdvertisementRequested === false) {
+        poorDataPromise.then(data => res.send(data)).catch(err => console.error(err));
+        return;
+    }
+
+    const promotedDataPromise = getPromotedData(advertisementInfoObject);
+
+    Promise.all([promotedDataPromise, poorDataPromise]).then(dataArr => res.send(dataArr[0].concat(dataArr[1])))
         .catch(err => console.error(err));
 });
 

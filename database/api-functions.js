@@ -9,26 +9,9 @@ class DatabaseAPI {
     }
 
     getAllData(opts = {}) {
-        if (typeof opts !== 'object') throw new Error('Options must be an object!');
+        if (typeof opts !== 'object') throw new Error('Options needs to be an object!');
 
-        const demands = opts.demands || '';
-        const skip = opts.skip || 0;
-        const limit = opts.limit || 0;
-        const incrementHits = opts.incrementHits || false;
-
-        if (incrementHits === false) return this.model.find({}, demands).skip(skip).limit(limit);
-
-        return new Promise((resolve, reject) => {
-            this.model.find({}, demands).skip(skip).limit(limit).then(documents => {
-                resolve(documents);
-                documents.forEach(document => {
-                    if (document.hits) {
-                        document.hits.total.push(Date.now());
-                        document.save();
-                    }
-                });
-            }).catch(err => reject(err));
-        })
+        return this.getMultipleData({}, opts);
     }
 
     getDataFromMultipleIds(idArray, opts = {}) {
@@ -55,12 +38,45 @@ class DatabaseAPI {
     }
 
     getMultipleData(searchParameters, opts = {}) {
+        if (typeof opts !== 'object') throw new Error('Options needs to be an object!');
+
         const demands = opts.demands || '';
         const skip = opts.skip || 0;
         const limit = opts.limit || 0;
-        return this.model.find(searchParameters, demands)
-            .skip(skip)
-            .limit(limit)
+        const incrementHits = opts.incrementHits || false;
+
+        if (incrementHits === false) return this.model.find(searchParameters, demands).skip(skip).limit(limit);
+
+        return this._getDocumentsAndIncrementTotalHitsOrViews({searchParameters, demands, skip, limit, increment})
+    }
+
+    _getDocumentsAndIncrementTotalHitsOrViews(opts) {
+        if (typeof opts !== 'object') throw new Error('Options needs to be an object!');
+
+        const searchParameters = opts.searchParameters || {};
+        const findingCriteria = opts.findOne ? 'findOne' : 'find';
+        return new Promise((resolve, reject) => {
+            this.model[findingCriteria](searchParameters, opts.demands).skip(opts.skip).limit(opts.limit).then(result => {
+                resolve(result);
+                if (Array.isArray(result)) {
+                    result.forEach(document => {
+                        if (document.hits) {
+                            document.hits.total.push(Date.now());
+                            document.save();
+                        }
+                    });
+                } else {
+                    // TODO: Optimise
+                    if (result.views) {
+                        result.views.total.push(Date.now());
+                        if (opts.homeAdvertisement) result.views.homeAdvertisement.push(Date.now());
+                        if (opts.searchAdvertisement) result.views.searchAdvertisement.push(Date.now());
+                        if (opts.relatedAdvertisement) result.views.relatedAdvertisement.push(Date.now());
+                        result.save();
+                    }
+                }
+            }).catch(err => reject(err));
+        })
     }
 
     getSpecificData(searchParameters, opts = {}) {
@@ -68,29 +84,16 @@ class DatabaseAPI {
 
         const returnPassword = opts.returnPassword || false;
         const incrementView = opts.incrementView || false;
-        const homeAdvertisement = opts.homeAdvertisment || false;
-        const searchAdvertisement = opts.searchAdvertisment || false;
-        const relatedAdvertisement = opts.relatedAdvertisment || false;
+        const homeAdvertisement = opts.homeAdvertisement || false;
+        const searchAdvertisement = opts.searchAdvertisement || false;
+        const relatedAdvertisement = opts.relatedAdvertisement || false;
+        const findOne = true;
 
         const select = returnPassword ? '+password' : '';
 
         if (incrementView === false) return this.model.findOne(searchParameters);
 
-        return new Promise((resolve, reject) => {
-            this.model.findOne(searchParameters)
-                .select(select)
-                .then(data => {
-                    resolve(data);
-                    if (data.views){
-                        data.views.total.push(Date.now());
-                        if (homeAdvertisement) data.views.homeAdvertisement.push(Date.now());
-                        if (searchAdvertisement) data.views.searchAdvertisement.push(Date.now());
-                        if (relatedAdvertisement) data.views.relatedAdvertisement.push(Date.now());
-                    }
-                    data.save();
-                })
-                .catch(err => reject(err));
-        });
+        return this._getDocumentsAndIncrementTotalHitsOrViews({searchParameters, findOne, homeAdvertisement, searchAdvertisement, relatedAdvertisement});
     }
 
     addCollection(newRowInformation) {
