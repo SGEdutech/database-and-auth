@@ -1,6 +1,6 @@
 const route = require('express')
     .Router();
-const Batch = require('../modles/issue');
+const Batch = require('../modles/batch');
 const DbAPIClass = require('../api-functions');
 const batchDbFunctions = new DbAPIClass(Batch);
 

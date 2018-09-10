@@ -6,18 +6,20 @@ const CourseModel = require('./course');
 const BatchSchema = new Schema({
     name: { type: String, required: true },
     description: String,
-    courseId: { type: mongoose.Types.ObjectId, required: true },
-    students: [{ type: mongoose.Types.ObjectId, ref: 'user' }],
+    courseId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }]
 });
 
-BatchSchema.pre('validate', next => {
-    CourseModel.findOne({ _id: doc.courseId }).then(() => next()).catch(err => next(err));
+BatchSchema.post('validate', doc => {
+    return CourseModel.findOne({ _id: doc.courseId });
 });
 
-BatchSchema.post('save', (batchAdded, next) => {
-    CourseModel.findOne({ _id: batchAdded.courseId }).then(result => {
-        result.batch.push(batchAdded._id);
-        result.save();
+BatchSchema.post('save', batchAdded => {
+    return new Promise((resolve, reject) => {
+        CourseModel.findOne({ _id: batchAdded.courseId }).then(result => {
+            result.batch.push(batchAdded._id);
+            return result.save();
+        }).then(() => resolve()).catch(err => reject(err));
     })
 });
 
