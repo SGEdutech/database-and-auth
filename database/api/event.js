@@ -34,7 +34,7 @@ function getPromotedData(queryObject) {
     const {promotedDbFunction, demandedAdvertisements} = getPromotedDbFunAndDemandedAdvertisements(queryObject);
 
     return new Promise((resolve, reject) => {
-        promotedDbFunction.getMultipleData({category: 'tuition'}, {limit: demandedAdvertisements}).then(promotedInfos => {
+        promotedDbFunction.getMultipleData({category: 'event'}, {limit: demandedAdvertisements}).then(promotedInfos => {
             const promotedListingIdArr = [];
             promotedInfos.forEach(promotedInfo => promotedListingIdArr.push(promotedInfo.listingId));
             return eventDbFunctions.getDataFromMultipleIds(promotedListingIdArr, queryObject)})

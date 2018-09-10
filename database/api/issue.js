@@ -13,7 +13,7 @@ route.get('/all', (req, res) => {
 });
 
 route.get('/', (req, res) => {
-	issueDbFunctions.getSpecificData(req.query, true)
+	issueDbFunctions.getSpecificData(req.query)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
