@@ -47,7 +47,7 @@ class DatabaseAPI {
 
         if (incrementHits === false) return this.model.find(searchParameters, demands).skip(skip).limit(limit);
 
-        return this._getDocumentsAndIncrementTotalHitsOrViews({searchParameters, demands, skip, limit, increment})
+        return this._getDocumentsAndIncrementTotalHitsOrViews({searchParameters, demands, skip, limit})
     }
 
     _getDocumentsAndIncrementTotalHitsOrViews(opts) {
