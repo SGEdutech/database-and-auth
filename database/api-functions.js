@@ -50,6 +50,20 @@ class DatabaseAPI {
         return this._getDocumentsAndIncrementTotalHitsOrViews({searchParameters, demands, skip, limit})
     }
 
+    getRelationalData(searchParameters, relationalKey) {
+        if (typeof searchParameters !== 'object') throw new Error('Options needs to be an object!');
+        if (typeof relationalKey !== 'string') throw new Error('Relational key needs to be a string');
+
+        return this.model.findOne(searchParameters).populate(relationalKey);
+    }
+
+    getMultipleRelationalData(searchParameters, relationalKey) {
+        if (typeof searchParameters !== 'object') throw new Error('Options needs to be an object!');
+        if (typeof relationalKey !== 'string') throw new Error('Relational key needs to be a string');
+
+        return this.model.find(searchParameters).populate(relationalKey);
+    }
+
     _getDocumentsAndIncrementTotalHitsOrViews(opts) {
         if (typeof opts !== 'object') throw new Error('Options needs to be an object!');
 
