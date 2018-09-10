@@ -15,7 +15,7 @@ route.get('/all', (req, res) => {
 });
 
 route.get('/', (req, res) => {
-	promotedHomeDBFunctions.getSpecificData(req.query, true)
+	promotedHomeDBFunctions.getSpecificData(req.query)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
