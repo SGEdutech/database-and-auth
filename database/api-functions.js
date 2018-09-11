@@ -105,7 +105,8 @@ class DatabaseAPI {
 
         const select = returnPassword ? '+password' : '';
 
-        if (incrementView === false) return this.model.findOne(searchParameters);
+
+        if (incrementView === false) return this.model.findOne(searchParameters).select(select);
 
         return this._getDocumentsAndIncrementTotalHitsOrViews({searchParameters, findOne, homeAdvertisement, searchAdvertisement, relatedAdvertisement});
     }
