@@ -6,8 +6,8 @@ const CourseModel = require('./course');
 const BatchSchema = new Schema({
     name: { type: String, required: true },
     description: String,
-    courseId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }]
+    courseId: { type: Schema.Types.ObjectId, required: true },
+    students: [{ type: Schema.Types.ObjectId, ref: 'user' }]
 });
 
 BatchSchema.post('validate', doc => {
