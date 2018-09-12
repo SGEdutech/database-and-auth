@@ -7,6 +7,7 @@ const CourseSchema = new Schema({
     name: {type: String, required: true},
     fees: {type: Number, required: true},
     description: String,
+    isActive: {type: Boolean, default: true},
     listingCategory: { type: String, required: true },
     listingId: {type: Schema.Types.ObjectId, required: true},
     batches: [{type: Schema.Types.ObjectId, ref: 'batch'}]
