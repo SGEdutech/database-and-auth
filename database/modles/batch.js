@@ -11,7 +11,15 @@ const BatchSchema = new Schema({
 });
 
 BatchSchema.post('validate', doc => {
-    return CourseModel.findOne({ _id: doc.courseId });
+    return new Promise((resolve, reject) => {
+        CourseModel.findOne({ _id: doc.courseId }).then(course => {
+            if (course === null) {
+                reject(new Error('No such course'));
+            } else {
+                resolve();
+            }
+        }).catch(err => reject(err));
+    })
 });
 
 BatchSchema.post('save', batchAdded => {

@@ -50,7 +50,7 @@ class DatabaseAPI {
     }
 
 
-    getOneRelationalData(searchParameters, relationalConfig, opts) {
+    getOneRelationalData(searchParameters, relationalConfig, opts = {}) {
         if (typeof searchParameters !== 'object') throw new Error('SearchParameters needs to be an object!');
         if (typeof relationalConfig !== 'object') throw new Error('Relational Config needs to be an object!');
         if (typeof opts !== 'object') throw new Error('Options needs to be an object!');
@@ -60,6 +60,24 @@ class DatabaseAPI {
         const demands = opts.demands || '';
 
         return this.model.find(searchParameters).select(demands).populate(populate, populationDemands);
+    }
+
+    getOneRelationalDataWithDepthTwo(searchParameter, relationalConfigFirstDegree, relationalConfigSecondDegree, opts) {
+        if (typeof searchParameters !== 'object') throw new Error('SearchParameters needs to be an object!');
+        if (typeof relationalConfigFirstDegree !== 'object') throw new Error('Relational Config needs to be an object!');
+        if (typeof opts !== 'object') throw new Error('Options needs to be an object!');
+
+        const demands = opts.demands || '';
+        const firstDegreePath = relationalConfigFirstDegree.path || '';
+        const firstDegreeDemands = relationalConfigFirstDegree.demands || '';
+        const secondDegreePath = relationalConfigSecondDegree.path || '';
+        const secondDegreeDemands = relationalConfigSecondDegree.demands || '';
+
+        return this.model.find(searchParameter).select(demands).populate({
+            path: firstDegreePath,
+            select: firstDegreeDemands,
+            populate: { path: secondDegreePath, select: secondDegreeDemands }
+        });
     }
 
     _getDocumentsAndIncrementTotalHitsOrViews(opts) {

@@ -89,6 +89,16 @@ route.get('/', (req, res) => {
         .catch(err => console.error(err));
 });
 
+route.get('/plus-courses', (req, res) => {
+    tuitionDbFunctions.getOneRelationalData(req.query, {populate: 'courses'})
+        .then(data => res.send(data)).catch(err => console.error(err));
+});
+
+route.get('/plus-courses-and-batches', (req, res) => {
+    tuitionDbFunctions.getOneRelationalDataWithDepthTwo(req.query, {path: 'courses'}, {path: 'batches'})
+        .then(data => res.send(data)).catch(err => console.error(err));
+});
+
 route.get('/search', (req, res) => {
     const queryObject = req.query;
     const demands = queryObject.demands || '';
