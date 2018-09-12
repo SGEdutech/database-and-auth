@@ -4,7 +4,6 @@ const Schema = mongoose.Schema;
 
 const secondarySchemas = require('../secondary-schemas');
 const ReviewSchema = secondarySchemas.ReviewSchema;
-const CourseSchema = secondarySchemas.CourseSchema;
 const TeamSchema = secondarySchemas.TeamSchema;
 const FacilitiesAndBraggingSchema = secondarySchemas.FacilitiesAndBraggingSchema;
 const TimeAndDateSchema = secondarySchemas.TimeAndDateSchema;
@@ -38,7 +37,7 @@ const TuitionSchema = new Schema({
 	img_tuitionCoverPic: String,
 	gallery: [String],
 	bragging: [FacilitiesAndBraggingSchema],
-	courses: [CourseSchema],
+	courses: [{ type: Schema.Types.ObjectId, ref: 'course' }],
 	reviews: [ReviewSchema],
 	views: ViewsOrHitsSchema,
 	hits: ViewsOrHitsSchema,

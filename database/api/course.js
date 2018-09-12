@@ -12,6 +12,20 @@ route.get('/all', (req, res) => {
         .catch(err => console.error(err));
 });
 
+route.get('/plus-batches', (req, res) => {
+    const demands = req.query.demands || '';
+    const batchDemands = req.query.batchDemands || '';
+
+    const relationalConfig = {
+        populate: 'batch',
+        populationDemands: batchDemands
+    };
+
+    courseDbFunctions.getOneRelationalData(req.query, relationalConfig, {demands})
+        .then(data => res.send(data))
+        .catch(err => console.error(err));
+});
+
 route.get('/', (req, res) => {
     courseDbFunctions.getSpecificData(req.query)
         .then(data => res.send(data))

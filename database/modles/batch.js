@@ -17,7 +17,7 @@ BatchSchema.post('validate', doc => {
 BatchSchema.post('save', batchAdded => {
     return new Promise((resolve, reject) => {
         CourseModel.findOne({ _id: batchAdded.courseId }).then(result => {
-            result.batch.push(batchAdded._id);
+            result.batches.push(batchAdded._id);
             return result.save();
         }).then(() => resolve()).catch(err => reject(err));
     })

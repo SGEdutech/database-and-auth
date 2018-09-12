@@ -43,14 +43,6 @@ const GallerySchema = new Schema({
 	album: String
 });
 
-const CourseSchema = new Schema({
-	title: String,
-	ageGroup: String,
-	duration: String,
-	fee: String,
-	nextBatch: Date
-});
-
 const FacilitiesAndBraggingSchema = new Schema({
 	title: String,
 	description: String,
@@ -86,7 +78,6 @@ exports = module.exports = {
 	ImportantDateSchema,
 	ReviewSchema,
 	GallerySchema,
-	CourseSchema,
 	FacilitiesAndBraggingSchema,
 	TeamSchema,
 	TimeAndDateSchema,

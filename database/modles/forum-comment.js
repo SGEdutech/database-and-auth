@@ -7,6 +7,6 @@ const forumCommentSchema = new Schema({
     user: { type: Schema.Types.ObjectId, required: true, ref: 'user' }
 });
 
-const ForumPost = mongoose.model('forumPost', forumCommentSchema);
+const ForumComment = mongoose.model('forumComment', forumCommentSchema);
 
-module.exports = ForumPost;
+module.exports = ForumComment;
