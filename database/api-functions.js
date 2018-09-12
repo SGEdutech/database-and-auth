@@ -62,8 +62,8 @@ class DatabaseAPI {
         return this.model.find(searchParameters).select(demands).populate(populate, populationDemands);
     }
 
-    getOneRelationalDataWithDepthTwo(searchParameter, relationalConfigFirstDegree, relationalConfigSecondDegree, opts) {
-        if (typeof searchParameters !== 'object') throw new Error('SearchParameters needs to be an object!');
+    getOneRelationalDataWithDepthTwo(searchParameter, relationalConfigFirstDegree, relationalConfigSecondDegree, opts = {}) {
+        if (typeof searchParameter !== 'object') throw new Error('SearchParameters needs to be an object!');
         if (typeof relationalConfigFirstDegree !== 'object') throw new Error('Relational Config needs to be an object!');
         if (typeof opts !== 'object') throw new Error('Options needs to be an object!');
 

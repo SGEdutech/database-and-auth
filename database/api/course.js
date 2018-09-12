@@ -16,6 +16,9 @@ route.get('/plus-batches', (req, res) => {
     const demands = req.query.demands || '';
     const batchDemands = req.query.batchDemands || '';
 
+    delete req.query.demands;
+    delete req.query.batchDemands;
+
     const relationalConfig = {
         populate: 'batch',
         populationDemands: batchDemands
