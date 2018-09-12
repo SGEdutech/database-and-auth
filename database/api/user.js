@@ -7,6 +7,7 @@ const youShallNotPass = require('../../../eduatlas-backend/scripts/login-check')
 
 route.get('/info', (req, res) => res.send(req.user));
 
+// todo - fix this route
 route.get('/all', (req, res) => {
 	const skip = (req.query.page - 1) * req.query.items;
 	const limit = parseInt(req.query.items, 10);
