@@ -1,23 +1,39 @@
-const mongoose = require("mongoose");
-const arrayUniquePlugin = require("mongoose-unique-array");
+const mongoose = require('mongoose');
+const arrayUniquePlugin = require('mongoose-unique-array');
 const Schema = mongoose.Schema;
-const secondarySchemas = require("../secondary-schemas");
-const { ReviewsOwnedSchema } = secondarySchemas;
-const { ClaimSchema } = secondarySchemas;
+const secondarySchemas = require('../secondary-schemas');
+const {
+	ReviewsOwnedSchema
+} = secondarySchemas;
+const {
+	ClaimSchema
+} = secondarySchemas;
+
+const Tuition = require('./tuition');
+const School = require('./school');
+const Event = require('./event');
 
 const UserSchema = new Schema({
+	firstName: String,
+	middleName: String,
+	lastName: String,
+	isFemale: Boolean,
 	about: String,
-	facebookId: String,
-	googleId: String,
 	password: {
+		type: String,
+		select: false
+	},
+	facebookId: {
+		type: String,
+		select: false
+	},
+	googleId: {
 		type: String,
 		select: false
 	},
 	claims: [ClaimSchema],
 	reviewsOwned: [ReviewsOwnedSchema],
-	schoolsOwned: [String],
 	primaryRole: String, // Institute, student, parent
-	isFemale: Boolean,
 	addressLine1: String,
 	addressLine2: String,
 	city: String,
@@ -25,9 +41,6 @@ const UserSchema = new Schema({
 	state: String,
 	country: String,
 	pin: Number,
-	firstName: String,
-	middleName: String,
-	lastName: String,
 	primaryEmail: {
 		type: String,
 		lowercase: true,
@@ -48,34 +61,30 @@ const UserSchema = new Schema({
 	youtubeLink: String,
 	instaLink: String,
 	linkedinLink: String,
-	bookmarkTuitions: [
-		{
-			type: String,
-			unique: true
-		}
-	],
-	bookmarkSchools: [
-		{
-			type: String,
-			unique: true
-		}
-	],
-	bookmarkEvents: [
-		{
-			type: String,
-			unique: true
-		}
-	],
-	bookmarkBlogs: [
-		{
-			type: String,
-			unique: true
-		}
-	]
+	bookmarkTuitions: [{
+		type: String,
+		unique: true
+	}],
+	bookmarkSchools: [{
+		type: String,
+		unique: true
+	}],
+	bookmarkEvents: [{
+		type: String,
+		unique: true
+	}],
+	bookmarkBlogs: [{
+		type: String,
+		unique: true
+	}]
 });
 
-UserSchema.plugin(arrayUniquePlugin);
+// CourseSchema.post('validate', docs => {
+// 	return new Promise((resolve, reject) => {
+//
+// 	})
+// });
 
-const User = mongoose.model("user", UserSchema);
+const User = mongoose.model('user', UserSchema);
 
 module.exports = User;

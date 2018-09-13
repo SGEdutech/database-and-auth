@@ -4,7 +4,7 @@ const LocalStrategy = require('passport-local');
 const User = require('../database/modles/user');
 const DatabaseAPIClass = require('../database/api-functions');
 const APIHelperFunctions = new DatabaseAPIClass(User);
-const sendWelcomeMail = require('../../eduatlas-backend/scripts/send-welcome-mail');
+const sendWelcomeMail = require('../scripts/send-welcome-mail');
 
 passport.serializeUser((userid, done) => {
     //userid will be stuffed in cookie

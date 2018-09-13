@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const deleteThisShit = require('../../eduatlas-backend/scripts/fsunlink');
+const deleteThisShit = require('../scripts/fsunlink');
 const path = require('path');
 
 class DatabaseAPI {

@@ -63,13 +63,11 @@ const TimeAndDateSchema = new Schema({
 });
 
 const ClaimSchema = new Schema({
-	category: String,
-	objectId: String,
-	isPromoted: {
-		type: Boolean,
-		default: false
+	category: {
+		type: String,
+		enum: ['tuition', 'school', 'event']
 	},
-	expires: Date
+    listingId: String
 });
 
 exports = module.exports = {
