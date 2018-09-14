@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const arrayUniquePlugin = require('mongoose-unique-array');
 const Schema = mongoose.Schema;
 
 const secondarySchemas = require('../secondary-schemas');
@@ -46,8 +45,6 @@ const TuitionSchema = new Schema({
 	claimedBy: String,
 	updatedOn: { type: Date, default: Date.now() }
 });
-
-TuitionSchema.plugin(arrayUniquePlugin);
 
 const Tuition = mongoose.model('tuition', TuitionSchema);
 

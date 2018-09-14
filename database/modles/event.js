@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const arrayUniquePlugin = require('mongoose-unique-array');
 const Schema = mongoose.Schema;
 
 const secondarySchemas = require('../secondary-schemas');
@@ -40,8 +39,6 @@ const EventSchema = new Schema({
 	signedBy: String,
 	claimedBy: String
 });
-
-EventSchema.plugin(arrayUniquePlugin);
 
 const Event = mongoose.model('event', EventSchema);
 
