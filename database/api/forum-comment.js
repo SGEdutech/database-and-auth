@@ -1,6 +1,6 @@
 const route = require('express')
     .Router();
-const ForumComment = require('../modles/forum-comment');
+const ForumComment = require('../models/forum-comment');
 const DbAPIClass = require('../api-functions');
 const forumCommentDbFunctions = new DbAPIClass(ForumComment);
 

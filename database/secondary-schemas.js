@@ -63,7 +63,7 @@ const TimeAndDateSchema = new Schema({
 });
 
 const ClaimSchema = new Schema({
-	category: {
+	listingCategory: {
 		type: String,
 		enum: ['tuition', 'school', 'event']
 	},

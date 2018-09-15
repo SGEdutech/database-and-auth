@@ -1,6 +1,6 @@
 const route = require('express')
 	.Router();
-const Solution = require('../modles/solution');
+const Solution = require('../models/solution');
 const escapeRegex = require('../../scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
 const solutionDbFunctions = new DbAPIClass(Solution);

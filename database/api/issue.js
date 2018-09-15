@@ -1,6 +1,6 @@
 const route = require('express')
 	.Router();
-const Issue = require('../modles/issue');
+const Issue = require('../models/issue');
 const DbAPIClass = require('../api-functions');
 const issueDbFunctions = new DbAPIClass(Issue);
 

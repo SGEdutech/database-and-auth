@@ -1,6 +1,6 @@
 const route = require('express')
 	.Router();
-const promotedHome = require('../modles/promoted-home');
+const promotedHome = require('../models/promoted-home');
 const escapeRegex = require('../../scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
 const promotedHomeDBFunctions = new DbAPIClass(promotedHome);

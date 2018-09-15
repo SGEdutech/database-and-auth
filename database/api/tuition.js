@@ -2,10 +2,10 @@ const route = require('express')
     .Router();
 const escapeRegex = require('../../scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
-const Tuition = require('../modles/tuition');
-const PromotedHome = require('../modles/promoted-home');
-const PromotedSearch = require('../modles/promoted-search');
-const PromotedRelated = require('../modles/promoted-related');
+const Tuition = require('../models/tuition');
+const PromotedHome = require('../models/promoted-home');
+const PromotedSearch = require('../models/promoted-search');
+const PromotedRelated = require('../models/promoted-related');
 const tuitionDbFunctions = new DbAPIClass(Tuition);
 const promotedHomeDbFunctions = new DbAPIClass(PromotedHome);
 const promotedSearchDbFunctions = new DbAPIClass(PromotedSearch);

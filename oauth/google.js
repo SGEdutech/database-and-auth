@@ -2,7 +2,7 @@ const route = require('express').Router();
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20');
 const config = require('./_config').ids;
-const User = require('../database/modles/user');
+const User = require('../database/models/user');
 const DatabaseAPIClass = require('../database/api-functions');
 const APIHelperFunctions = new DatabaseAPIClass(User);
 

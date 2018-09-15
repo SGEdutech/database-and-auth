@@ -4,7 +4,7 @@ const passport = require('passport');
 const FacebookStrategy = require('passport-facebook');
 const config = require('./_config')
 	.ids;
-const User = require('../database/modles/user');
+const User = require('../database/models/user');
 const DatabaseAPIClass = require('../database/api-functions');
 const APIHelperFunctions = new DatabaseAPIClass(User);
 

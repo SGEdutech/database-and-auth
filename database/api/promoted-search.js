@@ -1,6 +1,6 @@
 const route = require('express')
 	.Router();
-const promotedSearch = require('../modles/promoted-search');
+const promotedSearch = require('../models/promoted-search');
 const escapeRegex = require('../../scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
 const promotedSearchDBFunctions = new DbAPIClass(promotedSearch);
