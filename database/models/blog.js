@@ -6,8 +6,8 @@ const ViewsOrHitsSchema = require('../views-or-hits-schema');
 const BlogSchema = new Schema({
 	blogId: String,
 	owner: String, //no owner
-    views: ViewsOrHitsSchema,
-    hits: ViewsOrHitsSchema,
+	views: ViewsOrHitsSchema,
+	hits: ViewsOrHitsSchema,
 	bookmarks: Number,
 	title: String,
 	authorName: String,

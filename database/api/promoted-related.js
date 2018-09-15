@@ -42,7 +42,7 @@ route.get('/search', (req, res) => {
 			searchCriteria[key] = new RegExp(escapeRegex(value.search), 'i');
 		}
 	});
-	promotedRelatedDBFunctions.getMultipleData(searchCriteria, {demands, skip, limit, sortBy})
+	promotedRelatedDBFunctions.getMultipleData(searchCriteria, { demands, skip, limit, sortBy })
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
@@ -63,9 +63,7 @@ route.post('/', (req, res) => {
 
 route.put('/update/:idOfCollection/:arrayName/:idOfNestedObject', (req, res) => {
 	promotedRelatedDBFunctions
-		.updateElementInArray({
-			_id: req.params.idOfCollection
-		}, req.params.arrayName, req.params.idOfNestedObject, req.body)
+		.updateElementInArray({ _id: req.params.idOfCollection }, req.params.arrayName, req.params.idOfNestedObject, req.body)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
@@ -79,9 +77,7 @@ route.put('/:_id', (req, res) => {
 route.delete('/delete/:_id/:arrayName', (req, res) => {
 	const identifier = req.body.string || req.body;
 	promotedRelatedDBFunctions
-		.deleteElementFromArray({
-			_id: req.params._id
-		}, req.params.arrayName, identifier)
+		.deleteElementFromArray({ _id: req.params._id }, req.params.arrayName, identifier)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });

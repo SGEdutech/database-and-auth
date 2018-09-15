@@ -9,27 +9,15 @@ const ContactSchema = new Schema({
 
 const ReviewsOwnedSchema = new Schema({
 	category: String,
-	outerId: {
-		type: String,
-		unique: true
-	},
+	outerId: { type: String, unique: true },
 	innerId: String
 });
 
-const ImportantDateSchema = new Schema({
-	title: String,
-	date: Date
-});
+const ImportantDateSchema = new Schema({ title: String, date: Date });
 
 const ReviewSchema = new Schema({
-	likes: {
-		type: Number,
-		default: 0
-	},
-	rating: {
-		type: Number,
-		required: true
-	},
+	likes: { type: Number, default: 0 },
+	rating: { type: Number, required: true },
 	owner: {
 		type: String,
 		unique: true,
@@ -38,10 +26,7 @@ const ReviewSchema = new Schema({
 	description: String
 });
 
-const GallerySchema = new Schema({
-	img_path: String,
-	album: String
-});
+const GallerySchema = new Schema({ img_path: String, album: String });
 
 const FacilitiesAndBraggingSchema = new Schema({
 	title: String,
@@ -63,11 +48,8 @@ const TimeAndDateSchema = new Schema({
 });
 
 const ClaimSchema = new Schema({
-	listingCategory: {
-		type: String,
-		enum: ['tuition', 'school', 'event']
-	},
-    listingId: String
+	listingCategory: { type: String, enum: ['tuition', 'school', 'event'] },
+	listingId: String
 });
 
 exports = module.exports = {
