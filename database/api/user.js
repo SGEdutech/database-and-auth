@@ -4,7 +4,9 @@ const User = require('../models/user');
 const DbAPIClass = require('../api-functions');
 const userDbFunctions = new DbAPIClass(User);
 const youShallNotPass = require('../../scripts/login-check');
-const {claimListing} = require('../database-scripts/user-claim');
+const {
+    claimListing
+} = require('../database-scripts/user-claim');
 
 route.get('/info', (req, res) => res.send(req.user));
 
@@ -37,14 +39,16 @@ route.post('/add/:id/:arrayName', (req, res) => {
 
     if (req.params.arrayName === 'claims') {
         claimListing(req.params.id, elementToBePushed)
-            .then(() => res.send({done: true}))
+            .then(() => res.send({
+                done: true
+            }))
             .catch(err => console.error(err));
         return;
     }
 
     userDbFunctions
         .addElementToArray({
-            _id: req.params._id
+            _id: req.params.id
         }, req.params.arrayName, elementToBePushed)
         .then(data => res.send(data))
         .catch(err => console.error(err));

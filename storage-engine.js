@@ -87,11 +87,10 @@ const uploadSolutionPdf = multer({
     // limits: {fileSize: 1024 * 1024},  // Unit Bytes
     // fileFilter: checkFileType
 }).any();
-
+    
 function solutionPdfMiddleware(req, res, next) {
     uploadSolutionPdf(req, res, err => err ? console.error(err) : next());
 }
-
 
 exports = module.exports = {
     eventPicsMiddleware,
