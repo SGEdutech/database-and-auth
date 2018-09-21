@@ -2,53 +2,40 @@ const mongoose = require('mongoose');
 const arrayUniquePlugin = require('mongoose-unique-array');
 const Schema = mongoose.Schema;
 const secondarySchemas = require('../secondary-schemas');
+const { ReviewsOwnedSchema } = secondarySchemas;
+const { ClaimSchema } = secondarySchemas;
 const {
-	ReviewsOwnedSchema
-} = secondarySchemas;
-const {
-	ClaimSchema
-} = secondarySchemas;
+	isMaxStrLength,
+	isValidPhoneNumber,
+	isValidPin,
+	isValidEmail,
+	isValidDOB
+} = require('../scripts/user/validations');
+const { required, select } = require('../../config.json').MONGO;
 
 const UserSchema = new Schema({
-	firstName: String,
+	firstName: { type: String, required, lowercase: true },
 	middleName: String,
-	lastName: String,
-	gender: { type: String, enum: ['male', 'female', 'other'] },
+	lastName: { type: String, lowercase: true },
+	gender: { type: String, enum: ['male', 'female', 'other'], select },
 	about: String,
-	password: {
-		type: String,
-		select: false
-	},
-	facebookId: {
-		type: String,
-		select: false
-	},
-	googleId: {
-		type: String,
-		select: false
-	},
+	password: { type: String, select },
+	facebookId: { type: String, select },
+	googleId: { type: String, select },
 	claims: [ClaimSchema],
-	reviewsOwned: [ReviewsOwnedSchema],
-	primaryRole: String, // Institute, student, parent
+	primaryRole: { type: String, required, enum: ['enterprise', 'student', 'parent'] },
 	addressLine1: String,
 	addressLine2: String,
-	city: String,
+	city: { type: String, required },
 	district: String,
 	state: String,
-	country: String,
-	pin: Number,
-	primaryEmail: {
-		type: String,
-		lowercase: true,
-		unique: true
-	},
-	secondaryEmail: {
-		type: String,
-		lowercase: true
-	},
-	phone: Number,
+	country: { type: String, default: 'india' },
+	pin: { type: Number, select },
+	primaryEmail: { type: String, lowercase: true, required },
+	secondaryEmail: { type: String, lowercase: true, select },
+	phone: { type: Number, select },
 	img_userProfilePic: String,
-	dateOfBirth: Date,
+	dateOfBirth: { type: Date, select },
 	goingEvents: [String],
 	mayBeGoingEvents: [String],
 	schoolStuding: String,
@@ -57,29 +44,35 @@ const UserSchema = new Schema({
 	youtubeLink: String,
 	instaLink: String,
 	linkedinLink: String,
-	bookmarkTuitions: [{
-		type: String,
-		unique: true
-	}],
-	bookmarkSchools: [{
-		type: String,
-		unique: true
-	}],
-	bookmarkEvents: [{
-		type: String,
-		unique: true
-	}],
-	bookmarkBlogs: [{
-		type: String,
-		unique: true
-	}]
+	bookmarkTuitions: [{ type: String, unique: true }],
+	bookmarkSchools: [{ type: String, unique: true }],
+	bookmarkEvents: [{ type: String, unique: true }],
+	bookmarkBlogs: [{ type: String, unique: true }]
 });
 
-// CourseSchema.post('validate', docs => {
-// 	return new Promise((resolve, reject) => {
-//
-// 	})
-// });
+UserSchema.plugin(arrayUniquePlugin);
+
+// UserSchema.post('validate', validateUser);
+
+UserSchema.pre('findOneAndUpdate', function(next) {
+	this.options.runValidators = true;
+	next();
+});
+
+UserSchema.path('phone').validate(isValidPhoneNumber, 'Please enter a valid 10 digit number');
+
+UserSchema.path('about').validate(discription => isMaxStrLength(discription, 200),
+	'About cannot be longer than 200 caracters');
+
+UserSchema.path('pin').validate(isValidPin, 'Not a valid pin');
+
+UserSchema.path('primaryEmail').validate(isValidEmail, 'Not a valid email');
+
+// Todo: Test this
+UserSchema.path('dateOfBirth').validate(isValidDOB, 'Not a valid email');
+
+UserSchema.path('schoolStuding').validate(schoolName => isMaxStrLength(schoolName, 50),
+	'School name must be less than 50 characters');
 
 const User = mongoose.model('user', UserSchema);
 
