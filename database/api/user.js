@@ -2,7 +2,7 @@ const route = require('express').Router();
 const User = require('../models/user');
 const DbAPIClass = require('../api-functions');
 const userDbFunctions = new DbAPIClass(User);
-const { claimListing } = require('../scripts/user/user-claim');
+const { claimListing } = require('../validation-scripts/user-claim');
 const Tuition = require('../models/tuition');
 const tuitionDbFunctions = new DbAPIClass(Tuition);
 const School = require('../models/school');
@@ -12,16 +12,14 @@ route.get('/info', (req, res) => res.send(req.user));
 
 // todo - fix this route
 route.get('/all', (req, res) => {
-	const skip = (req.query.page - 1) * req.query.items;
-	const limit = parseInt(req.query.items, 10);
 	userDbFunctions
-		.getAllData(req.query.demands, skip, limit)
+		.getAllData(req.query.demands)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.get('/reviews', (req, res) => {
-	if (req.user === undefined) throw new Error('User nor logged in');
+	if (req.user === undefined) throw new Error('User not logged in');
 
 	const userReviews = [];
 
@@ -47,18 +45,30 @@ route.get('/reviews', (req, res) => {
 })
 
 route.get('/', (req, res) => {
-	userDbFunctions
-		.getSpecificData(req.query)
+	userDbFunctions.getSpecificData(req.query)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.post('/', (req, res) => {
-	userDbFunctions
-		.addCollection(req.body)
+	userDbFunctions.addCollection(req.body)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
+
+route.post('/add-claim', (req, res) => {
+	if (req.user === undefined) {
+		res.send('User not logged in');
+		return;
+	}
+
+	const userId = req.user._id;
+	const listingInfo = req.body.listingInfo || {};
+	const listingCategorty = listingInfo.listingCategorty;
+	const listingId = listingInfo.listingId;
+
+	claimListing(userId, listingInfo);
+})
 
 route.post('/add/:id/:arrayName', (req, res) => {
 	const elementToBePushed = req.body.string || req.body;

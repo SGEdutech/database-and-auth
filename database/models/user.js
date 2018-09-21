@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const arrayUniquePlugin = require('mongoose-unique-array');
 const Schema = mongoose.Schema;
 const secondarySchemas = require('../secondary-schemas');
-const { ReviewsOwnedSchema } = secondarySchemas;
 const { ClaimSchema } = secondarySchemas;
 const {
 	isMaxStrLength,
@@ -10,7 +9,7 @@ const {
 	isValidPin,
 	isValidEmail,
 	isValidDOB
-} = require('../scripts/user/validations');
+} = require('../validation-scripts/validations');
 const { required, select } = require('../../config.json').MONGO;
 
 const UserSchema = new Schema({
