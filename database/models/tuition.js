@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const arrayUniquePlugin = require('mongoose-unique-array');
 
 const secondarySchemas = require('../secondary-schemas');
 const ReviewSchema = secondarySchemas.ReviewSchema;
@@ -8,17 +9,26 @@ const FacilitiesAndBraggingSchema = secondarySchemas.FacilitiesAndBraggingSchema
 const TimeAndDateSchema = secondarySchemas.TimeAndDateSchema;
 const ViewsOrHitsSchema = require('../views-or-hits-schema');
 
+const {
+	isMaxStrLength,
+	isValidPhoneNumber,
+	isValidPin,
+	isValidEmail,
+	isValidWebsite
+} = require('../validation-scripts/validation');
+
+const { required, select } = require('../../config.json').MONGO;
+
 const TuitionSchema = new Schema({
-	name: String,
-	category: String,
-	fromAge: Number,
-	toAge: Number,
+	name: { type: String, required },
+	category: { type: String, required },
+	fromAge: { type: Number, min: [0, 'Age can\'t be negative'], max: [100, 'Too old to attend tuition'] },
+	toAge: { type: Number, min: [0, 'Age can\'t be negative'], max: [100, 'Too old to attend tuition'] },
 	addressLine1: String,
 	addressLine2: String,
-	city: String,
+	city: { type: String, required },
 	district: String,
 	state: String,
-	country: String,
 	pin: Number,
 	dayAndTimeOfOperation: [TimeAndDateSchema],
 	team: [TeamSchema],
@@ -36,7 +46,6 @@ const TuitionSchema = new Schema({
 	img_tuitionCoverPic: String,
 	gallery: [String],
 	bragging: [FacilitiesAndBraggingSchema],
-	courses: [{ type: Schema.Types.ObjectId, ref: 'course' }],
 	reviews: [ReviewSchema],
 	views: ViewsOrHitsSchema,
 	hits: ViewsOrHitsSchema,
@@ -45,6 +54,28 @@ const TuitionSchema = new Schema({
 	claimedBy: String,
 	updatedOn: { type: Date, default: Date.now() }
 });
+
+TuitionSchema.plugin(arrayUniquePlugin);
+
+TuitionSchema.path('name').validate(name => isMaxStrLength(name, 15),
+	'Name cannot be more than 15 charecters');
+
+TuitionSchema.path('category').validate(categoryName => isMaxStrLength(categoryName, 10),
+	'Category name cannot be more than 10 charecters');
+
+TuitionSchema.path('description').validate(description => isMaxStrLength(description, 200),
+	'Description cannot be more than 200 charecters');
+
+TuitionSchema.path('contactPerson').validate(contactPersonName => isMaxStrLength(contactPersonName, 15),
+	'Contact person name cannot be more than 15 charecters');
+
+TuitionSchema.path('primaryNumber').validate(isValidPhoneNumber, 'Phone number not valid');
+
+TuitionSchema.path('secondaryNumber').validate(isValidPhoneNumber, 'Phone number not valid');
+
+TuitionSchema.path('email').validate(isValidEmail, 'Email ID not valid');
+
+TuitionSchema.path('website').validate(isValidWebsite, 'Website link not valid');
 
 const Tuition = mongoose.model('tuition', TuitionSchema);
 

@@ -9,7 +9,7 @@ const {
 	isValidPin,
 	isValidEmail,
 	isValidDOB
-} = require('../validation-scripts/validations');
+} = require('../validation-scripts/validation');
 const { required, select } = require('../../config.json').MONGO;
 
 const UserSchema = new Schema({

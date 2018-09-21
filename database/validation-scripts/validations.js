@@ -61,6 +61,16 @@ function isValidDOB(dateOfBirth) {
 }
 
 /**
+ * Tests if url provided is possible weisite url
+ * @param {string} url Url of website
+ * @returns {boolean} True if url is a possible website else false
+ */
+function isValidWebsite(url) {
+	const websiteRegex = new RegExp('^((https?|ftp|smtp):\\/\\/)?(www.)?[a-z0-9]+\\.[a-z]+(\\/[a-zA-Z0-9#]+\\/?)*$');
+	return websiteRegex.test(url);
+}
+
+/**
  * Mongoose middleware that check if user to be posted is valid
  * @param {object} user User object to be posted
  * @param {function} next Callback
@@ -85,5 +95,6 @@ exports = module.exports = {
 	isMaxStrLength,
 	isValidPin,
 	isValidEmail,
-	isValidDOB
+	isValidDOB,
+	isValidWebsite
 };
