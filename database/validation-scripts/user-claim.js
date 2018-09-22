@@ -63,9 +63,6 @@ async function unclaimListing(userID, listingInfo = {}) {
 		const userInfo = await user.findById(userID).select('claims');
 		if (userInfo.claims) {
 			userInfo.claims.forEach(claimedListing => {
-				console.log(claimedListing);
-				console.log(listingCategory);
-				console.log(listingId);
 				if (claimedListing.listingCategory === listingCategory && claimedListing.listingId === listingId) {
 					isValidRequest = true;
 				}
@@ -73,12 +70,12 @@ async function unclaimListing(userID, listingInfo = {}) {
 		}
 		if (isValidRequest === false) throw new Error('Bad request');
 
-		transaction.update('user', userID, { $pull: { claims: { listingCategory, listingId } } });
+		transaction.update('user', userID, { $pull: { claims: { listingId, listingCategory } } });
 
 		const listingModelName = categoryToModel[listingCategory].name;
 		transaction.update(listingModelName, listingId, { $unset: { claimedBy: '' } });
 
-		return 'done';
+		return transaction.run();
 	} catch (err) {
 		console.error(err);
 		await transaction.rollback().catch(err1 => console.error(err1));
