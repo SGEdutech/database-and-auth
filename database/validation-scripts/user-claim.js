@@ -21,8 +21,7 @@ const categoryToModel = {
 async function claimListing(userID, listingInfo = {}) {
 	if (userID === undefined) throw new Error('User ID not provided');
 
-	const listingId = listingInfo.listingId;
-	const listingCategory = listingInfo.listingCategory;
+	const { listingId, listingCategory } = listingInfo.listingId;
 
 	if (listingId === undefined || listingCategory === undefined) throw new Error('Listing Info not provided');
 
@@ -32,9 +31,9 @@ async function claimListing(userID, listingInfo = {}) {
 		const listingModelName = categoryToModel[listingCategory].name;
 		const listingModel = categoryToModel[listingCategory].model;
 
-		listingModel.findById(listingId).then(listing => {
-			if (listing.claimedBy !== undefined) throw new Error('Listing already claimed')
-		})
+		const listing = await listingModel.findById(listingId);
+		if (listing.claimedBy !== undefined) throw new Error('Listing already claimed')
+
 		transaction.update(listingModelName, listingId, { claimedBy: userID });
 
 		return transaction.run();
