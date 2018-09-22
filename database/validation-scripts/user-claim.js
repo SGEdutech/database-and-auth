@@ -23,8 +23,7 @@ async function claimListing(userID, listingInfo = {}) {
 	try {
 		if (userID === undefined) throw new Error('User ID not provided');
 
-		const { listingId, listingCategory } = listingInfo.listingId;
-
+		const { listingId, listingCategory } = listingInfo;
 		if (listingId === undefined || listingCategory === undefined) throw new Error('Listing Info not provided');
 
 		transaction.update('user', userID, { $push: { claims: { listingCategory, listingId } } });
@@ -57,13 +56,16 @@ async function unclaimListing(userID, listingInfo = {}) {
 	try {
 		if (userID === undefined) throw new Error('User ID not provided');
 
-		const { listingId, listingCategory } = listingInfo.listingId;
+		const { listingId, listingCategory } = listingInfo;
 		if (listingId === undefined || listingCategory === undefined) throw new Error('Listing Info not provided');
 
 		let isValidRequest = false;
-		const userInfo = await user.findById(userID).select(claims);
+		const userInfo = await user.findById(userID).select('claims');
 		if (userInfo.claims) {
 			userInfo.claims.forEach(claimedListing => {
+				console.log(claimedListing);
+				console.log(listingCategory);
+				console.log(listingId);
 				if (claimedListing.listingCategory === listingCategory && claimedListing.listingId === listingId) {
 					isValidRequest = true;
 				}

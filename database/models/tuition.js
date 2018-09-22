@@ -55,7 +55,7 @@ const TuitionSchema = new Schema({
 	updatedOn: { type: Date, default: Date.now() }
 });
 
-TuitionSchema.plugin(arrayUniquePlugin);
+/* TuitionSchema.plugin(arrayUniquePlugin);
 
 TuitionSchema.path('name').validate(name => isMaxStrLength(name, 15),
 	'Name cannot be more than 15 charecters');
@@ -75,7 +75,7 @@ TuitionSchema.path('secondaryNumber').validate(isValidPhoneNumber, 'Phone number
 
 TuitionSchema.path('email').validate(isValidEmail, 'Email ID not valid');
 
-TuitionSchema.path('website').validate(isValidWebsite, 'Website link not valid');
+TuitionSchema.path('website').validate(isValidWebsite, 'Website link not valid'); */
 
 const Tuition = mongoose.model('tuition', TuitionSchema);
 

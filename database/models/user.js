@@ -53,12 +53,12 @@ UserSchema.plugin(arrayUniquePlugin);
 
 // UserSchema.post('validate', validateUser);
 
-UserSchema.pre('findOneAndUpdate', function(next) {
-	this.options.runValidators = true;
-	next();
-});
+// UserSchema.pre('findOneAndUpdate', function(next) {
+// 	this.options.runValidators = true;
+// 	next();
+// });
 
-UserSchema.path('phone').validate(isValidPhoneNumber, 'Please enter a valid 10 digit number');
+/* UserSchema.path('phone').validate(isValidPhoneNumber, 'Please enter a valid 10 digit number');
 
 UserSchema.path('about').validate(discription => isMaxStrLength(discription, 200),
 	'About cannot be longer than 200 caracters');
@@ -71,7 +71,7 @@ UserSchema.path('primaryEmail').validate(isValidEmail, 'Not a valid email');
 UserSchema.path('dateOfBirth').validate(isValidDOB, 'Not a valid email');
 
 UserSchema.path('schoolStuding').validate(schoolName => isMaxStrLength(schoolName, 50),
-	'School name must be less than 50 characters');
+	'School name must be less than 50 characters'); */
 
 const User = mongoose.model('user', UserSchema);
 
