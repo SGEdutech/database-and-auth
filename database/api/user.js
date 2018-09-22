@@ -63,11 +63,10 @@ route.post('/add-claim', (req, res) => {
 	}
 
 	const userId = req.user._id;
-	const listingInfo = req.body.listingInfo || {};
-	const listingCategorty = listingInfo.listingCategorty;
-	const listingId = listingInfo.listingId;
+	const listingCategorty = req.body.listingCategorty;
+	const listingId = req.body.listingId;
 
-	claimListing(userId, listingInfo);
+	claimListing(userId, { listingCategorty, listingId });
 })
 
 route.post('/add/:id/:arrayName', (req, res) => {
