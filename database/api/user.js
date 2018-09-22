@@ -115,7 +115,7 @@ route.delete('/empty/:keyname', (req, res) => {
 		.catch(err => console.error(err));
 });
 
-route.delete('remove-claim', (req, res) => {
+route.delete('/remove-claim', (req, res) => {
 	if (req.user === undefined) {
 		res.send('User not logged in');
 		return;
