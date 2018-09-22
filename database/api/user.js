@@ -63,13 +63,10 @@ route.post('/add-claim', (req, res) => {
 	}
 
 	const userId = req.user._id;
-	const listingCategory = req.body.listingCategory;
-	const listingId = req.body.listingId;
+	const { listingCategory, listingId } = req.body;
 
-	claimListing(userId, {
-		listingCategory,
-		listingId
-	}).then(() => res.end());
+	claimListing(userId, { listingCategory, listingId })
+		.then(() => res.end('done')).catch(err => console.error(err));
 })
 
 route.post('/add/:id/:arrayName', (req, res) => {
@@ -117,6 +114,19 @@ route.delete('/empty/:keyname', (req, res) => {
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
+
+route.delete('remove-claim', (req, res) => {
+	if (req.user === undefined) {
+		res.send('User not logged in');
+		return;
+	}
+
+	const userId = req.user._id;
+	const { listingCategory, listingId } = req.body;
+
+	claimListing(userId, { listingCategory, listingId })
+		.then(() => res.end('done')).catch(err => console.error(err));
+})
 
 route.delete('/:_id', (req, res) => {
 	userDbFunctions.deleteOneRow(req.params)

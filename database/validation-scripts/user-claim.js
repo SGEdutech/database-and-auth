@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const tuition = require('../models/tuition');
 const school = require('../models/school');
 const event = require('../models/event');
+const user = require('../models/user');
 const Transaction = require('mongoose-transactions');
 const transaction = new Transaction();
 
@@ -19,13 +20,13 @@ const categoryToModel = {
  * @returns {Promise} Resolves or rejects based on status
  */
 async function claimListing(userID, listingInfo = {}) {
-	if (userID === undefined) throw new Error('User ID not provided');
-
-	const { listingId, listingCategory } = listingInfo.listingId;
-
-	if (listingId === undefined || listingCategory === undefined) throw new Error('Listing Info not provided');
-
 	try {
+		if (userID === undefined) throw new Error('User ID not provided');
+
+		const { listingId, listingCategory } = listingInfo.listingId;
+
+		if (listingId === undefined || listingCategory === undefined) throw new Error('Listing Info not provided');
+
 		transaction.update('user', userID, { $push: { claims: { listingCategory, listingId } } });
 
 		const listingModelName = categoryToModel[listingCategory].name;
@@ -39,6 +40,37 @@ async function claimListing(userID, listingInfo = {}) {
 		return transaction.run();
 	} catch (err) {
 		console.error(err);
+		await transaction.rollback().catch(err1 => console.error(err1));
+		transaction.clean();
+		return new Promise((resolve, reject) => reject(new Error(err)))
+	}
+}
+
+async function unclaimListing(userId, listingInfo = {}) {
+	try {
+		if (userID === undefined) throw new Error('User ID not provided');
+
+		const { listingId, listingCategory } = listingInfo.listingId;
+		if (listingId === undefined || listingCategory === undefined) throw new Error('Listing Info not provided');
+
+		let isValidRequest = false;
+		const userInfo = await user.findById(userId).select(claims);
+		if (userInfo.claims) {
+			userInfo.claims.forEach(claimedListing => {
+				if (claimedListing.listingCategory === listingCategory && claimedListing.listingId === listingId) {
+					isValidRequest = true;
+				}
+			})
+		}
+		if (isValidRequest === false) throw new Error('Bad request');
+
+		transaction.update('user', userID, { $pull: { claims: { listingCategory, listingId } } });
+
+		const listingModelName = categoryToModel[listingCategory].name;
+		transaction.update(listingModelName, listingId, { $unset: { claimedBy: '' } });
+
+		return 'done';
+	} catch (err) {
 		await transaction.rollback().catch(err1 => console.error(err1));
 		transaction.clean();
 		return new Promise((resolve, reject) => reject(new Error(err)))
