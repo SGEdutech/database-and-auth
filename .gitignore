@@ -3,3 +3,5 @@
 config.json
 package-lock.json
 database/patch.js
+
+\.vscode/
