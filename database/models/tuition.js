@@ -15,7 +15,7 @@ const {
 	isValidPin,
 	isValidEmail,
 	isValidWebsite
-} = require('../validation-scripts/validation');
+} = require('../validation-scripts/validations');
 
 const { required, select } = require('../../config.json').MONGO;
 
