@@ -46,7 +46,14 @@ async function claimListing(userID, listingInfo = {}) {
 	}
 }
 
-async function unclaimListing(userId, listingInfo = {}) {
+// Todo: Optimisation needed
+/**
+ * Update user claims and listing claimedBy
+ * @param {ObjectId} userID Id of the user who is claiming the listing
+ * @param {object} listingInfo Object containing listingId and listingCategory
+ * @returns {Promise} Resolves or rejects based on status
+ */
+async function unclaimListing(userID, listingInfo = {}) {
 	try {
 		if (userID === undefined) throw new Error('User ID not provided');
 
@@ -54,7 +61,7 @@ async function unclaimListing(userId, listingInfo = {}) {
 		if (listingId === undefined || listingCategory === undefined) throw new Error('Listing Info not provided');
 
 		let isValidRequest = false;
-		const userInfo = await user.findById(userId).select(claims);
+		const userInfo = await user.findById(userID).select(claims);
 		if (userInfo.claims) {
 			userInfo.claims.forEach(claimedListing => {
 				if (claimedListing.listingCategory === listingCategory && claimedListing.listingId === listingId) {
@@ -71,6 +78,7 @@ async function unclaimListing(userId, listingInfo = {}) {
 
 		return 'done';
 	} catch (err) {
+		console.error(err);
 		await transaction.rollback().catch(err1 => console.error(err1));
 		transaction.clean();
 		return new Promise((resolve, reject) => reject(new Error(err)))
@@ -78,5 +86,6 @@ async function unclaimListing(userId, listingInfo = {}) {
 }
 
 exports = module.exports = {
-	claimListing
+	claimListing,
+	unclaimListing
 };

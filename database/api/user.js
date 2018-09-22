@@ -2,7 +2,7 @@ const route = require('express').Router();
 const User = require('../models/user');
 const DbAPIClass = require('../api-functions');
 const userDbFunctions = new DbAPIClass(User);
-const { claimListing } = require('../validation-scripts/user-claim');
+const { claimListing, unclaimListing } = require('../validation-scripts/user-claim');
 const Tuition = require('../models/tuition');
 const tuitionDbFunctions = new DbAPIClass(Tuition);
 const School = require('../models/school');
@@ -124,7 +124,7 @@ route.delete('remove-claim', (req, res) => {
 	const userId = req.user._id;
 	const { listingCategory, listingId } = req.body;
 
-	claimListing(userId, { listingCategory, listingId })
+	unclaimListing(userId, { listingCategory, listingId })
 		.then(() => res.end('done')).catch(err => console.error(err));
 })
 
