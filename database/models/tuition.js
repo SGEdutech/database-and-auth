@@ -8,6 +8,7 @@ const TeamSchema = secondarySchemas.TeamSchema;
 const FacilitiesAndBraggingSchema = secondarySchemas.FacilitiesAndBraggingSchema;
 const TimeAndDateSchema = secondarySchemas.TimeAndDateSchema;
 const ViewsOrHitsSchema = require('../views-or-hits-schema');
+const CourseSchema = require('./course-and-batch');
 
 const {
 	isMaxStrLength,
@@ -47,6 +48,7 @@ const TuitionSchema = new Schema({
 	gallery: [String],
 	bragging: [FacilitiesAndBraggingSchema],
 	reviews: [ReviewSchema],
+	courses: [CourseSchema],
 	views: ViewsOrHitsSchema,
 	hits: ViewsOrHitsSchema,
 	bookmarks: Number,

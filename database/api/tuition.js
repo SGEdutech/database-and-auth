@@ -41,14 +41,14 @@ function getPromotedData(queryObject) {
 
 	return new Promise((resolve, reject) => {
 		promotedDbFunction.getMultipleData({
-			category: 'tuition'
-		}, {
-			limit: demandedAdvertisements
-		}).then(promotedInfos => {
-			const promotedListingIdArr = [];
-			promotedInfos.forEach(promotedInfo => promotedListingIdArr.push(promotedInfo.listingId));
-			return tuitionDbFunctions.getDataFromMultipleIds(promotedListingIdArr, queryObject)
-		})
+				category: 'tuition'
+			}, {
+				limit: demandedAdvertisements
+			}).then(promotedInfos => {
+				const promotedListingIdArr = [];
+				promotedInfos.forEach(promotedInfo => promotedListingIdArr.push(promotedInfo.listingId));
+				return tuitionDbFunctions.getDataFromMultipleIds(promotedListingIdArr, queryObject)
+			})
 			.then(data => resolve(data)).catch(err => reject(err));
 	});
 }
@@ -67,11 +67,11 @@ route.get('/all', (req, res) => {
 
 	if (isAdvertisementRequested === false) {
 		tuitionDbFunctions.getAllData({
-			skip,
-			limit,
-			demands,
-			incrementHits
-		}).then(data => res.send(data))
+				skip,
+				limit,
+				demands,
+				incrementHits
+			}).then(data => res.send(data))
 			.catch(err => console.error(err));
 		return;
 	}
@@ -102,27 +102,27 @@ route.get('/', (req, res) => {
 	delete queryObject.incrementView;
 
 	tuitionDbFunctions.getSpecificData(req.query, {
-		incrementView,
-		homeAdvertisement,
-		searchAdvertisement,
-		relatedAdvertisement
-	}).then(data => res.send(data))
+			incrementView,
+			homeAdvertisement,
+			searchAdvertisement,
+			relatedAdvertisement
+		}).then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
 route.get('/plus-courses', (req, res) => {
 	tuitionDbFunctions.getOneRelationalData(req.query, {
-		populate: 'courses'
-	})
+			populate: 'courses'
+		})
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
 route.get('/plus-courses-and-batches', (req, res) => {
 	tuitionDbFunctions.getOneRelationalDataWithDepthTwo(req.query, {
-		path: 'courses'
-	}, {
-		path: 'batches'
-	})
+			path: 'courses'
+		}, {
+			path: 'batches'
+		})
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
@@ -178,8 +178,8 @@ route.get('/search', (req, res) => {
 route.post('/add/:_id/:arrayName', (req, res) => {
 	const elementToBePushed = req.body.string || req.body;
 	tuitionDbFunctions.addElementToArray({
-		_id: req.params._id
-	}, req.params.arrayName, elementToBePushed)
+			_id: req.params._id
+		}, req.params.arrayName, elementToBePushed)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
@@ -223,5 +223,20 @@ route.delete('/:_id', (req, res) => {
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
+
+// Courses
+route.get('/course', (req, res) => {
+	const tuitionId = req.query.id;
+	Tuition.find({ _id: tuitionId }).select('courses')
+		.then(data => res.send(data))
+		.catch(err => console.error(err))
+})
+
+route.post(':_id/course', (req, res) => {
+	const tuitionId = req.params._id;
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { courses: req.body } })
+		.then(data => res.send(data))
+		.catch(err => console.error(err))
+})
 
 module.exports = route;
