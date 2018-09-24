@@ -8,6 +8,7 @@ const TeamSchema = secondarySchemas.TeamSchema;
 const FacilitiesAndBraggingSchema = secondarySchemas.FacilitiesAndBraggingSchema;
 const TimeAndDateSchema = secondarySchemas.TimeAndDateSchema;
 const ViewsOrHitsSchema = require('../views-or-hits-schema');
+// const CourseSchema = require('./course-and-batch');
 
 const {
 	isMaxStrLength,
@@ -47,6 +48,7 @@ const TuitionSchema = new Schema({
 	gallery: [String],
 	bragging: [FacilitiesAndBraggingSchema],
 	reviews: [ReviewSchema],
+	// courses: [CourseSchema],
 	views: ViewsOrHitsSchema,
 	hits: ViewsOrHitsSchema,
 	bookmarks: Number,
@@ -55,27 +57,27 @@ const TuitionSchema = new Schema({
 	updatedOn: { type: Date, default: Date.now() }
 });
 
-/* TuitionSchema.plugin(arrayUniquePlugin);
+// TuitionSchema.plugin(arrayUniquePlugin);
 
-TuitionSchema.path('name').validate(name => isMaxStrLength(name, 15),
-	'Name cannot be more than 15 charecters');
+// TuitionSchema.path('name').validate(name => isMaxStrLength(name, 15),
+// 	'Name cannot be more than 15 charecters');
 
-TuitionSchema.path('category').validate(categoryName => isMaxStrLength(categoryName, 10),
-	'Category name cannot be more than 10 charecters');
+// TuitionSchema.path('category').validate(categoryName => isMaxStrLength(categoryName, 10),
+// 	'Category name cannot be more than 10 charecters');
 
-TuitionSchema.path('description').validate(description => isMaxStrLength(description, 200),
-	'Description cannot be more than 200 charecters');
+// TuitionSchema.path('description').validate(description => isMaxStrLength(description, 200),
+// 	'Description cannot be more than 200 charecters');
 
-TuitionSchema.path('contactPerson').validate(contactPersonName => isMaxStrLength(contactPersonName, 15),
-	'Contact person name cannot be more than 15 charecters');
+// TuitionSchema.path('contactPerson').validate(contactPersonName => isMaxStrLength(contactPersonName, 15),
+// 	'Contact person name cannot be more than 15 charecters');
 
-TuitionSchema.path('primaryNumber').validate(isValidPhoneNumber, 'Phone number not valid');
+// TuitionSchema.path('primaryNumber').validate(isValidPhoneNumber, 'Phone number not valid');
 
-TuitionSchema.path('secondaryNumber').validate(isValidPhoneNumber, 'Phone number not valid');
+// TuitionSchema.path('secondaryNumber').validate(isValidPhoneNumber, 'Phone number not valid');
 
-TuitionSchema.path('email').validate(isValidEmail, 'Email ID not valid');
+// TuitionSchema.path('email').validate(isValidEmail, 'Email ID not valid');
 
-TuitionSchema.path('website').validate(isValidWebsite, 'Website link not valid'); */
+// TuitionSchema.path('website').validate(isValidWebsite, 'Website link not valid');
 
 const Tuition = mongoose.model('tuition', TuitionSchema);
 

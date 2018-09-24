@@ -1,8 +1,8 @@
 const route = require('express')
 	.Router();
-const Course = require('../models/course');
+// const Course = require('../models/course');
 const DbAPIClass = require('../api-functions');
-const courseDbFunctions = new DbAPIClass(Course);
+// const courseDbFunctions = new DbAPIClass(Course);
 
 route.get('/all', (req, res) => {
 	const skip = (req.query.page - 1) * req.query.items;
