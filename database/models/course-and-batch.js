@@ -4,7 +4,7 @@ const { required } = require('../../config.json').MONGO;
 
 const BatchSchema = new Schema({
 	name: String,
-	course: { type: Schema.Types.ObjectId(), required },
+	course: { type: mongoose.Types.ObjectId(), required },
 	description: String,
 	students: [Schema.Types.ObjectId]
 });
