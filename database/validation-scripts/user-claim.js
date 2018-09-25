@@ -23,8 +23,7 @@ async function claimListing(userID, listingInfo = {}) {
 	try {
 		if (userID === undefined) throw new Error('User ID not provided');
 
-		const { listingId, listingCategory } = listingInfo.listingId;
-
+		const { listingId, listingCategory } = listingInfo;
 		if (listingId === undefined || listingCategory === undefined) throw new Error('Listing Info not provided');
 
 		transaction.update('user', userID, { $push: { claims: { listingCategory, listingId } } });
@@ -57,11 +56,11 @@ async function unclaimListing(userID, listingInfo = {}) {
 	try {
 		if (userID === undefined) throw new Error('User ID not provided');
 
-		const { listingId, listingCategory } = listingInfo.listingId;
+		const { listingId, listingCategory } = listingInfo;
 		if (listingId === undefined || listingCategory === undefined) throw new Error('Listing Info not provided');
 
 		let isValidRequest = false;
-		const userInfo = await user.findById(userID).select(claims);
+		const userInfo = await user.findById(userID).select('claims');
 		if (userInfo.claims) {
 			userInfo.claims.forEach(claimedListing => {
 				if (claimedListing.listingCategory === listingCategory && claimedListing.listingId === listingId) {
@@ -71,12 +70,12 @@ async function unclaimListing(userID, listingInfo = {}) {
 		}
 		if (isValidRequest === false) throw new Error('Bad request');
 
-		transaction.update('user', userID, { $pull: { claims: { listingCategory, listingId } } });
+		transaction.update('user', userID, { $pull: { claims: { listingId, listingCategory } } });
 
 		const listingModelName = categoryToModel[listingCategory].name;
 		transaction.update(listingModelName, listingId, { $unset: { claimedBy: '' } });
 
-		return 'done';
+		return transaction.run();
 	} catch (err) {
 		console.error(err);
 		await transaction.rollback().catch(err1 => console.error(err1));

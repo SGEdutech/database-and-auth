@@ -35,8 +35,12 @@ route.get('/reviews', (req, res) => {
 	}
 
 	Promise.all([
-		tuitionDbFunctions.getAllData({ demands: 'name reviews' }),
-		schoolDbFunctions.getAllData({ demands: 'name reviews' })
+		tuitionDbFunctions.getAllData({
+			demands: 'name reviews'
+		}),
+		schoolDbFunctions.getAllData({
+			demands: 'name reviews'
+		})
 	]).then(tuitionsAndSchoolCollection => {
 		filterUserReviews(tuitionsAndSchoolCollection[0], 'tuition');
 		filterUserReviews(tuitionsAndSchoolCollection[1], 'school');
@@ -74,13 +78,17 @@ route.post('/add/:id/:arrayName', (req, res) => {
 
 	if (req.params.arrayName === 'claims') {
 		claimListing(req.params.id, elementToBePushed)
-			.then(() => res.send({ done: true }))
+			.then(() => res.send({
+				done: true
+			}))
 			.catch(err => console.error(err));
 		return;
 	}
 
 	userDbFunctions
-		.addElementToArray({ _id: req.params.id }, req.params.arrayName, elementToBePushed)
+		.addElementToArray({
+			_id: req.params.id
+		}, req.params.arrayName, elementToBePushed)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
@@ -103,7 +111,9 @@ route.put('/:_id', (req, res) => {
 route.delete('/delete/:arrayName/:_id', (req, res) => {
 	const identifier = req.body.string || req.body;
 	userDbFunctions
-		.deleteElementFromArray({ _id: req.params._id }, req.params.arrayName, identifier)
+		.deleteElementFromArray({
+			_id: req.params._id
+		}, req.params.arrayName, identifier)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
@@ -123,7 +133,6 @@ route.delete('/remove-claim', (req, res) => {
 
 	const userId = req.user._id;
 	const { listingCategory, listingId } = req.body;
-
 	unclaimListing(userId, { listingCategory, listingId })
 		.then(() => res.end('done')).catch(err => console.error(err));
 })
