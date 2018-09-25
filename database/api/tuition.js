@@ -215,7 +215,7 @@ route.delete('/:_id', (req, res) => {
 });
 
 // Courses
-route.get('/:tuitionId/course', (req, res) => {
+route.get('/:tuitionId/courses', (req, res) => {
 	const { tuitionId } = req.params;
 	Tuition.find({ _id: tuitionId }).select('courses')
 		.then(data => res.send(data))
