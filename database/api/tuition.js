@@ -54,6 +54,15 @@ function areAdvertisementsRequested(queryObject) {
 	return Boolean(queryObject.homeAdvertisement || queryObject.searchAdvertisement || queryObject.relatedAdvertisement);
 }
 
+function prependToObjKey(obj, prependStr) {
+	const keys = Object.keys(obj);
+
+	keys.forEach(key => {
+		obj[prependStr + key] = obj[key];
+		delete obj[key];
+	})
+}
+
 route.get('/all', (req, res) => {
 	const queryObject = req.query;
 	const skip = parseInt(queryObject.skip, 10) || 0;
@@ -206,18 +215,36 @@ route.delete('/:_id', (req, res) => {
 });
 
 // Courses
-route.get('/course', (req, res) => {
-	const tuitionId = req.query.id;
+route.get('/:tuitionId/course', (req, res) => {
+	const { tuitionId } = req.params;
 	Tuition.find({ _id: tuitionId }).select('courses')
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
-})
+});
 
-route.post(':_id/course', (req, res) => {
-	const tuitionId = req.params._id;
+route.post('/:tuitionId/course', (req, res) => {
+	const { tuitionId } = req.params;
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { courses: req.body } })
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
+});
+
+route.put('/:tuitionId/course/:courseId', (req, res) => {
+	const { tuitionId } = req.params;
+	const { courseId } = req.params;
+
+	prependToObjKey(req.body, 'courses.$.');
+
+	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $set: req.body })
+		.then(data => res.send(data)).catch(err => console.error(err));
+});
+
+route.delete('/:tuitionId/course/:courseId', (req, res) => {
+	const { tuitionId } = req.params;
+	const { courseId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $pull: { courses: { _id: courseId } } })
+		.then(data => res.send(data)).catch(err => console.error(err))
 })
 
 module.exports = route;

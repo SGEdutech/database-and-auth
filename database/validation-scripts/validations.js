@@ -1,6 +1,3 @@
-const School = require('../models/school');
-const Tuition = require('../models/tuition');
-
 /**
  * Returns if a user has provided any ID
  * @param {object} user User object to be posted

@@ -4,7 +4,6 @@ const { required } = require('../../config.json').MONGO;
 
 const BatchSchema = new Schema({
 	name: String,
-	course: { type: mongoose.Types.ObjectId(), required },
 	description: String,
 	students: [Schema.Types.ObjectId]
 });
@@ -17,6 +16,4 @@ const CourseSchema = new Schema({
 	batches: [BatchSchema]
 });
 
-const Course = mongoose.model('course', CourseSchema);
-
-module.exports = Course;
+module.exports = CourseSchema;
