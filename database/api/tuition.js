@@ -311,7 +311,7 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 
 // Todo: Write mongo query
 // Todo: Add validation while adding students
-route.post('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
+route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
 	if (Array.isArray(req.body.students) === false) throw new Error('Students provided is not an array or not provided at all');
 
@@ -331,7 +331,7 @@ route.post('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 		}).catch(err => console.error(err));
 });
 
-route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
+route.delete('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
 	if (ObjectId.isValid(req.body.string) === false) throw new Error('Id provided is not valid mongo id');
 
