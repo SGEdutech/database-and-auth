@@ -8,6 +8,7 @@ const FacilitiesAndBraggingSchema = secondarySchemas.FacilitiesAndBraggingSchema
 const TeamSchema = secondarySchemas.TeamSchema;
 const TimeAndDateSchema = secondarySchemas.TimeAndDateSchema;
 const ViewsOrHitsSchema = require('../views-or-hits-schema');
+const CourseSchema = require('./course-and-batch');
 
 const SchoolSchema = new Schema({
 	coverPic: String,
@@ -35,7 +36,7 @@ const SchoolSchema = new Schema({
 	team: [TeamSchema],
 	reviews: [ReviewSchema],
 	fee: String,
-	courses: [{ type: Schema.Types.ObjectId, ref: 'course' }],
+	courses: [CourseSchema],
 	img_schoolCoverPic: String,
 	admissionProcess: String,
 	eligibilityCriteria: String,
