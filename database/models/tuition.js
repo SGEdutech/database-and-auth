@@ -9,6 +9,7 @@ const FacilitiesAndBraggingSchema = secondarySchemas.FacilitiesAndBraggingSchema
 const TimeAndDateSchema = secondarySchemas.TimeAndDateSchema;
 const ViewsOrHitsSchema = require('../views-or-hits-schema');
 const CourseSchema = require('./course-and-batch');
+const StudentSchema = require('../schemas/student');
 
 const {
 	isMaxStrLength,
@@ -45,6 +46,7 @@ const TuitionSchema = new Schema({
 	instaLink: String,
 	facilities: String,
 	img_tuitionCoverPic: String,
+	students: [StudentSchema],
 	gallery: [String],
 	bragging: [FacilitiesAndBraggingSchema],
 	reviews: [ReviewSchema],
