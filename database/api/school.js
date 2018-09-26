@@ -185,4 +185,145 @@ route.delete('/:_id', (req, res) => {
 		.catch(err => console.error(err));
 });
 
+// Courses
+route.get('/:tuitionId/courses', (req, res) => {
+	const { tuitionId } = req.params;
+	Tuition.find({ _id: tuitionId }).select('courses')
+		.then(data => res.send(data))
+		.catch(err => console.error(err));
+});
+
+route.post('/:tuitionId/course', (req, res) => {
+	const { tuitionId } = req.params;
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { courses: req.body } })
+		.then(data => res.send(data))
+		.catch(err => console.error(err));
+});
+
+route.put('/:tuitionId/course/:courseId', (req, res) => {
+	const { tuitionId } = req.params;
+	const { courseId } = req.params;
+
+	prependToObjKey(req.body, 'courses.$.');
+
+	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $set: req.body })
+		.then(data => res.send(data)).catch(err => console.error(err));
+});
+
+route.delete('/:tuitionId/course/:courseId', (req, res) => {
+	const { tuitionId } = req.params;
+	const { courseId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $pull: { courses: { _id: courseId } } })
+		.then(data => res.send(data)).catch(err => console.error(err))
+});
+
+// Batches
+
+// Todo: Write mongo query
+route.get('/:tuitionId/course/:courseId/batches', (req, res) => {
+	const { tuitionId, courseId } = req.params;
+
+	Tuition.findById(tuitionId).select('courses')
+		.then(tuition => {
+			tuition.courses.forEach(course => {
+				if (course._id === courseId) res.send(course.batches);
+			})
+		}).catch(err => console.error(err))
+});
+
+route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
+	const { tuitionId, courseId } = req.params;
+	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $push: { 'courses.$.batches': req.body } })
+		.then(data => res.send(data)).catch(err => console.error(err))
+})
+
+// Todo: Write mongo query
+route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
+	const { tuitionId, courseId, batchId } = req.params;
+	const bodyObjKeys = Object.keys(req.body);
+
+	Tuition.findById(tuitionId).select('courses')
+		.then(tuition => {
+			tuition.courses.forEach(course => {
+				if (course._id.toString() === courseId) {
+					course.batches.forEach(batch => {
+						if (batch._id.toString() === batchId) {
+							bodyObjKeys.forEach(key => batch[key] = req.body[key]);
+							tuition.save().then(data => res.send(data))
+								.catch(err => console.error(err));
+						}
+					})
+				}
+			})
+		}).catch(err => console.error(err));
+});
+
+route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
+	const { tuitionId, courseId, batchId } = req.params;
+
+	Tuition.findById(tuitionId).select('courses')
+		.then(tuition => {
+			tuition.courses.forEach(course => {
+				if (course._id.toString() === courseId) {
+					course.batches.forEach((batch, index) => {
+						if (batch._id.toString() === batchId) {
+							course.batches.splice(index, 1);
+							tuition.save()
+								.then(data => res.send(data))
+								.catch(err => console.error(err));
+						}
+					})
+				}
+			})
+		}).catch(err => console.error(err));
+});
+
+
+// Todo: Write mongo query
+// Todo: Add validation while adding students
+route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
+	const { tuitionId, courseId, batchId } = req.params;
+	if (Array.isArray(req.body.students) === false) throw new Error('Students provided is not an array or not provided at all');
+
+	Tuition.findById(tuitionId).select('courses')
+		.then(tuition => {
+			tuition.courses.forEach(course => {
+				if (course._id.toString() === courseId) {
+					course.batches.forEach(batch => {
+						if (batch._id.toString() === batchId) {
+							batch.students.concat(req.body.students);
+							tuition.save()
+								.then(data => res.send(data)).catch(err => console.error(err));
+						}
+					})
+				}
+			})
+		}).catch(err => console.error(err));
+});
+
+route.delete('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
+	const { tuitionId, courseId, batchId } = req.params;
+	if (ObjectId.isValid(req.body.string) === false) throw new Error('Id provided is not valid mongo id');
+
+	Tuition.findById(tuitionId).select('courses')
+		.then(tuition => {
+			tuition.courses.forEach(course => {
+				if (course._id.toString() === courseId) {
+					course.batches.forEach(batch => {
+						if (batch._id.toString() === batchId) {
+							batch.students.forEach((student, index) => {
+								if (student === req.body.string) {
+									student.splice(index, 1);
+									tuition.save().then(data => res.send(data))
+										.catch(err => console.error(err))
+								}
+							})
+						}
+					})
+				}
+			})
+		}).catch(err => console.error(err));
+});
+
 module.exports = route;
