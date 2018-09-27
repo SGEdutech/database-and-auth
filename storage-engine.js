@@ -92,10 +92,26 @@ function solutionPdfMiddleware(req, res, next) {
 	uploadSolutionPdf(req, res, err => err ? console.error(err) : next());
 }
 
+const notificationStorage = multer.diskStorage({
+	destination: './public/pdfs/notification',
+	filename: nameThatBitch
+});
+
+const uploadNotification = multer({
+	storage: notificationStorage
+	// limits: {fileSize: 1024 * 1024},  // Unit Bytes
+	// fileFilter: checkFileType
+}).any();
+
+function notificationMiddleware(req, res, next) {
+	uploadNotification(req, res, err => err ? console.error(err) : next());
+}
+
 exports = module.exports = {
 	eventPicsMiddleware,
 	schoolPicsMiddleware,
 	tuitionPicsMiddleware,
 	userCoverPicMiddleware,
-	solutionPdfMiddleware
+	solutionPdfMiddleware,
+	notificationMiddleware
 };
