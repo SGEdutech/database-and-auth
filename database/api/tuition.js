@@ -313,14 +313,28 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 // Todo: Add validation while adding students
 route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
-	if (Array.isArray(req.body.students) === false) throw new Error('Students provided is not an array or not provided at all');
+	let isArray;
+	if (Array.isArray(req.body.students) === false) {
+		if (ObjectId.isValid(req.body.students) === false) throw new Error('Not a valid mongo id');
+		isArray = false;
+	} else {
+		req.body.students.forEach(student => {
+			if (ObjectId.isValid(student) === false) throw new Error('Not a valid mongo id');
+		})
+		isArray = true;
+	}
+
 	Tuition.findById(tuitionId).select('courses')
 		.then(tuition => {
 			tuition.courses.forEach(course => {
 				if (course._id.toString() === courseId) {
 					course.batches.forEach(batch => {
 						if (batch._id.toString() === batchId) {
-							batch.students = batch.students.concat(req.body.students);
+							if (isArray) {
+								batch.students = batch.students.concat(req.body.students);
+							} else {
+								batch.students.push(req.body.students);
+							}
 							tuition.save()
 								.then(data => res.send(data)).catch(err => console.error(err));
 						}
