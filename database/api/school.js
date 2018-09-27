@@ -1,5 +1,6 @@
 const route = require('express')
 	.Router();
+const { ObjectId } = require('mongoose').Types;
 const escapeRegex = require('../../scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
 const School = require('../models/school');
@@ -302,9 +303,9 @@ route.post('/:schoolId/course/:courseId/batch/:batchId/student', (req, res) => {
 		}).catch(err => console.error(err));
 });
 
-route.delete('/:schoolId/course/:courseId/batch/:batchId/student', (req, res) => {
-	const { schoolId, courseId, batchId } = req.params;
-	if (ObjectId.isValid(req.body.string) === false) throw new Error('Id provided is not valid mongo id');
+route.delete('/:schoolId/course/:courseId/batch/:batchId/student/:studentId', (req, res) => {
+	const { schoolId, courseId, batchId, studentId } = req.params;
+	if (ObjectId.isValid(studentId) === false) throw new Error('Id provided is not valid mongo id');
 
 	School.findById(schoolId).select('courses')
 		.then(school => {
@@ -313,7 +314,7 @@ route.delete('/:schoolId/course/:courseId/batch/:batchId/student', (req, res) =>
 					course.batches.forEach(batch => {
 						if (batch._id.toString() === batchId) {
 							batch.students.forEach((student, index) => {
-								if (student === req.body.string) {
+								if (student === studentId) {
 									student.splice(index, 1);
 									school.save().then(data => res.send(data))
 										.catch(err => console.error(err))

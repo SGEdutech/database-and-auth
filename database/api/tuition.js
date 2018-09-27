@@ -314,14 +314,13 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
 	if (Array.isArray(req.body.students) === false) throw new Error('Students provided is not an array or not provided at all');
-
 	Tuition.findById(tuitionId).select('courses')
 		.then(tuition => {
 			tuition.courses.forEach(course => {
 				if (course._id.toString() === courseId) {
 					course.batches.forEach(batch => {
 						if (batch._id.toString() === batchId) {
-							batch.students.concat(req.body.students);
+							batch.students = batch.students.concat(req.body.students);
 							tuition.save()
 								.then(data => res.send(data)).catch(err => console.error(err));
 						}
@@ -331,20 +330,20 @@ route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => 
 		}).catch(err => console.error(err));
 });
 
-route.delete('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
-	const { tuitionId, courseId, batchId } = req.params;
-	if (ObjectId.isValid(req.body.string) === false) throw new Error('Id provided is not valid mongo id');
+route.delete('/:schoolId/course/:courseId/batch/:batchId/student/:studentId', (req, res) => {
+	const { schoolId, courseId, batchId, studentId } = req.params;
+	if (ObjectId.isValid(studentId) === false) throw new Error('Id provided is not valid mongo id');
 
-	Tuition.findById(tuitionId).select('courses')
-		.then(tuition => {
-			tuition.courses.forEach(course => {
+	Tuition.findById(schoolId).select('courses')
+		.then(school => {
+			school.courses.forEach(course => {
 				if (course._id.toString() === courseId) {
 					course.batches.forEach(batch => {
 						if (batch._id.toString() === batchId) {
 							batch.students.forEach((student, index) => {
-								if (student === req.body.string) {
+								if (student === studentId) {
 									student.splice(index, 1);
-									tuition.save().then(data => res.send(data))
+									school.save().then(data => res.send(data))
 										.catch(err => console.error(err))
 								}
 							})
