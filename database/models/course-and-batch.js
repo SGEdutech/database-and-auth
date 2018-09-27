@@ -11,6 +11,7 @@ const BatchSchema = new Schema({
 const CourseSchema = new Schema({
 	name: { type: String, required },
 	fees: { type: Number, required },
+	gstPercentage: { type: Number, min: 0, max: 100 },
 	description: String,
 	isActive: { type: Boolean, default: true },
 	batches: [BatchSchema]
