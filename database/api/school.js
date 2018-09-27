@@ -283,18 +283,31 @@ route.delete('/:schoolId/course/:courseId/batch/:batchId', (req, res) => {
 
 // Todo: Write mongo query
 // Todo: Add validation while adding students
-route.post('/:schoolId/course/:courseId/batch/:batchId/student', (req, res) => {
-	const { schoolId, courseId, batchId } = req.params;
-	if (Array.isArray(req.body.students) === false) throw new Error('Students provided is not an array or not provided at all');
+route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
+	const { tuitionId, courseId, batchId } = req.params;
+	let isArray;
+	if (Array.isArray(req.body.students) === false) {
+		if (ObjectId.isValid(req.body.students) === false) throw new Error('Not a valid mongo id');
+		isArray = false;
+	} else {
+		req.body.students.forEach(student => {
+			if (ObjectId.isValid(student) === false) throw new Error('Not a valid mongo id');
+		})
+		isArray = true;
+	}
 
-	School.findById(schoolId).select('courses')
-		.then(school => {
-			school.courses.forEach(course => {
+	Tuition.findById(tuitionId).select('courses')
+		.then(tuition => {
+			tuition.courses.forEach(course => {
 				if (course._id.toString() === courseId) {
 					course.batches.forEach(batch => {
 						if (batch._id.toString() === batchId) {
-							batch.students.concat(req.body.students);
-							school.save()
+							if (isArray) {
+								batch.students = batch.students.concat(req.body.students);
+							} else {
+								batch.students.push(req.body.students);
+							}
+							tuition.save()
 								.then(data => res.send(data)).catch(err => console.error(err));
 						}
 					})
@@ -307,15 +320,15 @@ route.delete('/:schoolId/course/:courseId/batch/:batchId/student/:studentId', (r
 	const { schoolId, courseId, batchId, studentId } = req.params;
 	if (ObjectId.isValid(studentId) === false) throw new Error('Id provided is not valid mongo id');
 
-	School.findById(schoolId).select('courses')
+	Tuition.findById(schoolId).select('courses')
 		.then(school => {
 			school.courses.forEach(course => {
 				if (course._id.toString() === courseId) {
 					course.batches.forEach(batch => {
 						if (batch._id.toString() === batchId) {
 							batch.students.forEach((student, index) => {
-								if (student === studentId) {
-									student.splice(index, 1);
+								if (student.toString() === studentId) {
+									batch.students.splice(index, 1);
 									school.save().then(data => res.send(data))
 										.catch(err => console.error(err))
 								}

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const { ObjectId } = require('mongoose').Types;
 const deleteThisShit = require('../scripts/fsunlink');
 const path = require('path');
 
@@ -226,7 +226,9 @@ class DatabaseAPI {
 					} else {
 						const nestedObjectIdentifierKey = Object.keys(identifier)[0];
 						data[arrayName].forEach((item, index) => {
-							if (item[nestedObjectIdentifierKey] === identifier[nestedObjectIdentifierKey]) {
+							let valueOfNestedObject = item[nestedObjectIdentifierKey];
+							if (ObjectId.isValid(valueOfNestedObject)) valueOfNestedObject = valueOfNestedObject.toString();
+							if (valueOfNestedObject === identifier[nestedObjectIdentifierKey]) {
 								const nestedObjectKeys = Object.keys(item);
 								nestedObjectKeys.forEach(nestedKey => {
 									this.constructor._deleteIfImage(nestedKey, item[nestedKey]);
