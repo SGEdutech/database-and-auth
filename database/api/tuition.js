@@ -355,8 +355,8 @@ route.delete('/:schoolId/course/:courseId/batch/:batchId/student/:studentId', (r
 					course.batches.forEach(batch => {
 						if (batch._id.toString() === batchId) {
 							batch.students.forEach((student, index) => {
-								if (student === studentId) {
-									student.splice(index, 1);
+								if (student.toString() === studentId) {
+									batch.students.splice(index, 1);
 									school.save().then(data => res.send(data))
 										.catch(err => console.error(err))
 								}
