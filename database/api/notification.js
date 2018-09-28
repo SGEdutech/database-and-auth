@@ -35,4 +35,10 @@ route.post('/', (req, res) => {
 		.catch(err => console.error(err));
 });
 
+route.put('/user-read', (req, res) => {
+	const idsOfNotificationsToBeMarkedAsRead = req.body.ids;
+
+	Notification.find({ _id: { $in: idsOfNotificationsToBeMarkedAsRead } })
+})
+
 module.exports = route;
