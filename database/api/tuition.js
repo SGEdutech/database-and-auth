@@ -265,25 +265,14 @@ route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 		.then(data => res.send(data)).catch(err => console.error(err))
 })
 
-// Todo: Write mongo query
 route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
-	const bodyObjKeys = Object.keys(req.body);
 
-	Tuition.findById(tuitionId).select('courses')
-		.then(tuition => {
-			tuition.courses.forEach(course => {
-				if (course._id.toString() === courseId) {
-					course.batches.forEach(batch => {
-						if (batch._id.toString() === batchId) {
-							bodyObjKeys.forEach(key => batch[key] = req.body[key]);
-							tuition.save().then(data => res.send(data))
-								.catch(err => console.error(err));
-						}
-					})
-				}
-			})
-		}).catch(err => console.error(err));
+	prependToObjKey(req.body, 'courses.$[i].batches.$[j].');
+
+	// Strings must be casted to object array in array filter
+	Tuition.findByIdAndUpdate(tuitionId, { $set: req.body }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
+		.then(data => res.send(data)).catch(err => console.error(err))
 });
 
 route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
