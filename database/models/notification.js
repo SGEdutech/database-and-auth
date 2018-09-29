@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const RecieverSchema = require('../schemas/reciever');
+const RecieverSchema = require('../schemas/receiver');
 const { required, select } = require('../../config.json').MONGO;
 
 const NotificationSchema = new Schema({

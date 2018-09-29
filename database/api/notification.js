@@ -4,9 +4,7 @@ const DbAPIClass = require('../api-functions');
 const notificationDbFunctions = new DbAPIClass(Notification);
 
 route.get('/all', (req, res) => {
-	const skip = (req.query.page - 1) * req.query.items;
-	const limit = parseInt(req.query.items, 10);
-	notificationDbFunctions.getAllData(req.query.demands, skip, limit)
+	notificationDbFunctions.getAllData(req.query.demands)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
@@ -18,19 +16,20 @@ route.get('/', (req, res) => {
 });
 
 route.get('/user-notification', (req, res) => {
-	const userEmail = req.user.primaryEmail;
+	// if (req.user === undefined) throw new Error('User not logged in');
+	// const userEmail = req.user.primaryEmail;
+	const userEmail = 'ash';
 
-	Notification.findOne({ 'receivers': { $elemMatch: { userEmail } } })
+	Notification.find({ receivers: { $all: { $elemMatch: { userEmail } } } })
 		.then(data => res.send(data)).catch(err => console.error(err));
 })
 
 route.post('/', (req, res) => {
-	if (Array.isArray(req.body.recievers) === undefined) throw new Error('Recievers not an array or not provided at all');
-	req.body.receivers.forEach((userEmail, index) => {
-		req.body.receivers[index] = { userEmail };
-	})
+	if (Array.isArray(req.body.receivers) === false) req.body.receivers = [req.body.receivers];
 
-	notificationDbFunctions.addCollection(req.body)
+	req.body.receivers.forEach((userEmail, index) => req.body.receivers[index] = { userEmail });
+
+	Notification.create(req.body)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
 });
