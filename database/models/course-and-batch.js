@@ -3,13 +3,13 @@ const Schema = mongoose.Schema;
 const { required } = require('../../config.json').MONGO;
 
 const BatchSchema = new Schema({
-	name: String,
+	code: String,
 	description: String,
 	students: [Schema.Types.ObjectId]
 });
 
 const CourseSchema = new Schema({
-	name: { type: String, required },
+	code: { type: String, required },
 	fees: { type: Number, required },
 	gstPercentage: { type: Number, min: 0, max: 100 },
 	description: String,
