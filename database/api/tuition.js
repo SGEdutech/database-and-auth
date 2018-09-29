@@ -282,39 +282,21 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 		.then(data => res.send(data)).catch(err => console.error(err))
 });
 
-
-// Todo: Add validation while adding students
 route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
+	// Can't think of a better name
+	const removeElements = Array.isArray(req.body.students) ? { $each: req.body.students } : req.body.students;
 
-	const noName = Array.isArray(req.body.students) ? { $each: req.body.students } : req.body.students;
-
-	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].students': noName } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].students': removeElements } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
 		.then(data => res.send(data)).catch(err => console.error(err))
 });
 
-route.delete('/:schoolId/course/:courseId/batch/:batchId/student/:studentId', (req, res) => {
-	const { schoolId, courseId, batchId, studentId } = req.params;
-	if (ObjectId.isValid(studentId) === false) throw new Error('Id provided is not valid mongo id');
+route.delete('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
+	const { tuitionId, courseId, batchId } = req.params;
+	const pullQuery = Array.isArray(req.body.students) ? { $pullAll: { 'courses.$[i].batches.$[j].students': req.body.students } } : { $pull: { 'courses.$[i].batches.$[j].students': req.body.students } };
 
-	Tuition.findById(schoolId).select('courses')
-		.then(school => {
-			school.courses.forEach(course => {
-				if (course._id.toString() === courseId) {
-					course.batches.forEach(batch => {
-						if (batch._id.toString() === batchId) {
-							batch.students.forEach((student, index) => {
-								if (student.toString() === studentId) {
-									batch.students.splice(index, 1);
-									school.save().then(data => res.send(data))
-										.catch(err => console.error(err))
-								}
-							})
-						}
-					})
-				}
-			})
-		}).catch(err => console.error(err));
+	Tuition.findByIdAndUpdate(tuitionId, pullQuery, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
+		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
 module.exports = route;
