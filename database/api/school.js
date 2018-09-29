@@ -239,105 +239,38 @@ route.post('/:schoolId/course/:courseId/batch', (req, res) => {
 		.then(data => res.send(data)).catch(err => console.error(err))
 })
 
-// Todo: Write mongo query
 route.put('/:schoolId/course/:courseId/batch/:batchId', (req, res) => {
 	const { schoolId, courseId, batchId } = req.params;
-	const bodyObjKeys = Object.keys(req.body);
 
-	School.findById(schoolId).select('courses')
-		.then(school => {
-			school.courses.forEach(course => {
-				if (course._id.toString() === courseId) {
-					course.batches.forEach(batch => {
-						if (batch._id.toString() === batchId) {
-							bodyObjKeys.forEach(key => batch[key] = req.body[key]);
-							school.save().then(data => res.send(data))
-								.catch(err => console.error(err));
-						}
-					})
-				}
-			})
-		}).catch(err => console.error(err));
+	prependToObjKey(req.body, 'courses.$[i].batches.$[j].');
+
+	// Strings must be casted to object ID in array filter
+	School.findByIdAndUpdate(schoolId, { $set: req.body }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
+		.then(data => res.send(data)).catch(err => console.error(err))
 });
 
 route.delete('/:schoolId/course/:courseId/batch/:batchId', (req, res) => {
 	const { schoolId, courseId, batchId } = req.params;
 
-	School.findById(schoolId).select('courses')
-		.then(school => {
-			school.courses.forEach(course => {
-				if (course._id.toString() === courseId) {
-					course.batches.forEach((batch, index) => {
-						if (batch._id.toString() === batchId) {
-							course.batches.splice(index, 1);
-							school.save()
-								.then(data => res.send(data))
-								.catch(err => console.error(err));
-						}
-					})
-				}
-			})
-		}).catch(err => console.error(err));
+	School.findOneAndUpdate({ '_id': schoolId, 'courses._id': courseId }, { $pull: { 'courses.$.batches': { _id: batchId } } })
+		.then(data => res.send(data)).catch(err => console.error(err))
 });
 
+route.post('/:schoolId/course/:courseId/batch/:batchId/student', (req, res) => {
+	const { schoolId, courseId, batchId } = req.params;
+	// Can't think of a better name
+	const removeElements = Array.isArray(req.body.students) ? { $each: req.body.students } : req.body.students;
 
-// Todo: Write mongo query
-// Todo: Add validation while adding students
-route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
-	const { tuitionId, courseId, batchId } = req.params;
-	let isArray;
-	if (Array.isArray(req.body.students) === false) {
-		if (ObjectId.isValid(req.body.students) === false) throw new Error('Not a valid mongo id');
-		isArray = false;
-	} else {
-		req.body.students.forEach(student => {
-			if (ObjectId.isValid(student) === false) throw new Error('Not a valid mongo id');
-		})
-		isArray = true;
-	}
-
-	Tuition.findById(tuitionId).select('courses')
-		.then(tuition => {
-			tuition.courses.forEach(course => {
-				if (course._id.toString() === courseId) {
-					course.batches.forEach(batch => {
-						if (batch._id.toString() === batchId) {
-							if (isArray) {
-								batch.students = batch.students.concat(req.body.students);
-							} else {
-								batch.students.push(req.body.students);
-							}
-							tuition.save()
-								.then(data => res.send(data)).catch(err => console.error(err));
-						}
-					})
-				}
-			})
-		}).catch(err => console.error(err));
+	School.findByIdAndUpdate(schoolId, { $push: { 'courses.$[i].batches.$[j].students': removeElements } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
+		.then(data => res.send(data)).catch(err => console.error(err))
 });
 
-route.delete('/:schoolId/course/:courseId/batch/:batchId/student/:studentId', (req, res) => {
-	const { schoolId, courseId, batchId, studentId } = req.params;
-	if (ObjectId.isValid(studentId) === false) throw new Error('Id provided is not valid mongo id');
+route.delete('/:schoolId/course/:courseId/batch/:batchId/student', (req, res) => {
+	const { schoolId, courseId, batchId } = req.params;
+	const pullQuery = Array.isArray(req.body.students) ? { $pullAll: { 'courses.$[i].batches.$[j].students': req.body.students } } : { $pull: { 'courses.$[i].batches.$[j].students': req.body.students } };
 
-	Tuition.findById(schoolId).select('courses')
-		.then(school => {
-			school.courses.forEach(course => {
-				if (course._id.toString() === courseId) {
-					course.batches.forEach(batch => {
-						if (batch._id.toString() === batchId) {
-							batch.students.forEach((student, index) => {
-								if (student.toString() === studentId) {
-									batch.students.splice(index, 1);
-									school.save().then(data => res.send(data))
-										.catch(err => console.error(err))
-								}
-							})
-						}
-					})
-				}
-			})
-		}).catch(err => console.error(err));
+	School.findByIdAndUpdate(schoolId, pullQuery, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
+		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
 module.exports = route;
