@@ -283,39 +283,14 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 });
 
 
-// Todo: Write mongo query
 // Todo: Add validation while adding students
 route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
-	let isArray;
-	if (Array.isArray(req.body.students) === false) {
-		if (ObjectId.isValid(req.body.students) === false) throw new Error('Not a valid mongo id');
-		isArray = false;
-	} else {
-		req.body.students.forEach(student => {
-			if (ObjectId.isValid(student) === false) throw new Error('Not a valid mongo id');
-		})
-		isArray = true;
-	}
 
-	Tuition.findById(tuitionId).select('courses')
-		.then(tuition => {
-			tuition.courses.forEach(course => {
-				if (course._id.toString() === courseId) {
-					course.batches.forEach(batch => {
-						if (batch._id.toString() === batchId) {
-							if (isArray) {
-								batch.students = batch.students.concat(req.body.students);
-							} else {
-								batch.students.push(req.body.students);
-							}
-							tuition.save()
-								.then(data => res.send(data)).catch(err => console.error(err));
-						}
-					})
-				}
-			})
-		}).catch(err => console.error(err));
+	const noName = Array.isArray(req.body.students) ? { $each: req.body.students } : req.body.students;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].students': noName } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
+		.then(data => res.send(data)).catch(err => console.error(err))
 });
 
 route.delete('/:schoolId/course/:courseId/batch/:batchId/student/:studentId', (req, res) => {
