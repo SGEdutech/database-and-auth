@@ -270,7 +270,7 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 
 	prependToObjKey(req.body, 'courses.$[i].batches.$[j].');
 
-	// Strings must be casted to object array in array filter
+	// Strings must be casted to object ID in array filter
 	Tuition.findByIdAndUpdate(tuitionId, { $set: req.body }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
 		.then(data => res.send(data)).catch(err => console.error(err))
 });
@@ -278,21 +278,8 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
 
-	Tuition.findById(tuitionId).select('courses')
-		.then(tuition => {
-			tuition.courses.forEach(course => {
-				if (course._id.toString() === courseId) {
-					course.batches.forEach((batch, index) => {
-						if (batch._id.toString() === batchId) {
-							course.batches.splice(index, 1);
-							tuition.save()
-								.then(data => res.send(data))
-								.catch(err => console.error(err));
-						}
-					})
-				}
-			})
-		}).catch(err => console.error(err));
+	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $pull: { 'courses.$.batches': { _id: batchId } } })
+		.then(data => res.send(data)).catch(err => console.error(err))
 });
 
 
