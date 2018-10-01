@@ -300,7 +300,6 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) =
 });
 
 // Fourm
-
 route.get('/:tuitionId/forum', (req, res) => {
 	// Todo: Use aggration
 });
@@ -308,23 +307,23 @@ route.get('/:tuitionId/forum', (req, res) => {
 route.post('/:tuitionId/forum', (req, res) => {
 	const { tuitionId } = req.params;
 
-	Tuition.findByIdAndUpdate(tuitionId, { $push: { fourms: req.body } })
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { forums: req.body } })
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
 route.put('/:tuitionId/forum/:forumId', (req, res) => {
-	const { tuitionId, fourmId } = req.params;
+	const { tuitionId, forumId } = req.params;
 
-	prependToObjKey(req.body, 'fourms.$.');
+	prependToObjKey(req.body, 'forums.$.');
 
-	Tuition.findByOneAndUpdate({ _id: tuitionId, fourms: { $elemMatch: { _id: fourmId } } }, req.body)
+	Tuition.findByOneAndUpdate({ _id: tuitionId, forums: { $elemMatch: { _id: forumId } } }, req.body)
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/forum/:forumId', (req, res) => {
-	const { tuitionId, fourmId } = req.params;
+	const { tuitionId, forumId } = req.params;
 
-	Tuition.findByIdAndUpdate(tuitionId, { $pull: { fourms: { _id: fourmId } } })
+	Tuition.findByIdAndUpdate(tuitionId, { $pull: { forums: { _id: forumId } } })
 		.then(data => res.send(data)).catch(err => console.error(err));
 })
 
@@ -333,21 +332,21 @@ route.delete('/:tuitionId/forum/:forumId', (req, res) => {
 route.post('/:tuitionId/forum/:forumId/comment', (req, res) => {
 	const { tuitionId, forumId } = req.params;
 
-	Tuition.findOneAndUpdate({ _id: tuitionId, fourms: { $elemMatch: { _id: forumId } } }, { $push: { 'fourms.$.comments': req.body } })
+	Tuition.findOneAndUpdate({ _id: tuitionId, forums: { $elemMatch: { _id: forumId } } }, { $push: { 'forums.$.comments': req.body } })
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
 route.put('/:tuitionId/forum/:forumId/comment/:commentId', (req, res) => {
 	const { tuitionId, forumId, commentId } = req.params;
 
-	Tuition.findOneAndUpdate(tuitionId, { 'fourms.$[i].comments.$[j]': req.body }, { arrayFilters: [{ 'i._id': ObjectId(forumId), 'j._id': ObjectId(commentId) }] })
+	Tuition.findOneAndUpdate(tuitionId, { 'forums.$[i].comments.$[j]': req.body }, { arrayFilters: [{ 'i._id': ObjectId(forumId), 'j._id': ObjectId(commentId) }] })
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/forum/:forumId/comment/:commentId', (req, res) => {
-	const { tuitionId, fourmId, commentId } = req.params;
+	const { tuitionId, forumId, commentId } = req.params;
 
-	Tuition.findOneAndUpdate({ _id: tuitionId, fourms: { $elemMatch: { _id: fourmId } } }, { $pull: { 'forums.$.comments': { _id: commentId } } })
+	Tuition.findOneAndUpdate({ _id: tuitionId, forums: { $elemMatch: { _id: forumId } } }, { $pull: { 'forums.$.comments': { _id: commentId } } })
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
