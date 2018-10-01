@@ -317,7 +317,7 @@ route.put('/:tuitionId/forum/:forumId', (req, res) => {
 
 	prependToObjKey(req.body, 'forums.$.');
 
-	Tuition.findByOneAndUpdate({ _id: tuitionId, forums: { $elemMatch: { _id: forumId } } }, req.body)
+	Tuition.findOneAndUpdate({ _id: tuitionId, forums: { $elemMatch: { _id: forumId } } }, req.body)
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
@@ -351,8 +351,7 @@ route.delete('/:tuitionId/forum/:forumId/comment/:commentId', (req, res) => {
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
-// schedule
-
+// Schedule
 route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
 	if (Array.isArray(req.body)) throw new Error('Body object must be an array');
@@ -366,7 +365,15 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (r
 
 	prependToObjKey(req.body, 'courses.$[i].batches.$[j].schedules.$[k].')
 
-	// Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id' }] })
+	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }] })
+		.then(data => res.send(data)).catch(err => console.error(err));
 });
+
+route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (req, res) => {
+	const { tuitionId, courseId, batchId, scheduleId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $pull: { 'courses.$[i].batches.$[j].schedules': { _id: scheduleId } } })
+		.then(data => res.send(data)).catch(err => console.error(err));
+})
 
 module.exports = route;
