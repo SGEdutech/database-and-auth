@@ -300,6 +300,7 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) =
 });
 
 // Fourm
+
 route.get('/:tuitionId/forum', (req, res) => {
 	// Todo: Use aggration
 });
@@ -348,6 +349,24 @@ route.delete('/:tuitionId/forum/:forumId/comment/:commentId', (req, res) => {
 
 	Tuition.findOneAndUpdate({ _id: tuitionId, forums: { $elemMatch: { _id: forumId } } }, { $pull: { 'forums.$.comments': { _id: commentId } } })
 		.then(data => res.send(data)).catch(err => console.error(err));
+});
+
+// schedule
+
+route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule', (req, res) => {
+	const { tuitionId, courseId, batchId } = req.params;
+	if (Array.isArray(req.body)) throw new Error('Body object must be an array');
+
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules': { $each: req.body } } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
+		.then(data => res.send(data)).catch(err => console.error(err));
+});
+
+route.put('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (req, res) => {
+	const { tuitionId, courseId, batchId, scheduleId } = req.params;
+
+	prependToObjKey(req.body, 'courses.$[i].batches.$[j].schedules.$[k].')
+
+	// Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id' }] })
 });
 
 module.exports = route;
