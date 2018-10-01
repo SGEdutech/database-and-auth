@@ -340,7 +340,7 @@ route.post('/:tuitionId/forum/:forumId/comment', (req, res) => {
 route.put('/:tuitionId/forum/:forumId/comment/:commentId', (req, res) => {
 	const { tuitionId, forumId, commentId } = req.params;
 
-	Tuition.findOneAndUpdate(tuitionId, { 'forums.$[i].comments.$[j]': req.body }, { arrayFilters: [{ 'i._id': ObjectId(forumId), 'j._id': ObjectId(commentId) }] })
+	Tuition.findOneAndUpdate(tuitionId, { 'forums.$[i].comments.$[j]': req.body }, { arrayFilters: [{ 'i._id': ObjectId(forumId) }, { 'j._id': ObjectId(commentId) }] })
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
