@@ -2,10 +2,20 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const { required } = require('../../config.json').MONGO;
 
+const ScheduleSchema = new Schema({
+	date: Date,
+	fromTime: Number,
+	toTime: Number,
+	topic: String,
+	faculty: String,
+	studentsAbsent: [mongoose.Types.ObjectId]
+});
+
 const BatchSchema = new Schema({
 	code: String,
 	description: String,
-	students: [Schema.Types.ObjectId]
+	students: [Schema.Types.ObjectId],
+	schedules: [ScheduleSchema]
 });
 
 const CourseSchema = new Schema({
