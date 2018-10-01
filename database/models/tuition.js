@@ -9,6 +9,7 @@ const TimeAndDateSchema = secondarySchemas.TimeAndDateSchema;
 const ViewsOrHitsSchema = require('../views-or-hits-schema');
 const CourseSchema = require('./course-and-batch');
 const StudentSchema = require('../schemas/student');
+const FourmSchama = require('../schemas/fourm');
 
 const {
 	isMaxStrLength,
@@ -50,6 +51,7 @@ const TuitionSchema = new Schema({
 	bragging: [FacilitiesAndBraggingSchema],
 	reviews: [ReviewSchema],
 	courses: [CourseSchema],
+	fourms: [FourmSchama],
 	views: ViewsOrHitsSchema,
 	hits: ViewsOrHitsSchema,
 	bookmarks: Number,
