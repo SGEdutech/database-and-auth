@@ -8,7 +8,7 @@ const ScheduleSchema = new Schema({
 	toTime: Number,
 	topic: String,
 	faculty: String,
-	studentsAbsent: [mongoose.Types.ObjectId]
+	studentsAbsent: [Schema.Types.ObjectId]
 });
 
 const BatchSchema = new Schema({

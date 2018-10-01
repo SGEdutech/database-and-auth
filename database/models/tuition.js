@@ -82,6 +82,6 @@ const TuitionSchema = new Schema({
 
 // TuitionSchema.path('website').validate(isValidWebsite, 'Website link not valid');
 
-// const Tuition = mongoose.model('tuition', TuitionSchema);
+const Tuition = mongoose.model('tuition', TuitionSchema);
 
 module.exports = Tuition;

@@ -11,4 +11,4 @@ const FourmSchema = new Schema({
 	comments: [FourmComments]
 });
 
-module.exports = fourmSchema;
+module.exports = FourmSchema;
