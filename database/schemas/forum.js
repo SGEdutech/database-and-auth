@@ -8,7 +8,8 @@ const ForumComments = new Schema({
 const ForumSchema = new Schema({
 	title: String,
 	body: String,
-	comments: [ForumComments]
+	comments: [ForumComments],
+	createdAt: { type: Date, default: Date.now() }
 });
 
 module.exports = ForumSchema;

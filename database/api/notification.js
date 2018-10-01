@@ -65,7 +65,7 @@ route.post('/', (req, res) => {
 
 	if (req.body.receivers) {
 		if (Array.isArray(req.body.receivers)) {
-			userEmails = req.user.receivers;
+			userEmails = req.body.receivers;
 		} else {
 			userEmails.push(req.body.receivers);
 		}
