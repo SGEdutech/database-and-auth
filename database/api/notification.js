@@ -64,14 +64,16 @@ route.post('/', (req, res) => {
 	let userEmails = [];
 
 	if (req.body.receivers) {
-		if (Array.isArray(req.body.receivers) === false) {
-			userEmails.push(req.body.receivers);
-		} else {
+		if (Array.isArray(req.body.receivers)) {
 			userEmails = req.user.receivers;
+		} else {
+			userEmails.push(req.body.receivers);
 		}
 	}
 
-	getEmailIds(req.body.instituteId, req.body.batchId)
+	const instituteId = req.body.senderId;
+
+	getEmailIds(instituteId, req.body.batchId)
 		.then(allEmails => {
 			userEmails = userEmails.concat(allEmails);
 			delete req.body.receivers;
