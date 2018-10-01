@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const FourmComments = new Schema({
+const ForumComments = new Schema({
 	content: String
 });
 
-const FourmSchema = new Schema({
+const ForumSchema = new Schema({
 	title: String,
 	body: String,
-	comments: [FourmComments]
+	comments: [ForumComments]
 });
 
-module.exports = FourmSchema;
+module.exports = ForumSchema;
