@@ -328,4 +328,15 @@ route.delete('/:tuitionId/fourm/:forumId', (req, res) => {
 		.then(data => res.send(data)).catch(err => console.error(err));
 })
 
+// schedule
+
+route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule', (req, res) => {
+	const { tuitionId } = req.params;
+	if (Array.isArray(req.body)) throw new Error('Body object must be an array');
+
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules': { $each: req.body } } })
+})
+
+route.put('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (req, res) => )
+
 module.exports = route;
