@@ -71,9 +71,7 @@ route.post('/', (req, res) => {
 		}
 	}
 
-	const instituteId = req.body.senderId;
-
-	getEmailIds(instituteId, req.body.batchId)
+	getEmailIds(req.body.instituteId, req.body.batchId)
 		.then(allEmails => {
 			userEmails = userEmails.concat(allEmails);
 			delete req.body.receivers;
