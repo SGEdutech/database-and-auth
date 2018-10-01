@@ -299,4 +299,33 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) =
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
+// Fourm
+
+route.get('/:tuitionId/fourm', (req, res) => {
+	// Todo: Use aggration
+});
+
+route.post('/:tuitionId/fourm', (req, res) => {
+	const { tuitionId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { fourms: req.body } })
+		.then(data => res.send(data)).catch(err => console.error(err));
+});
+
+route.put('/:tuitionId/fourm/:forumId', (req, res) => {
+	const { tuitionId, fourmId } = req.params;
+
+	prependToObjKey(req.body, 'fourms.$.');
+
+	Tuition.findByOneAndUpdate({ _id: tuitionId, fourms: { $elemMatch: { _id: fourmId } } }, req.body)
+		.then(data => res.send(data)).catch(err => console.error(err));
+});
+
+route.delete('/:tuitionId/fourm/:forumId', (req, res) => {
+	const { tuitionId, fourmId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $pull: { fourms: { _id: fourmId } } })
+		.then(data => res.send(data)).catch(err => console.error(err));
+})
+
 module.exports = route;
