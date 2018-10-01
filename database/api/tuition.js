@@ -300,7 +300,6 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) =
 });
 
 // Fourm
-
 route.get('/:tuitionId/fourm', (req, res) => {
 	// Todo: Use aggration
 });
@@ -313,18 +312,18 @@ route.post('/:tuitionId/fourm', (req, res) => {
 });
 
 route.put('/:tuitionId/fourm/:forumId', (req, res) => {
-	const { tuitionId, fourmId } = req.params;
+	const { tuitionId, forumId } = req.params;
 
 	prependToObjKey(req.body, 'fourms.$.');
 
-	Tuition.findByOneAndUpdate({ _id: tuitionId, fourms: { $elemMatch: { _id: fourmId } } }, req.body)
+	Tuition.findOneAndUpdate({ _id: tuitionId, fourms: { $elemMatch: { _id: forumId } } }, req.body)
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/fourm/:forumId', (req, res) => {
-	const { tuitionId, fourmId } = req.params;
+	const { tuitionId, forumId } = req.params;
 
-	Tuition.findByIdAndUpdate(tuitionId, { $pull: { fourms: { _id: fourmId } } })
+	Tuition.findByIdAndUpdate(tuitionId, { $pull: { fourms: { _id: forumId } } })
 		.then(data => res.send(data)).catch(err => console.error(err));
 })
 
