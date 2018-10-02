@@ -354,9 +354,9 @@ route.delete('/:tuitionId/forum/:forumId/comment/:commentId', (req, res) => {
 // Schedule
 route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
-	if (Array.isArray(req.body)) throw new Error('Body object must be an array');
+	if (Array.isArray(req.body.schedules) === false) throw new Error('Schedules must be an array');
 
-	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules': { $each: req.body } } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules': { $each: req.body.schedules } } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
@@ -373,6 +373,23 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId',
 	const { tuitionId, courseId, batchId, scheduleId } = req.params;
 
 	Tuition.findByIdAndUpdate(tuitionId, { $pull: { 'courses.$[i].batches.$[j].schedules': { _id: scheduleId } } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
+		.then(data => res.send(data)).catch(err => console.error(err));
+});
+
+// Attendance
+route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId/student-absent', (req, res) => {
+	const { tuitionId, courseId, batchId, scheduleId } = req.params;
+	if (Array.isArray(req.body.absentees) === false) throw new Error('Absentees must be an array');
+
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': { $each: req.body.absentees } } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }] })
+		.then(data => res.send(data)).catch(err => console.error(err));
+});
+
+route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId/student-absent', (req, res) => {
+	const { tuitionId, courseId, batchId, scheduleId } = req.params;
+	if (Array.isArray(req.body.absentees) === false) throw new Error('Student Id must be an array');
+
+	Tuition.findByIdAndUpdate(tuitionId, { $pullAll: { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': req.body.absentees } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }] })
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
