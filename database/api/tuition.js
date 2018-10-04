@@ -201,7 +201,6 @@ route.delete('/empty/:keyname', (req, res) => {
 });
 
 route.delete('/:_id', (req, res) => {
-	// if (req.params._id.match(/^[0-9a-fA-F]{24}$/) === null) res.send('Not a valid id');
 	tuitionDbFunctions.deleteOneRow(req.params)
 		.then(data => res.send(data))
 		.catch(err => console.error(err));
@@ -235,7 +234,8 @@ route.put('/:tuitionId/course/:courseId', (req, res) => {
 
 	prependToObjKey(req.body, 'courses.$.');
 
-	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $set: req.body }, { new: true })
+	// Mongoose automaticly calls $set for object in second argument
+	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, req.body, { new: true })
 		.then(tuition => res.send(_.find(tuition.courses, { _id: ObjectId(courseId) })))
 		.catch(err => console.error(err));
 });
@@ -289,7 +289,7 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 
 	prependToObjKey(req.body, 'courses.$[i].batches.$[j].');
 
-	Tuition.findByIdAndUpdate(tuitionId, { $set: req.body }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
+	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			res.send(_.find(course.batches, { _id: ObjectId(batchId) }));
