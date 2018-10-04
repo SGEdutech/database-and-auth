@@ -425,7 +425,10 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId/s
 
 // Fourm
 route.get('/:tuitionId/forum', (req, res) => {
-	// Todo: Use aggration
+	const { tuitionId } = req.params;
+
+	Tuition.findById(tuitionId).select('forums')
+		.then(tuition => res.send(tuition.forums)).catch(err => console.error(err));
 });
 
 route.post('/:tuitionId/forum', (req, res) => {
