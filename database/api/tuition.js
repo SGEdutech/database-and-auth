@@ -474,10 +474,12 @@ route.post('/:tuitionId/forum/:forumId/comment', (req, res) => {
 route.put('/:tuitionId/forum/:forumId/comment/:commentId', (req, res) => {
 	const { tuitionId, forumId, commentId } = req.params;
 
-	Tuition.findOneAndUpdate(tuitionId, { 'forums.$[i].comments.$[j]': req.body }, { arrayFilters: [{ 'i._id': ObjectId(forumId) }, { 'j._id': ObjectId(commentId) }], new: true })
+	prependToObjKey(req.body, 'forums.$[i].comments.$[j]');
+
+	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(forumId) }, { 'j._id': ObjectId(commentId) }], new: true })
 		.then(tuition => {
-			const forum = _.find(tuition.forums, { _id: forumId });
-			res.send(_.find(forum.comments, { _id: commentId }))
+			const forum = _.find(tuition.forums, { _id: ObjectId(forumId) });
+			res.send(_.find(forum.comments, { _id: ObjectId(commentId) }))
 		}).catch(err => console.error(err));
 });
 
@@ -486,8 +488,8 @@ route.delete('/:tuitionId/forum/:forumId/comment/:commentId', (req, res) => {
 
 	Tuition.findOneAndUpdate({ _id: tuitionId, forums: { $elemMatch: { _id: forumId } } }, { $pull: { 'forums.$.comments': { _id: commentId } } })
 		.then(tuition => {
-			const forum = _.find(tuition.forums, { _id: forumId });
-			res.send(_.find(forum.comments, { _id: commentId }))
+			const forum = _.find(tuition.forums, { _id: ObjectId(forumId) });
+			res.send(_.find(forum.comments, { _id: ObjectId(commentId) }))
 		}).catch(err => console.error(err));
 });
 
