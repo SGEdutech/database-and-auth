@@ -1,5 +1,6 @@
 const route = require('express').Router();
 const { ObjectId } = require('mongoose').Types;
+const _ = require('lodash');
 const escapeRegex = require('../../scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
 const Tuition = require('../models/tuition');
@@ -113,11 +114,6 @@ route.get('/plus-courses', (req, res) => {
 		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
-route.get('/plus-courses-and-batches', (req, res) => {
-	tuitionDbFunctions.getOneRelationalDataWithDepthTwo(req.query, { path: 'courses' }, { path: 'batches' })
-		.then(data => res.send(data)).catch(err => console.error(err));
-});
-
 route.get('/search', (req, res) => {
 	const queryObject = req.query;
 	const demands = queryObject.demands || '';
@@ -175,8 +171,7 @@ route.post('/add/:_id/:arrayName', (req, res) => {
 });
 
 route.post('/', (req, res) => {
-	tuitionDbFunctions.addCollection(req.body)
-		.then(data => res.send(data))
+	tuitionDbFunctions.addCollection(req.body).then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
@@ -213,56 +208,81 @@ route.delete('/:_id', (req, res) => {
 });
 
 // Courses
-route.get('/:tuitionId/courses', (req, res) => {
+route.get('/:tuitionId/course/all', (req, res) => {
 	const { tuitionId } = req.params;
-	Tuition.find({ _id: tuitionId }).select('courses')
-		.then(data => res.send(data))
+	Tuition.findById(tuitionId).select('courses')
+		.then(tuition => res.send(tuition.courses))
+		.catch(err => console.error(err));
+});
+
+route.get('/:tuitionId/course', (req, res) => {
+	const { tuitionId } = req.params;
+	const courseId = req.query._id;
+	Tuition.findById(tuitionId).select('courses')
+		.then(tuition => res.send(_.find(tuition.courses, { _id: ObjectId(courseId) })))
 		.catch(err => console.error(err));
 });
 
 route.post('/:tuitionId/course', (req, res) => {
 	const { tuitionId } = req.params;
-	Tuition.findByIdAndUpdate(tuitionId, { $push: { courses: req.body } })
-		.then(data => res.send(data))
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { courses: req.body } }, { new: true })
+		.then(tuition => res.send(_.find(tuition.courses, { code: req.body.code })))
 		.catch(err => console.error(err));
 });
 
 route.put('/:tuitionId/course/:courseId', (req, res) => {
-	const { tuitionId } = req.params;
-	const { courseId } = req.params;
+	const { tuitionId, courseId } = req.params;
 
 	prependToObjKey(req.body, 'courses.$.');
 
-	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $set: req.body })
-		.then(data => res.send(data)).catch(err => console.error(err));
+	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $set: req.body }, { new: true })
+		.then(tuition => res.send(_.find(tuition.courses, { _id: ObjectId(courseId) })))
+		.catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/course/:courseId', (req, res) => {
-	const { tuitionId } = req.params;
-	const { courseId } = req.params;
+	const { tuitionId, courseId } = req.params;
 
 	Tuition.findByIdAndUpdate(tuitionId, { $pull: { courses: { _id: courseId } } })
-		.then(data => res.send(data)).catch(err => console.error(err))
+		.then(tuition => res.send(_.find(tuition.courses, { _id: ObjectId(courseId) }))).catch(err => console.error(err))
 });
 
 // Batches
-
 // Todo: Write mongo query
-route.get('/:tuitionId/course/:courseId/batches', (req, res) => {
-	const { tuitionId, courseId } = req.params;
+route.get('/:tuitionId/batch/all', (req, res) => {
+	const { tuitionId } = req.params;
 
-	Tuition.findById(tuitionId).select('courses')
-		.then(tuition => {
-			tuition.courses.forEach(course => {
-				if (course._id === courseId) res.send(course.batches);
-			})
-		}).catch(err => console.error(err))
+	Tuition.aggregate([
+		{ $match: { _id: ObjectId(tuitionId) } },
+		{ $project: { courses: 1 } },
+		{ $unwind: '$courses' },
+		{ $unwind: '$courses.batches' },
+		{ $project: { _id: '$courses.batches._id', courseId: '$courses._id', courseCode: '$courses.code', code: '$courses.batches.code', description: '$courses.batches.description', numberOfStudents: { $size: '$courses.batches.students' } } }
+	]).then(batch => res.send(batch)).catch(err => console.error(err));
 });
+
+route.get('/:tuitionId/batch', (req, res) => {
+	if (req.query._id === undefined) throw new Error('Batch id not provided')
+
+	const { tuitionId } = req.params;
+	const batchId = req.query._id;
+
+	Tuition.aggregate([
+		{ $match: { _id: ObjectId(tuitionId) } },
+		{ $project: { courses: 1 } },
+		{ $unwind: '$courses' },
+		{ $unwind: '$courses.batches' },
+		{ $match: { 'courses.batches._id': ObjectId(batchId) } }
+	]).then(batchArr => batchArr.length === 1 ? res.send(batchArr[0]) : res.status(400).end()).catch(err => console.error(err));
+})
 
 route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 	const { tuitionId, courseId } = req.params;
-	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $push: { 'courses.$.batches': req.body } })
-		.then(data => res.send(data)).catch(err => console.error(err))
+	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $push: { 'courses.$.batches': req.body } }, { new: true })
+		.then(tuition => {
+			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
+			res.send(_.find(course.batches, { code: req.body.code }))
+		}).catch(err => console.error(err))
 })
 
 route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
@@ -270,16 +290,21 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 
 	prependToObjKey(req.body, 'courses.$[i].batches.$[j].');
 
-	// Strings must be casted to object ID in array filter
-	Tuition.findByIdAndUpdate(tuitionId, { $set: req.body }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
-		.then(data => res.send(data)).catch(err => console.error(err))
+	Tuition.findByIdAndUpdate(tuitionId, { $set: req.body }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
+		.then(tuition => {
+			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
+			res.send(_.find(course.batches, { _id: ObjectId(batchId) }));
+		}).catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
 
 	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $pull: { 'courses.$.batches': { _id: batchId } } })
-		.then(data => res.send(data)).catch(err => console.error(err))
+		.then(tuition => {
+			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
+			res.send(_.find(course.batches, { _id: ObjectId(batchId) }));
+		}).catch(err => console.error(err))
 });
 
 route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
@@ -287,17 +312,32 @@ route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => 
 	// Can't think of a better name
 	const removeElements = Array.isArray(req.body.students) ? { $each: req.body.students } : req.body.students;
 
-	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].students': removeElements } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
-		.then(data => res.send(data)).catch(err => console.error(err))
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].students': removeElements } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
+		.then(tuition => {
+			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
+			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			res.send(batch.students);
+		}).catch(err => console.error(err))
 });
 
 route.delete('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
 	const pullQuery = Array.isArray(req.body.students) ? { $pullAll: { 'courses.$[i].batches.$[j].students': req.body.students } } : { $pull: { 'courses.$[i].batches.$[j].students': req.body.students } };
 
-	Tuition.findByIdAndUpdate(tuitionId, pullQuery, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
-		.then(data => res.send(data)).catch(err => console.error(err));
+	Tuition.findByIdAndUpdate(tuitionId, pullQuery, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
+		.then(tuition => {
+			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
+			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			res.send(batch.students);
+		}).catch(err => console.error(err));
 });
+
+route.delete('/:tuitionId/course/:courseId/batch/:batchId/student/empty', (req, res) => {
+	const { tuitionId, courseId, batchId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { 'courses.$[i].batches.$[j].students': [] }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
+		.then(() => res.send([]).catch(err => console.error(err)));
+})
 
 // Fourm
 
@@ -354,10 +394,15 @@ route.delete('/:tuitionId/forum/:forumId/comment/:commentId', (req, res) => {
 // Schedule
 route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
-	if (Array.isArray(req.body.schedules) === false) throw new Error('Schedules must be an array');
+	const pushQuery = Array.isArray(req.body.schedules) ? { $each: req.body.schedules } : req.body;
 
-	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules': { $each: req.body.schedules } } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
-		.then(data => res.send(data)).catch(err => console.error(err));
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules': pushQuery } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
+		.then(tuition => {
+			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
+			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			const scheduleAdded = Array.isArray(req.body.schedules) ? batch.schedules : _.find(batch.schedules, { topic: req.body.topic });
+			res.send(scheduleAdded);
+		}).catch(err => console.error(err));
 });
 
 route.put('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (req, res) => {
@@ -365,32 +410,70 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (r
 
 	prependToObjKey(req.body, 'courses.$[i].batches.$[j].schedules.$[k].')
 
-	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }] })
-		.then(data => res.send(data)).catch(err => console.error(err));
+	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }], new: true })
+		.then(tuition => {
+			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
+			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			res.send(_.find(batch.schedules, { _id: ObjectId(scheduleId) }));
+		}).catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (req, res) => {
 	const { tuitionId, courseId, batchId, scheduleId } = req.params;
 
 	Tuition.findByIdAndUpdate(tuitionId, { $pull: { 'courses.$[i].batches.$[j].schedules': { _id: scheduleId } } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
-		.then(data => res.send(data)).catch(err => console.error(err));
+		.then(tuition => {
+			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
+			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			res.send(_.find(batch.schedules, { _id: ObjectId(scheduleId) }));
+		}).catch(err => console.error(err));
 });
 
 // Attendance
+route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId/student-absent/new', (req, res) => {
+	const { tuitionId, courseId, batchId, scheduleId } = req.params;
+	const studendsToAdd = req.body.students || [req.body._id];
+
+	Tuition.findByIdAndUpdate(tuitionId, { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': studendsToAdd }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }], new: true })
+		.then(tuition => {
+			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
+			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			const schedule = _.find(batch.schedules, { _id: ObjectId(scheduleId) });
+			res.send(schedule.studentsAbsent);
+		}).catch(err => console.error(err));
+});
+
 route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId/student-absent', (req, res) => {
 	const { tuitionId, courseId, batchId, scheduleId } = req.params;
-	if (Array.isArray(req.body.absentees) === false) throw new Error('Absentees must be an array');
+	const pushQuery = Array.isArray(req.body.absentees) ? { $each: req.body.absentees } : req.body._id;
 
-	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': { $each: req.body.absentees } } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }] })
-		.then(data => res.send(data)).catch(err => console.error(err));
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': pushQuery } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }], new: true })
+		.then(tuition => {
+			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
+			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			const schedule = _.find(batch.schedules, { _id: ObjectId(scheduleId) });
+			res.send(schedule.studentsAbsent);
+		}).catch(err => console.error(err));
+});
+
+route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId/student-absent/empty', (req, res) => {
+	const { tuitionId, courseId, batchId, scheduleId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': [] }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }], new: true })
+		.then(() => res.send([])).catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId/student-absent', (req, res) => {
 	const { tuitionId, courseId, batchId, scheduleId } = req.params;
-	if (Array.isArray(req.body.absentees) === false) throw new Error('Student Id must be an array');
+	const pullQuery = Array.isArray(req.body.absentees) ? { $pullAll: { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': req.body.absentees } } : { $pull: { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': req.body._id } };
 
-	Tuition.findByIdAndUpdate(tuitionId, { $pullAll: { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': req.body.absentees } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }] })
-		.then(data => res.send(data)).catch(err => console.error(err));
+	Tuition.findByIdAndUpdate(tuitionId, pullQuery, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }], new: true })
+		.then(tuition => {
+			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
+			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			const schedule = _.find(batch.schedules, { _id: ObjectId(scheduleId) });
+			res.send(schedule.studentsAbsent);
+		}).catch(err => console.error(err));
 });
 
 module.exports = route;
