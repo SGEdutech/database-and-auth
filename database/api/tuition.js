@@ -109,6 +109,14 @@ route.get('/', (req, res) => {
 		.catch(err => console.error(err));
 });
 
+route.get('/multiple', (req, res) => {
+	if (Array.isArray(req.query.tuitions) === false && req.query._id === undefined) throw new Error('No tuition id provided');
+	const tuitionArr = req.query.tuitions || [req.query._id];
+
+	Tuition.find({ _id: { $in: tuitionArr } }).then(tuitions => res.send(tuitions))
+		.catch(err => console.error(err));
+});
+
 route.get('/plus-courses', (req, res) => {
 	tuitionDbFunctions.getOneRelationalData(req.query, { populate: 'courses' })
 		.then(data => res.send(data)).catch(err => console.error(err));
