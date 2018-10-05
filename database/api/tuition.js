@@ -117,11 +117,6 @@ route.get('/multiple', (req, res) => {
 		.catch(err => console.error(err));
 });
 
-route.get('/plus-courses', (req, res) => {
-	tuitionDbFunctions.getOneRelationalData(req.query, { populate: 'courses' })
-		.then(data => res.send(data)).catch(err => console.error(err));
-});
-
 route.get('/search', (req, res) => {
 	const queryObject = req.query;
 	const demands = queryObject.demands || '';
@@ -221,6 +216,26 @@ route.get('/:tuitionId/course/all', (req, res) => {
 		.then(tuition => res.send(tuition.courses))
 		.catch(err => console.error(err));
 });
+
+route.get('/course/claimed', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+	const claimedTuitions = [];
+	req.user.claims.forEach(listingInfo => {
+		if (listingInfo.listingCategory === 'tuition') claimedTuitions.push(ObjectId(listingInfo.listingId));
+	});
+
+	Tuition.aggregate([
+		{ $match: { _id: { $in: claimedTuitions } } },
+		{ $project: { courses: 1 } },
+		{ $unwind: '$courses' },
+		{ $addFields: { 'courses.tuitionId': '$_id' } },
+		{ $project: { _id: false } }
+	]).then(objectsArr => {
+		// FIXME: Make more readable
+		objectsArr.forEach((obj, index) => objectsArr[index] = obj.courses);
+		res.send(objectsArr);
+	}).catch(err => console.error(err))
+})
 
 route.get('/:tuitionId/course', (req, res) => {
 	const { tuitionId } = req.params;
