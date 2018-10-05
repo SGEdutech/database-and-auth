@@ -296,7 +296,7 @@ route.get('/batch/claimed', (req, res) => {
 		{ $project: { courses: 1 } },
 		{ $unwind: '$courses' },
 		{ $unwind: '$courses.batches' },
-		{ $addFields: { 'courses.batches.tuitionId': '$_id', 'courses.batches.courseId': '$courses._id' } },
+		{ $addFields: { 'courses.batches.tuitionId': '$_id', 'courses.batches.courseId': '$courses._id', 'courses.batches.courseCode': '$courses.code' } },
 		{ $replaceRoot: { newRoot: '$courses.batches' } }
 	]).then(data => res.send(data)).catch(err => console.error(err));
 })
