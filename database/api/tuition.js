@@ -229,12 +229,9 @@ route.get('/course/claimed', (req, res) => {
 		{ $project: { courses: 1 } },
 		{ $unwind: '$courses' },
 		{ $addFields: { 'courses.tuitionId': '$_id' } },
-		{ $project: { _id: false } }
-	]).then(objectsArr => {
-		// FIXME: Make more readable
-		objectsArr.forEach((obj, index) => objectsArr[index] = obj.courses);
-		res.send(objectsArr);
-	}).catch(err => console.error(err))
+		{ $project: { _id: false } },
+		{ $replaceRoot: { newRoot: '$courses' } }
+	]).then(courses => res.send(courses)).catch(err => console.error(err))
 })
 
 route.get('/:tuitionId/course', (req, res) => {
