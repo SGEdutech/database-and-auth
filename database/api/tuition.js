@@ -247,8 +247,11 @@ route.get('/:tuitionId/course', (req, res) => {
 
 route.post('/:tuitionId/course', (req, res) => {
 	const { tuitionId } = req.params;
+	_id = new ObjectId();
+	req.body._id = _id;
+
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { courses: req.body } }, { new: true })
-		.then(tuition => res.send(_.find(tuition.courses, { code: req.body.code })))
+		.then(tuition => res.send(_.find(tuition.courses, { _id })))
 		.catch(err => console.error(err));
 });
 
