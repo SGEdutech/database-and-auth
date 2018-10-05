@@ -286,6 +286,24 @@ route.get('/:tuitionId/batch/all', (req, res) => {
 	]).then(batch => res.send(batch)).catch(err => console.error(err));
 });
 
+route.get('/batch/claimed', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	const claimedTuitions = [];
+	req.user.claims.forEach(listingInfo => {
+		if (listingInfo.listingCategory === 'tuition') claimedTuitions.push(ObjectId(listingInfo.listingId));
+	});
+
+	Tuition.aggregate([
+		{ $match: { _id: { $in: claimedTuitions } } },
+		{ $project: { courses: 1 } },
+		{ $unwind: '$courses' },
+		{ $unwind: '$courses.batches' },
+		{ $addFields: { 'courses.batches.tuitionId': '$_id', 'courses.batches.courseId': '$courses._id' } },
+		{ $replaceRoot: { newRoot: '$courses.batches' } }
+	]).then(data => res.send(data)).catch(err => console.error(err));
+})
+
 route.get('/:tuitionId/batch', (req, res) => {
 	if (req.query._id === undefined) throw new Error('Batch id not provided')
 
