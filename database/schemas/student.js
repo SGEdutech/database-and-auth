@@ -9,10 +9,10 @@ const StudentSchema = new Schema({
 	email: { type: String, required },
 	address: String,
 	contactNumber: String,
-	courseName: String,
-	discountAmount: String,
+	courseId: Schema.Types.ObjectId,
+	discountAmount: Number,
 	discountReason: String,
-	feeCollected: String,
+	feeCollected: Number,
 	modeOfPayment: String,
 	nextInstallment: Date
 });
