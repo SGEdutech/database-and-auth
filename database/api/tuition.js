@@ -209,6 +209,24 @@ route.delete('/:_id', (req, res) => {
 		.catch(err => console.error(err));
 });
 
+// Get all students
+route.get('/student/claimed', (req, res) => {
+	if (req.body === undefined) throw new Error('User not logged in!');
+
+	const claimedTuitions = [];
+	req.user.claims.forEach(listingInfo => {
+		if (listingInfo.listingCategory === 'tuition') claimedTuitions.push(ObjectId(listingInfo.listingId));
+	});
+
+	Tuition.aggregate([
+		{ $match: { _id: { $in: claimedTuitions } } },
+		{ $project: { students: 1 } },
+		{ $unwind: '$students' },
+		{ $addFields: { 'students.tuitionId': '$_id' } },
+		{ $replaceRoot: { newRoot: '$students' } }
+	]).then(students => res.send(students)).catch(err => console.error(err));
+});
+
 // Courses
 route.get('/:tuitionId/course/all', (req, res) => {
 	const { tuitionId } = req.params;
