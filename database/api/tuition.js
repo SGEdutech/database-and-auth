@@ -227,6 +227,47 @@ route.get('/student/claimed', (req, res) => {
 	]).then(students => res.send(students)).catch(err => console.error(err));
 });
 
+route.get('/:tuitionId/student', (req, res) => {
+	if (req.query._id === undefined) throw new Error('Student id not peovided');
+	const { tuitionId } = req.params;
+	const studentId = req.query._id;
+
+	Tuition.aggregate([
+		{ $match: { _id: ObjectId(tuitionId) } },
+		{ $project: { students: 1 } },
+		{ $unwind: '$students' },
+		{ $match: { 'students._id': ObjectId(studentId) } },
+		{ $replaceRoot: { newRoot: '$students' } }
+	]).then(data => res.send(data)).catch(err => console.error(err));
+});
+
+route.post('/:tuitionId/student', (req, res) => {
+	const { tuitionId } = req.params;
+	const _id = new ObjectId();
+	req.body._id = _id;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { students: req.body } }, { new: true })
+		.then(tuition => res.send(_.find(tuition.students, { _id }))).catch(err => console.error(err));
+});
+
+route.put('/:tuitionId/student/:studentId', (req, res) => {
+	const { tuitionId, studentId } = req.params;
+
+	prependToObjKey(req.body, 'students.$.')
+
+	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), students: { $elemMatch: { _id: ObjectId(studentId) } } }, req.body, { new: true })
+		.then(tuition => res.send(_.find(tuition.students, { _id: ObjectId(studentId) })))
+		.catch(err => console.error(err));
+});
+
+route.delete('/:tuitionId/student/:studentId', (req, res) => {
+	const { tuitionId, studentId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $pull: { students: { _id: ObjectId(studentId) } } })
+		.then(tuition => res.send(_.find(tuition.students, { _id: ObjectId(studentId) })))
+		.catch(err => console.error(err));
+})
+
 // Courses
 route.get('/:tuitionId/course/all', (req, res) => {
 	const { tuitionId } = req.params;
