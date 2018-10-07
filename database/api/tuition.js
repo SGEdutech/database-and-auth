@@ -92,6 +92,18 @@ route.get('/all', (req, res) => {
 		.catch(err => console.error(err));
 });
 
+route.get('/claimed', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	const claimedTuitions = [];
+	req.user.claims.forEach(listingInfo => {
+		if (listingInfo.listingCategory === 'tuition') claimedTuitions.push(ObjectId(listingInfo.listingId));
+	});
+
+	Tuition.find({ _id: { $in: claimedTuitions } }).then(tuitions => res.send(tuitions))
+		.catch(err => console.error(err))
+})
+
 route.get('/', (req, res) => {
 	const queryObject = req.query;
 	const homeAdvertisement = queryObject.homeAdvertisement || false;
