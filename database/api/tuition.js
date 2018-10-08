@@ -389,6 +389,11 @@ route.get('/:tuitionId/batch', (req, res) => {
 
 route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 	const { tuitionId, courseId } = req.params;
+
+	if (typeof req.body.students === 'string') req.body.students = [req.body.students];
+
+	console.log(req.body);
+
 	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $push: { 'courses.$.batches': req.body } }, { new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
@@ -398,6 +403,10 @@ route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 
 route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
+
+	//FIXME: Implement this diffently on frontend
+	if (typeof req.body.students === 'string') req.body.students = [req.body.students];
+	if (req.body.students === undefined) req.body.students = [];
 
 	prependToObjKey(req.body, 'courses.$[i].batches.$[j].');
 
@@ -451,15 +460,38 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/student/empty', (req, 
 })
 
 // Schedule
+route.get('/schedule/claimed', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	const claimedTuitions = [];
+	req.user.claims.forEach(listingInfo => {
+		if (listingInfo.listingCategory === 'tuition') claimedTuitions.push(ObjectId(listingInfo.listingId));
+	});
+
+	Tuition.aggregate([
+		{ $match: { _id: { $in: claimedTuitions } } },
+		{ $project: { courses: 1 } },
+		{ $unwind: '$courses' },
+		{ $unwind: '$courses.batches' },
+		{ $unwind: '$courses.batches.schedules' },
+		{ $addFields: { 'courses.batches.schedules.tuitionId': '$_id', 'courses.batches.schedules.courseId': '$courses._id', 'courses.batches.schedules.courseCode': '$courses.code', 'courses.batches.schedules.batchId': '$courses.batches._id', 'courses.batches.schedules.batchCode': '$courses.batches.code' } },
+		{ $replaceRoot: { newRoot: '$courses.batches.schedules' } }
+	]).then(schedules => res.send(schedules)).catch(err => console.error(err));
+})
+
 route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
+
+	const _id = new ObjectId();
+	req.body._id = _id;
+
 	const pushQuery = Array.isArray(req.body.schedules) ? { $each: req.body.schedules } : req.body;
 
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules': pushQuery } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
-			const scheduleAdded = Array.isArray(req.body.schedules) ? batch.schedules : _.find(batch.schedules, { topic: req.body.topic });
+			const scheduleAdded = Array.isArray(req.body.schedules) ? batch.schedules : _.find(batch.schedules, { _id });
 			res.send(scheduleAdded);
 		}).catch(err => console.error(err));
 });
