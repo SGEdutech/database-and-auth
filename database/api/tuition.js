@@ -477,22 +477,46 @@ route.get('/schedule/claimed', (req, res) => {
 		{ $addFields: { 'courses.batches.schedules.tuitionId': '$_id', 'courses.batches.schedules.courseId': '$courses._id', 'courses.batches.schedules.courseCode': '$courses.code', 'courses.batches.schedules.batchId': '$courses.batches._id', 'courses.batches.schedules.batchCode': '$courses.batches.code' } },
 		{ $replaceRoot: { newRoot: '$courses.batches.schedules' } }
 	]).then(schedules => res.send(schedules)).catch(err => console.error(err));
-})
+});
 
 route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
+	let _idArr = [];
+	let isReqArray;
+	let pushQuery;
+	if (Array.isArray(req.body.schedules)) {
+		isReqArray = true;
+		req.body.schedules.forEach(schedule => {
+			const _id = new ObjectId();
+			_idArr.push(_id);
+			schedule._id = _id;
+		});
+		pushQuery = { $each: req.body.schedules };
+	} else {
+		isReqArray = false;
+		const _id = new ObjectId();
+		req.body._id = _id;
+		pushQuery = req.body;
+	}
 
 	const _id = new ObjectId();
 	req.body._id = _id;
-
-	const pushQuery = Array.isArray(req.body.schedules) ? { $each: req.body.schedules } : req.body;
 
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules': pushQuery } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
-			const scheduleAdded = Array.isArray(req.body.schedules) ? batch.schedules : _.find(batch.schedules, { _id });
-			res.send(scheduleAdded);
+
+			let schedulesAdded;
+			if (isReqArray) {
+				//Making sure all object ids are converted to strings for comparison
+				_idArr = _idArr.map(_idElement => _idElement.toString());
+				// Can't change object key in batches.schedule because of some mongoose object bullshit
+				schedulesAdded = batch.schedules.filter(schedule => _idArr.indexOf(schedule._id.toString()) !== -1);
+			} else {
+				schedulesAdded = _.find(batch.schedules, { _id });
+			}
+			res.send(schedulesAdded);
 		}).catch(err => console.error(err));
 });
 
@@ -523,9 +547,14 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId',
 // Attendance
 route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId/student-absent/new', (req, res) => {
 	const { tuitionId, courseId, batchId, scheduleId } = req.params;
-	const studendsToAdd = req.body.students || [req.body._id];
 
-	Tuition.findByIdAndUpdate(tuitionId, { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': studendsToAdd }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }], new: true })
+	if (req.body.absentees === undefined) {
+		req.body.absentees = [];
+	} else if (Array.isArray(req.body.absentees) === false) {
+		req.body.absentees = [req.body.absentees];
+	}
+
+	Tuition.findByIdAndUpdate(tuitionId, { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': req.body.absentees }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }], new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
@@ -535,10 +564,14 @@ route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId/stu
 });
 
 route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId/student-absent', (req, res) => {
+	if (req.body.absentees === undefined) {
+		res.send([]);
+		return;
+	}
 	const { tuitionId, courseId, batchId, scheduleId } = req.params;
-	const pushQuery = Array.isArray(req.body.absentees) ? { $each: req.body.absentees } : req.body._id;
+	if (Array.isArray(req.body.absentees) === false) req.body.absentees = [req.body.absentees];
 
-	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': pushQuery } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }], new: true })
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].schedules.$[k].studentsAbsent': { $each: req.body.absentees } } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }], new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
