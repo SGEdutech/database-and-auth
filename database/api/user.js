@@ -108,7 +108,7 @@ route.put('/:_id', (req, res) => {
 		.catch(err => console.error(err));
 });
 
-route.delete('/delete/:arrayName/:_id', (req, res) => {
+route.delete('/delete/:_id/:arrayName', (req, res) => {
 	const identifier = req.body.string || req.body;
 	userDbFunctions
 		.deleteElementFromArray({
