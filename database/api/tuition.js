@@ -392,8 +392,6 @@ route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 
 	if (typeof req.body.students === 'string') req.body.students = [req.body.students];
 
-	console.log(req.body);
-
 	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $push: { 'courses.$.batches': req.body } }, { new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
@@ -646,7 +644,6 @@ route.post('/:tuitionId/forum/:forumId/comment', (req, res) => {
 	Tuition.findOneAndUpdate({ _id: tuitionId, forums: { $elemMatch: { _id: forumId } } }, { $push: { 'forums.$.comments': req.body } }, { new: true })
 		.then(tuition => {
 			const forum = _.find(tuition.forums, { _id: ObjectId(forumId) });
-			console.log(forum);
 			res.send(_.find(forum.comments, { _id }))
 		}).catch(err => console.error(err));
 });

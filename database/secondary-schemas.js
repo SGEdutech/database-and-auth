@@ -52,6 +52,14 @@ const ClaimSchema = new Schema({
 	listingId: String
 });
 
+const coursesOfferedSchema = new Schema({
+	title: String,
+	ageGroup: String,
+	duration: String,
+	fee: Number,
+	nextBatch: Date
+});
+
 exports = module.exports = {
 	ContactSchema,
 	ReviewsOwnedSchema,
@@ -61,5 +69,6 @@ exports = module.exports = {
 	FacilitiesAndBraggingSchema,
 	TeamSchema,
 	TimeAndDateSchema,
+	CoursesOfferedSchema,
 	ClaimSchema
 };
