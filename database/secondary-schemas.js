@@ -52,7 +52,7 @@ const ClaimSchema = new Schema({
 	listingId: String
 });
 
-const coursesOfferedSchema = new Schema({
+const CoursesOfferedSchema = new Schema({
 	title: String,
 	ageGroup: String,
 	duration: String,
