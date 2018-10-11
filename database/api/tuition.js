@@ -389,13 +389,15 @@ route.get('/:tuitionId/batch', (req, res) => {
 
 route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 	const { tuitionId, courseId } = req.params;
+	const _id = new ObjectId();
+	req.body._id = _id;
 
 	if (typeof req.body.students === 'string') req.body.students = [req.body.students];
 
 	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $push: { 'courses.$.batches': req.body } }, { new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
-			res.send(_.find(course.batches, { code: req.body.code }))
+			res.send(_.find(course.batches, { _id }))
 		}).catch(err => console.error(err))
 })
 
