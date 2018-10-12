@@ -601,6 +601,23 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId/s
 });
 
 // Fourm
+route.get('/forum/claimed', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	const claimedTuitions = [];
+	req.user.claims.forEach(listingInfo => {
+		if (listingInfo.listingCategory === 'tuition') claimedTuitions.push(ObjectId(listingInfo.listingId));
+	});
+
+	Tuition.aggregate([
+		{ $match: { _id: { $in: claimedTuitions } } },
+		{ $project: { forums: 1 } },
+		{ $unwind: '$forums' },
+		{ $addFields: { 'forums.tuitionId': '$_id' } },
+		{ $replaceRoot: { newRoot: '$forums' } }
+	]).then(forums => res.send(forums)).catch(err => console.error(err));
+})
+
 route.get('/:tuitionId/forum', (req, res) => {
 	const { tuitionId } = req.params;
 
