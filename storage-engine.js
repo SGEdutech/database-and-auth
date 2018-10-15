@@ -18,7 +18,7 @@ function checkFileType(req, file, cb) {
 }
 
 const eventPicsStorage = multer.diskStorage({
-	destination: './public/images/eventPics',
+	destination: './images/eventPics',
 	filename: nameThatBitch
 });
 
@@ -33,7 +33,7 @@ function eventPicsMiddleware(req, res, next) {
 }
 
 const schoolPicsStorage = multer.diskStorage({
-	destination: './public/images/schoolPics',
+	destination: './images/schoolPics',
 	filename: nameThatBitch
 });
 
@@ -48,7 +48,7 @@ function schoolPicsMiddleware(req, res, next) {
 }
 
 const tuitionPicsStorage = multer.diskStorage({
-	destination: './public/images/tuitionPics',
+	destination: './images/tuitionPics',
 	filename: nameThatBitch
 });
 
@@ -63,7 +63,7 @@ function tuitionPicsMiddleware(req, res, next) {
 }
 
 const userPicsStorage = multer.diskStorage({
-	destination: './public/images/userPics',
+	destination: './images/userPics',
 	filename: nameThatBitch
 });
 
@@ -78,7 +78,7 @@ function userCoverPicMiddleware(req, res, next) {
 }
 
 const solutionPdfStorage = multer.diskStorage({
-	destination: './public/pdfs/solutions',
+	destination: './pdfs/solutions',
 	filename: nameThatBitch
 });
 
@@ -93,7 +93,7 @@ function solutionPdfMiddleware(req, res, next) {
 }
 
 const notificationStorage = multer.diskStorage({
-	destination: './public/pdfs/notification',
+	destination: './pdfs/notification',
 	filename: nameThatBitch
 });
 
