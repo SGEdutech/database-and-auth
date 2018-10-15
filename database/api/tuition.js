@@ -4,6 +4,7 @@ const _ = require('lodash');
 const escapeRegex = require('../../scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
 const Tuition = require('../models/tuition');
+const Notification = require('../models/notification');
 const PromotedHome = require('../models/promoted-home');
 const PromotedSearch = require('../models/promoted-search');
 const PromotedRelated = require('../models/promoted-related');
@@ -688,5 +689,19 @@ route.delete('/:tuitionId/forum/:forumId/comment/:commentId', (req, res) => {
 			res.send(_.find(forum.comments, { _id: ObjectId(commentId) }))
 		}).catch(err => console.error(err));
 });
+
+// Notification
+route.get('/notification/claimed', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	const claimedTuitions = [];
+	req.user.claims.forEach(listingInfo => {
+		if (listingInfo.listingCategory === 'tuition') claimedTuitions.push(ObjectId(listingInfo.listingId));
+	});
+
+	Notification.aggregate([
+		{ $match: { senderId: { $in: claimedTuitions } } },
+	]).then(notification => res.send(notification)).catch(err => console.error(err));
+})
 
 module.exports = route;

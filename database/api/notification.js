@@ -77,8 +77,9 @@ route.post('/', (req, res) => {
 			delete req.body.receivers;
 			req.body.receivers = [];
 			userEmails.forEach(userEmail => req.body.receivers.push({ userEmail }));
+			req.body.receivers = [...new Set(req.body.receivers)];
 			return Notification.create(req.body);
-		}).then(data => res.send(data)).catch(err => console.error(err));
+		}).then(notification => res.send(notification)).catch(err => console.error(err));
 });
 
 route.put('/user-read', (req, res) => {

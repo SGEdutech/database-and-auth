@@ -32,6 +32,7 @@ async function claimListing(userID, listingInfo = {}) {
 		const listingModel = categoryToModel[listingCategory].model;
 
 		const listing = await listingModel.findById(listingId);
+		console.log(listing.claimedBy);
 		if (listing.claimedBy !== undefined) throw new Error('Listing already claimed')
 
 		transaction.update(listingModelName, listingId, { claimedBy: userID });

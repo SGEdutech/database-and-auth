@@ -10,6 +10,7 @@ const StudentSchema = new Schema({
 	address: String,
 	contactNumber: String,
 	courseId: Schema.Types.ObjectId,
+	batchId: Schema.Types.ObjectId,
 	discountAmount: Number,
 	discountReason: String,
 	feeCollected: Number,
