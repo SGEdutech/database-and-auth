@@ -36,6 +36,7 @@ const EventSchema = new Schema({
 	hits: ViewsOrHitsSchema,
 	goingUsers: [String],
 	bookmarks: Number,
+	entryFee: Number,
 	signedBy: String,
 	claimedBy: String
 });
