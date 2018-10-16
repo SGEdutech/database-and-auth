@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const autoIncrement = require('mongoose-sequence')(mongoose);
 const secondarySchemas = require('../secondary-schemas');
 const { ClaimSchema } = secondarySchemas;
 const {
@@ -12,6 +13,7 @@ const {
 const { required, select } = require('../../config.json').MONGO;
 
 const UserSchema = new Schema({
+	eAId: Number,
 	firstName: { type: String, required, lowercase: true },
 	middleName: String,
 	lastName: { type: String, lowercase: true },
@@ -47,6 +49,8 @@ const UserSchema = new Schema({
 	bookmarkEvents: [{ type: String, unique: true }],
 	bookmarkBlogs: [{ type: String, unique: true }]
 });
+
+UserSchema.plugin(autoIncrement, { inc_field: 'eAId' });
 
 // UserSchema.post('validate', validateUser);
 
