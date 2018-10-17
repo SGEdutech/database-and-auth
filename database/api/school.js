@@ -36,10 +36,10 @@ function getPromotedData(queryObject) {
 
 	return new Promise((resolve, reject) => {
 		promotedDbFunction.getMultipleData({ category: 'school' }, { limit: demandedAdvertisements }).then(promotedInfos => {
-			const promotedListingIdArr = [];
-			promotedInfos.forEach(promotedInfo => promotedListingIdArr.push(promotedInfo.listingId));
-			return schoolDbFunctions.getDataFromMultipleIds(promotedListingIdArr, queryObject)
-		})
+				const promotedListingIdArr = [];
+				promotedInfos.forEach(promotedInfo => promotedListingIdArr.push(promotedInfo.listingId));
+				return schoolDbFunctions.getDataFromMultipleIds(promotedListingIdArr, queryObject)
+			})
 			.then(data => resolve(data)).catch(err => reject(err));
 	});
 }
@@ -83,11 +83,11 @@ route.get('/', (req, res) => {
 	delete queryObject.incrementView;
 
 	schoolDbFunctions.getSpecificData(req.query, {
-		incrementView,
-		homeAdvertisement,
-		searchAdvertisement,
-		relatedAdvertisement
-	}).then(data => res.send(data))
+			incrementView,
+			homeAdvertisement,
+			searchAdvertisement,
+			relatedAdvertisement
+		}).then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
@@ -134,6 +134,11 @@ route.get('/search', (req, res) => {
 	Promise.all([promotedDataPromise, poorDataPromise]).then(dataArr => res.send(dataArr[0].concat(dataArr[1])))
 		.catch(err => console.error(err));
 });
+
+route.get('/super-admin', (req, res) => {
+	School.find({ signedBy: { $regex: new RegExp(req.query.signedBy, 'i') }, updated: { $gte: req.query.fromDate, $lt: req.query.toDate } })
+		.then(data => res.send(data)).catch(err => console.error(err))
+})
 
 route.post('/add/:_id/:arrayName', (req, res) => {
 	const elementToBePushed = req.body.string || req.body;

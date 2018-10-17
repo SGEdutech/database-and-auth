@@ -18,6 +18,16 @@ route.get('/all', (req, res) => {
 		.catch(err => console.error(err));
 });
 
+route.get('/batch/joined', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	Tuition.aggregate([
+		{ $match: { students: { $elemMatch: { email: req.user.primaryEmail } } } },
+		{ $project: { batches: 1, name: 1 } },
+		{ $unwind: '$batches' },
+	]);
+});
+
 route.get('/reviews', (req, res) => {
 	if (req.user === undefined) throw new Error('User not logged in');
 
