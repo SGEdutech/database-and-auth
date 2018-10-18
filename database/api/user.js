@@ -18,7 +18,7 @@ route.get('/all', (req, res) => {
 		.catch(err => console.error(err));
 });
 
-route.get('/batch/joined', (req, res) => {
+route.get('/batches', (req, res) => {
 	if (req.user === undefined) throw new Error('User not logged in');
 
 	Tuition.aggregate([
@@ -29,6 +29,18 @@ route.get('/batch/joined', (req, res) => {
 		{ $addFields: { 'courses.batches.tuitionId': '$_id', 'courses.batches.tuitionName': '$name', 'courses.batches.courseId': '$courses._id', 'courses.batches.courseCode': '$courses.code' } },
 		{ $replaceRoot: { newRoot: '$courses.batches' } }
 	]).then(batches => res.send(batches)).catch(err => console.error(err));
+});
+
+route.get('/forums', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	Tuition.aggregate([
+		{ $match: { students: { $elemMatch: { email: req.user.primaryEmail } } } },
+		{ $project: { forums: 1, name: 1 } },
+		{ $unwind: '$forums' },
+		{ $addFields: { 'forums.tuitionId': '$_id', 'forums.tuitionName': '$name' } },
+		{ $replaceRoot: { newRoot: '$forums' } }
+	]).then(data => res.send(data)).catch(err => console.error(err));
 });
 
 route.get('/reviews', (req, res) => {
