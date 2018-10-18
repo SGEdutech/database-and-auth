@@ -657,9 +657,12 @@ route.delete('/:tuitionId/forum/:forumId', (req, res) => {
 
 // Forum comment
 route.post('/:tuitionId/forum/:forumId/comment', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
 	const { tuitionId, forumId } = req.params;
 	const _id = new ObjectId();
 	req.body._id = _id;
+	req.body.userEmail = req.user.primaryEmail;
 
 	Tuition.findOneAndUpdate({ _id: tuitionId, forums: { $elemMatch: { _id: forumId } } }, { $push: { 'forums.$.comments': req.body } }, { new: true })
 		.then(tuition => {

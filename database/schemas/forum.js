@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 const { required, select } = require('../../config.json').MONGO;
 
 const ForumComments = new Schema({
+	userEmail: String,
 	content: String
 });
 
