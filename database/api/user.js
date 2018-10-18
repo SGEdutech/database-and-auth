@@ -48,10 +48,15 @@ route.get('/classes', (req, res) => {
 
 	Tuition.aggregate([
 		{ $match: { students: { $elemMatch: { email: req.user.primaryEmail } } } },
-		{ $project: { forums: 1, courses: 1 } },
+		{ $project: { courses: 1, students: 1 } },
 		{ $unwind: '$courses' },
 		{ $unwind: '$courses.batches' },
+		{ $addFields: { 'courses.batches.studentInfo': { $arrayElemAt: ['$students', { $indexOfArray: ['$students.email', req.user.primaryEmail] }] } } },
+		{ $addFields: { 'courses.batches.studentId': '$courses.batches.studentInfo._id' } },
+		{ $unwind: '$courses.batches.students' },
 		{ $unwind: '$courses.batches.schedules' },
+		// Why is this working
+		{ $match: { $expr: { $eq: ['$courses.batches.studentId', '$courses.batches.students'] } } },
 		{
 			$addFields: {
 				'courses.batches.schedules.tuitionName': '$name',
@@ -60,6 +65,7 @@ route.get('/classes', (req, res) => {
 				'courses.batches.schedules.courseCode': '$courses.code',
 				'courses.batches.schedules.batchId': '$courses.batches._id',
 				'courses.batches.schedules.batchCode': '$courses.batches.code',
+				'courses.batches.schedules.studentId': '$courses.batches.studentId'
 			}
 		},
 		{ $replaceRoot: { newRoot: '$courses.batches.schedules' } }

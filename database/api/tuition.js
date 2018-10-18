@@ -664,7 +664,7 @@ route.post('/:tuitionId/forum/:forumId/comment', (req, res) => {
 	req.body._id = _id;
 	req.body.userEmail = req.user.primaryEmail;
 
-	Tuition.findOneAndUpdate({ _id: tuitionId, forums: { $elemMatch: { _id: forumId } } }, { $push: { 'forums.$.comments': req.body } }, { new: true })
+	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), forums: { $elemMatch: { _id: ObjectId(forumId) } } }, { $push: { 'forums.$.comments': req.body } }, { new: true })
 		.then(tuition => {
 			const forum = _.find(tuition.forums, { _id: ObjectId(forumId) });
 			res.send(_.find(forum.comments, { _id }))
