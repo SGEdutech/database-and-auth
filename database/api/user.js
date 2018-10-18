@@ -23,9 +23,12 @@ route.get('/batch/joined', (req, res) => {
 
 	Tuition.aggregate([
 		{ $match: { students: { $elemMatch: { email: req.user.primaryEmail } } } },
-		{ $project: { batches: 1, name: 1 } },
-		{ $unwind: '$batches' },
-	]);
+		{ $project: { courses: 1, name: 1 } },
+		{ $unwind: '$courses' },
+		{ $unwind: '$courses.batches' },
+		{ $addFields: { 'courses.batches.tuitionId': '$_id', 'courses.batches.tuitionName': '$name', 'courses.batches.courseId': '$courses._id', 'courses.batches.courseCode': '$courses.code' } },
+		{ $replaceRoot: { newRoot: '$courses.batches' } }
+	]).then(batches => res.send(batches)).catch(err => console.error(err));
 });
 
 route.get('/reviews', (req, res) => {

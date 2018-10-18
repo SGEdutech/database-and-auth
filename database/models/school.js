@@ -58,6 +58,7 @@ const SchoolSchema = new Schema({
 	instaLink: String,
 	category: String,
 	signedBy: String,
+	isVerified: Boolean,
 	updated: { type: Date, default: Date.now }
 });
 
