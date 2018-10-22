@@ -13,7 +13,7 @@ const {
 const { required, select } = require('../../config.json').MONGO;
 
 const UserSchema = new Schema({
-	eAId: Number,
+	eANumber: Number,
 	firstName: { type: String, required, lowercase: true },
 	middleName: String,
 	lastName: { type: String, lowercase: true },
@@ -50,7 +50,7 @@ const UserSchema = new Schema({
 	bookmarkBlogs: [String]
 });
 
-UserSchema.plugin(autoIncrement, { inc_field: 'eAId' });
+UserSchema.plugin(autoIncrement, { inc_field: 'eANumber' });
 
 // UserSchema.post('validate', validateUser);
 
