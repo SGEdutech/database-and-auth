@@ -82,6 +82,18 @@ route.get('/all', (req, res) => {
 		.catch(err => console.error(err));
 });
 
+route.get('/claimed', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	const claimedEvents = [];
+	req.user.claims.forEach(listingInfo => {
+		if (listingInfo.listingCategory === 'event') claimedEvents.push(ObjectId(listingInfo.listingId));
+	});
+
+	Event.find({ _id: { $in: claimedEvents } }).then(events => res.send(events))
+		.catch(err => console.error(err))
+});
+
 route.get('/', (req, res) => {
 	const queryObject = req.query;
 	const homeAdvertisement = queryObject.homeAdvertisement || false;

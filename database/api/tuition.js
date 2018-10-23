@@ -103,7 +103,7 @@ route.get('/claimed', (req, res) => {
 
 	Tuition.find({ _id: { $in: claimedTuitions } }).then(tuitions => res.send(tuitions))
 		.catch(err => console.error(err))
-})
+});
 
 route.get('/', (req, res) => {
 	const queryObject = req.query;

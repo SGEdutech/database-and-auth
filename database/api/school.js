@@ -70,6 +70,18 @@ route.get('/all', (req, res) => {
 		.catch(err => console.error(err));
 });
 
+route.get('/claimed', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	const claimedSchools = [];
+	req.user.claims.forEach(listingInfo => {
+		if (listingInfo.listingCategory === 'school') claimedSchools.push(ObjectId(listingInfo.listingId));
+	});
+
+	School.find({ _id: { $in: claimedSchools } }).then(schools => res.send(schools))
+		.catch(err => console.error(err))
+});
+
 route.get('/', (req, res) => {
 	const queryObject = req.query;
 	const homeAdvertisement = queryObject.homeAdvertisement || false;
