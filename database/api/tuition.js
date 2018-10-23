@@ -179,6 +179,11 @@ route.get('/search', (req, res) => {
 		.catch(err => console.error(err));
 });
 
+route.get('/super-admin', (req, res) => {
+	Tuition.find({ signedBy: { $regex: new RegExp(req.query.signedBy, 'i') }, updated: { $gte: req.query.fromDate, $lt: req.query.toDate } })
+		.then(tuitions => res.send(tuitions)).catch(err => console.error(err))
+});
+
 route.post('/add/:_id/:arrayName', (req, res) => {
 	const elementToBePushed = req.body.string || req.body;
 	tuitionDbFunctions.addElementToArray({ _id: req.params._id }, req.params.arrayName, elementToBePushed)

@@ -38,7 +38,8 @@ const EventSchema = new Schema({
 	bookmarks: Number,
 	entryFee: Number,
 	signedBy: String,
-	claimedBy: String
+	claimedBy: String,
+	updatedOn: { type: Date, default: Date.now() }
 });
 
 const Event = mongoose.model('event', EventSchema);

@@ -148,8 +148,8 @@ route.get('/search', (req, res) => {
 
 route.get('/super-admin', (req, res) => {
 	School.find({ signedBy: { $regex: new RegExp(req.query.signedBy, 'i') }, updated: { $gte: req.query.fromDate, $lt: req.query.toDate } })
-		.then(data => res.send(data)).catch(err => console.error(err))
-})
+		.then(schools => res.send(schools)).catch(err => console.error(err))
+});
 
 route.post('/add/:_id/:arrayName', (req, res) => {
 	const elementToBePushed = req.body.string || req.body;

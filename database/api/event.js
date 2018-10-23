@@ -94,27 +94,6 @@ route.get('/claimed', (req, res) => {
 		.catch(err => console.error(err))
 });
 
-route.get('/', (req, res) => {
-	const queryObject = req.query;
-	const homeAdvertisement = queryObject.homeAdvertisement || false;
-	const searchAdvertisement = queryObject.searchAdvertisement || false;
-	const relatedAdvertisement = queryObject.relatedAdvertisement || false;
-	const incrementView = queryObject.incrementView || true;
-
-	delete queryObject.homeAdvertisement;
-	delete queryObject.searchAdvertisement;
-	delete queryObject.relatedAdvertisement;
-	delete queryObject.incrementView;
-
-	eventDbFunctions.getSpecificData(req.query, {
-		incrementView,
-		homeAdvertisement,
-		searchAdvertisement,
-		relatedAdvertisement
-	}).then(data => res.send(data))
-		.catch(err => console.error(err));
-});
-
 route.get('/search', (req, res) => {
 	const queryObject = req.query;
 	const demands = queryObject.demands || '';
@@ -161,6 +140,32 @@ route.get('/search', (req, res) => {
 	const promotedDataPromise = getPromotedData(advertisementInfoObject);
 
 	Promise.all([promotedDataPromise, poorDataPromise]).then(dataArr => res.send(dataArr[0].concat(dataArr[1])))
+		.catch(err => console.error(err));
+});
+
+route.get('/super-admin', (req, res) => {
+	Event.find({ signedBy: { $regex: new RegExp(req.query.signedBy, 'i') }, updatedOn: { $gte: req.query.fromDate, $lt: req.query.toDate } })
+		.then(schools => res.send(schools)).catch(err => console.error(err))
+});
+
+route.get('/', (req, res) => {
+	const queryObject = req.query;
+	const homeAdvertisement = queryObject.homeAdvertisement || false;
+	const searchAdvertisement = queryObject.searchAdvertisement || false;
+	const relatedAdvertisement = queryObject.relatedAdvertisement || false;
+	const incrementView = queryObject.incrementView || true;
+
+	delete queryObject.homeAdvertisement;
+	delete queryObject.searchAdvertisement;
+	delete queryObject.relatedAdvertisement;
+	delete queryObject.incrementView;
+
+	eventDbFunctions.getSpecificData(req.query, {
+		incrementView,
+		homeAdvertisement,
+		searchAdvertisement,
+		relatedAdvertisement
+	}).then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
