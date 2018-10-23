@@ -1,5 +1,4 @@
-const route = require('express')
-	.Router();
+const route = require('express').Router();
 const { ObjectId } = require('mongoose').Types;
 const escapeRegex = require('../../scripts/escape-regex');
 const DbAPIClass = require('../api-functions');
