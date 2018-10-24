@@ -59,7 +59,7 @@ const TuitionSchema = new Schema({
 	bookmarks: Number,
 	signedBy: String,
 	claimedBy: String,
-	updatedOn: { type: Date, default: Date.now() }
+	updatedOn: { type: Date, default: Date.now }
 });
 
 // TuitionSchema.path('name').validate(name => isMaxStrLength(name, 15),

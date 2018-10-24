@@ -39,7 +39,7 @@ const EventSchema = new Schema({
 	entryFee: Number,
 	signedBy: String,
 	claimedBy: String,
-	updatedOn: { type: Date, default: Date.now() }
+	updatedOn: { type: Date, default: Date.now }
 });
 
 const Event = mongoose.model('event', EventSchema);
