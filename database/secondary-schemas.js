@@ -60,6 +60,11 @@ const CoursesOfferedSchema = new Schema({
 	nextBatch: Date
 });
 
+const DiscountSchema = new Schema({
+	code: String,
+	amount: Number
+});
+
 exports = module.exports = {
 	ContactSchema,
 	ReviewsOwnedSchema,
@@ -70,5 +75,6 @@ exports = module.exports = {
 	TeamSchema,
 	TimeAndDateSchema,
 	CoursesOfferedSchema,
-	ClaimSchema
+	ClaimSchema,
+	DiscountSchema
 };

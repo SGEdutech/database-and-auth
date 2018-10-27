@@ -463,7 +463,71 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/student/empty', (req, 
 
 	Tuition.findByIdAndUpdate(tuitionId, { 'courses.$[i].batches.$[j].students': [] }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }] })
 		.then(() => res.send([]).catch(err => console.error(err)));
-})
+});
+
+// Student Payment
+route.get('/:tuitionId/student/:studentId/payment/all', (req, res) => {
+	const { tuitionId, studentId } = req.params;
+
+	Tuition.findById(tuitionId)
+		.then(tuition => {
+			const student = _.find(tuition.students, { _id: studentId });
+			res.send(student.payments)
+		}).catch(err => console.error(err))
+});
+
+route.get('/:tuitionId/student/:studentId/payment/all', (req, res) => {
+	const { tuitionId, studentId } = req.params;
+
+	Tuition.findById(tuitionId)
+		.then(tuition => {
+			const student = _.find(tuition.students, { _id: studentId });
+			res.send(student.payments)
+		}).catch(err => console.error(err))
+});
+
+route.get('/:tuitionId/student/:studentId/payment/:paymentId', (req, res) => {
+	const { tuitionId, studentId, paymentId } = req.params;
+
+	Tuition.findById(tuitionId).then(tuition => {
+		const student = _.find(tuition.students, { _id: studentId });
+		res.send(_.find(student.payments, { _id: paymentId }));
+	}).catch(err => console.error(err));
+});
+
+route.post('/:tuitionId/student/:studentId/payment', (req, res) => {
+	const { tuitionId, studentId } = req.params;
+	const _id = new ObjectId();
+	req.body._id = _id;
+
+	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), students: { $elemMatch: { _id: studentId } } }, { $push: { 'students.$.payments': req.body } }, { new: true })
+		.then(tuition => {
+			const student = _.find(tuition.students, studentId);
+			res.send(_.find(student.payments, { _id }));
+		}).catch(err => console.error(err))
+});
+
+route.put('/:tuitionId/student/:studentId/payment/:paymentId', (req, res) => {
+	const { tuitionId, studentId, paymentId } = req.params;
+
+	prependToObjKey(req.body, 'students.$[i].payments.$[j].');
+
+	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(studentId) }, { 'j._id': ObjectId(paymentId) }], new: true })
+		.then(tuition => {
+			const student = _.find(tuition.students, { _id: studentId });
+			res.send(_.find(student.payments, { _id: paymentId }))
+		}).catch(err => console.error(err))
+});
+
+route.delete('/:tuitionId/student/:studentId/payment/:paymentId', (req, res) => {
+	const { tuitionId, studentId, paymentId } = req.params;
+
+	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), students: { $elemMatch: { _id: ObjectId(studentId) } } }, { $pull: { 'students.$.payments': { _id: paymentId } } })
+		.then(tuition => {
+			const student = _.find(tuition.students, { _id: studentId });
+			res.send(_.find(student.payments, { _id: paymentId }))
+		}).catch(err => console.error(err))
+});
 
 // Schedule
 route.get('/schedule/claimed', (req, res) => {
@@ -710,6 +774,76 @@ route.get('/notification/claimed', (req, res) => {
 	Notification.aggregate([
 		{ $match: { senderId: { $in: claimedTuitions } } },
 	]).then(notification => res.send(notification)).catch(err => console.error(err));
-})
+});
+
+// Discount
+route.get('/:tuitionId/discount/all', (req, res) => {
+	const { tuitionId } = req.params;
+
+	Tuition.findById(tuitionId).select('discounts')
+		.then(tuition => res.send(tuition.discounts)).catch(err => console.error(err))
+});
+
+route.get('/discount/claimed', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	const claimedTuitions = [];
+	req.user.claims.forEach(listingInfo => {
+		if (listingInfo.listingCategory === 'tuition') claimedTuitions.push(ObjectId(listingInfo.listingId));
+	});
+
+	Tuition.aggregate([
+		{ match: { $in: claimedTuitions } },
+		{ $unwind: '$discounts' },
+		{ $addFields: { 'discounts.tuitionId': '$_id' } },
+		{ $replaceRoot: { newRoot: 'discounts' } }
+	]).then(discounts => res.send(discounts)).catch(err => console.error(err));
+});
+
+route.get('/:tuitionId/discount', (req, res) => {
+	const { tuitionId } = req.params;
+
+	Tuition.aggregate([
+		{ $match: { _id: ObjectId(tuitionId) } },
+		{ $project: { discounts: 1 } },
+		{ $unwind: '$discounts' },
+		{ $match: { 'discounts._id': ObjectId(req.query._id) } },
+		{ $replaceRoot: { newRoot: '$discounts' } }
+	]).then(discount => res.send(discount)).catch(err => console.error(err));
+});
+
+route.post('/:tuitionId/discount', (req, res) => {
+	const { tuitionId } = req.params;
+	const _id = new ObjectId();
+	req.body._id = _id
+
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { discounts: req.body } }, { new: true })
+		.then(tuition => res.send(_.find(tuition.discounts, { _id })))
+		.catch(err => console.error(err))
+});
+
+route.put('/:tuitionId/discount/:discountId', (req, res) => {
+	const { tuitionId, discountId } = req.params;
+	prependToObjKey(req.body, 'discounts.$.')
+
+	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), discounts: { $elemMatch: { _id: ObjectId(discountId) } } }, req.body, { new: true })
+		.then(tuition => res.send(_.find(tuition.discounts, { _id: ObjectId(discountId) })))
+		.catch(err => console.error(err))
+});
+
+route.delete('/:tuitionId/discount/all', (req, res) => {
+	const { tuitionId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { discounts: [] })
+		.then(() => res.send([])).catch(err => console.error(err))
+});
+
+route.delete('/:tuitionId/discount/:discountId', (req, res) => {
+	const { tuitionId, discountId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $pull: { discounts: { _id: ObjectId(discountId) } } })
+		.then(tuition => res.send(_.find(tuition.discounts, { _id: ObjectId(discountId) })))
+		.catch(err => console.error(err))
+});
 
 module.exports = route;

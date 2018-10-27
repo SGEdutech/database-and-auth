@@ -7,6 +7,7 @@ const TeamSchema = secondarySchemas.TeamSchema;
 const FacilitiesAndBraggingSchema = secondarySchemas.FacilitiesAndBraggingSchema;
 const TimeAndDateSchema = secondarySchemas.TimeAndDateSchema;
 const CoursesOfferedSchema = secondarySchemas.CoursesOfferedSchema;
+const DiscountSchema = secondarySchemas.DiscountSchema;
 const ViewsOrHitsSchema = require('../views-or-hits-schema');
 const CourseSchema = require('./course-and-batch');
 const StudentSchema = require('../schemas/student');
@@ -53,6 +54,7 @@ const TuitionSchema = new Schema({
 	reviews: [ReviewSchema],
 	coursesOffered: [CoursesOfferedSchema],
 	courses: [CourseSchema],
+	discounts: [DiscountSchema],
 	forums: [ForumSchama],
 	views: ViewsOrHitsSchema,
 	hits: ViewsOrHitsSchema,
