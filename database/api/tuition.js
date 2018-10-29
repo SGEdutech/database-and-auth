@@ -793,7 +793,7 @@ route.get('/discount/claimed', (req, res) => {
 	});
 
 	Tuition.aggregate([
-		{ match: { $in: claimedTuitions } },
+		{ $match: { $in: claimedTuitions } },
 		{ $unwind: '$discounts' },
 		{ $addFields: { 'discounts.tuitionId': '$_id' } },
 		{ $replaceRoot: { newRoot: 'discounts' } }
