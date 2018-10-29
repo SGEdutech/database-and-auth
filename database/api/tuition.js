@@ -796,7 +796,7 @@ route.get('/discount/claimed', (req, res) => {
 		{ $match: { _id: { $in: claimedTuitions } } },
 		{ $unwind: '$discounts' },
 		{ $addFields: { 'discounts.tuitionId': '$_id' } },
-		{ $replaceRoot: { newRoot: 'discounts' } }
+		{ $replaceRoot: { newRoot: '$discounts' } }
 	]).then(discounts => res.send(discounts)).catch(err => console.error(err));
 });
 
