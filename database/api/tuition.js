@@ -261,11 +261,35 @@ route.get('/:tuitionId/student', (req, res) => {
 
 route.post('/:tuitionId/student', (req, res) => {
 	const { tuitionId } = req.params;
-	const _id = new ObjectId();
-	req.body._id = _id;
+	let isArray;
+	const idsOfAddedStudents = [];
+	let idOfStudentToBeAdded;
+	let updateQuery;
 
-	Tuition.findByIdAndUpdate(tuitionId, { $push: { students: req.body } }, { new: true })
-		.then(tuition => res.send(_.find(tuition.students, { _id }))).catch(err => console.error(err));
+	if (Array.isArray(req.body.students)) {
+		req.body.students.forEach(studentToBeAdded => {
+			const _id = new ObjectId();
+			studentToBeAdded._id = _id;
+			idsOfAddedStudents.push(_id.toString());
+		});
+		isArray = true;
+		updateQuery = { $push: { students: { $each: req.body.students } } };
+	} else {
+		isArray = false;
+		updateQuery = { $push: { students: req.body } };
+		const _id = new ObjectId();
+		idOfStudentToBeAdded = _id;
+		req.body._id = _id;
+	}
+
+	Tuition.findByIdAndUpdate(tuitionId, updateQuery, { new: true })
+		.then(tuition => {
+			if (isArray) {
+				res.send(tuition.students.filter(student => idsOfAddedStudents.indexOf(student._id.toString()) !== -1));
+			} else {
+				res.send(_.find(tuition.students, { _id: idOfStudentToBeAdded }))
+			}
+		}).catch(err => console.error(err));
 });
 
 route.put('/:tuitionId/student/:studentId', (req, res) => {
