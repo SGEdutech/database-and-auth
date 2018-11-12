@@ -268,14 +268,25 @@ route.post('/:tuitionId/student', (req, res) => {
 	let options;
 
 	if (Array.isArray(req.body.students)) {
+		isArray = true;
 		req.body.students.forEach(studentToBeAdded => {
 			const _id = new ObjectId();
 			studentToBeAdded._id = _id;
 			idsOfAddedStudents.push(_id.toString());
 		});
-		isArray = true;
-		updateQuery = { $push: { students: { $each: req.body.students } } };
-		options = { new: true };
+
+		if (req.body.batchInfo) {
+			if (req.body.batchInfo.courseId === undefined) throw new Error('Course Id not provided');
+			if (req.body.batchInfo.batchId === undefined) throw new Error('Course Id not provided');
+
+			const { courseId, batchId } = req.body.batchInfo;
+
+			updateQuery = { $push: { 'students': { $each: req.body.students }, 'courses.$[i].batches.$[j].students': { $each: idsOfAddedStudents } } };
+			options = { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true }
+		} else {
+			updateQuery = { $push: { students: { $each: req.body.students } } };
+			options = { new: true };
+		}
 	} else {
 		isArray = false;
 		const _id = new ObjectId();
