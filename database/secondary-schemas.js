@@ -62,7 +62,8 @@ const CoursesOfferedSchema = new Schema({
 
 const DiscountSchema = new Schema({
 	code: String,
-	amount: Number
+	amount: Number,
+	isPercent: { type: Boolean, default: false }
 });
 
 exports = module.exports = {

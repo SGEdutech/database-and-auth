@@ -265,6 +265,7 @@ route.post('/:tuitionId/student', (req, res) => {
 	const idsOfAddedStudents = [];
 	let idOfStudentToBeAdded;
 	let updateQuery;
+	let options;
 
 	if (Array.isArray(req.body.students)) {
 		req.body.students.forEach(studentToBeAdded => {
@@ -274,15 +275,28 @@ route.post('/:tuitionId/student', (req, res) => {
 		});
 		isArray = true;
 		updateQuery = { $push: { students: { $each: req.body.students } } };
+		options = { new: true };
 	} else {
 		isArray = false;
-		updateQuery = { $push: { students: req.body } };
 		const _id = new ObjectId();
 		idOfStudentToBeAdded = _id;
 		req.body._id = _id;
+
+		if (req.body.batchInfo) {
+			if (req.body.batchInfo.courseId === undefined) throw new Error('Course Id not provided');
+			if (req.body.batchInfo.batchId === undefined) throw new Error('Course Id not provided');
+
+			const { courseId, batchId } = req.body.batchInfo;
+
+			updateQuery = { $push: { 'students': req.body, 'courses.$[i].batches.$[j].students': _id } };
+			options = { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true }
+		} else {
+			updateQuery = { $push: { 'students': req.body } };
+			options = { new: true };
+		}
 	}
 
-	Tuition.findByIdAndUpdate(tuitionId, updateQuery, { new: true })
+	Tuition.findByIdAndUpdate(tuitionId, updateQuery, options)
 		.then(tuition => {
 			if (isArray) {
 				res.send(tuition.students.filter(student => idsOfAddedStudents.indexOf(student._id.toString()) !== -1));
@@ -305,7 +319,7 @@ route.put('/:tuitionId/student/:studentId', (req, res) => {
 route.delete('/:tuitionId/student/:studentId', (req, res) => {
 	const { tuitionId, studentId } = req.params;
 
-	Tuition.findByIdAndUpdate(tuitionId, { $pull: { students: { _id: ObjectId(studentId) } } })
+	Tuition.findByIdAndUpdate(tuitionId, { $pull: { 'students': { _id: ObjectId(studentId) }, 'courses.$[].batches.$[].students': studentId } })
 		.then(tuition => res.send(_.find(tuition.students, { _id: ObjectId(studentId) })))
 		.catch(err => console.error(err));
 })
@@ -840,6 +854,7 @@ route.post('/:tuitionId/discount', (req, res) => {
 	const { tuitionId } = req.params;
 	const _id = new ObjectId();
 	req.body._id = _id
+	console.log(req.body);
 
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { discounts: req.body } }, { new: true })
 		.then(tuition => res.send(_.find(tuition.discounts, { _id })))
