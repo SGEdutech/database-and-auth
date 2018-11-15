@@ -5,7 +5,7 @@ const { required, select } = require('../../config.json').MONGO;
 const ForumComments = new Schema({
 	userEmail: String,
 	content: String,
-	createdAt: Date.now()
+	createdAt: { type: Date, default: Date.now() }
 });
 
 const ForumSchema = new Schema({

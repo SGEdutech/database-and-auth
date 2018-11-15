@@ -333,7 +333,14 @@ route.delete('/:tuitionId/student/:studentId', (req, res) => {
 	Tuition.findByIdAndUpdate(tuitionId, { $pull: { 'students': { _id: ObjectId(studentId) }, 'courses.$[].batches.$[].students': studentId } })
 		.then(tuition => res.send(_.find(tuition.students, { _id: ObjectId(studentId) })))
 		.catch(err => console.error(err));
-})
+});
+route.delete('/:tuitionId/student/all', (req, res) => {
+	const { tuitionId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { students: [] })
+		.then(tuition => res.send(tuition.students))
+		.catch(err => console.error(err))
+});
 
 // Courses
 route.get('/:tuitionId/course/all', (req, res) => {
