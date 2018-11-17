@@ -4,13 +4,12 @@ const { required } = require('../../config.json').MONGO;
 
 const PaymentSchema = new Schema({
 	courseId: Schema.Types.ObjectId,
-	batchId: Schema.Types.ObjectId,
 	discountAmount: Number,
 	discountReason: String,
 	feeCollected: Number,
 	modeOfPayment: String,
 	bank: String,
-	dateOfCheck: String,
+	dateOfCheck: Date,
 	checkNumber: String,
 	cardNumber: String,
 	transactionId: String,

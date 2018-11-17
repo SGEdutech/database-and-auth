@@ -266,6 +266,7 @@ route.post('/:tuitionId/student', (req, res) => {
 	let idOfStudentToBeAdded;
 	let updateQuery;
 	let options;
+	console.log(req.body);
 
 	if (Array.isArray(req.body.students)) {
 		isArray = true;
