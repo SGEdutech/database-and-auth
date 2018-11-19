@@ -391,7 +391,7 @@ route.put('/:tuitionId/student/:studentId/payment/:paymentId', (req, res) => {
 	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(studentId) }, { 'j._id': ObjectId(paymentId) }], new: true })
 		.then(tuition => {
 			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
-			res.send(_.find(student.payments, { _id: ObjectId(paymentId) }))
+			res.send(_.find(student.payments, { _id: ObjectId(paymentId) }));
 		}).catch(err => console.error(err));
 });
 
@@ -410,6 +410,82 @@ route.delete('/:tuitionId/student/:studentId/payment/:paymentId', (req, res) => 
 			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
 			res.send(_.find(student.payments, { _id: ObjectId(paymentId) }));
 		}).catch(err => console.error(err));
+});
+
+// Student payment installment
+route.get('/:tuitionId/student/:studentId/payment/:paymentId/installment/all', (req, res) => {
+	const { tuitionId, studentId, paymentId } = req.params;
+
+	Tuition.aggregate([
+		{ $match: { _id: ObjectId(tuitionId) } },
+		{ $project: { students: 1 } },
+		{ $unwind: '$students' },
+		{ $match: { 'students._id': ObjectId(studentId) } },
+		{ $unwind: '$students.payments' },
+		{ $match: { 'students.payments._id': ObjectId(paymentId) } },
+		{ $unwind: '$students.payments.installments' },
+		{ $replaceRoot: { newRoot: '$students.payments.installments' } }
+	]).then(data => res.send(data)).catch(err => console.error(err))
+});
+
+route.get('/:tuitionId/student/:studentId/payment/:paymentId/installment/:installmentId', (req, res) => {
+	const { tuitionId, studentId, paymentId, installmentId } = req.params;
+
+	Tuition.aggregate([
+		{ $match: { _id: ObjectId(tuitionId) } },
+		{ $project: { students: 1 } },
+		{ $unwind: '$students' },
+		{ $match: { 'students._id': ObjectId(studentId) } },
+		{ $unwind: '$students.payments' },
+		{ $match: { 'students.payments._id': ObjectId(paymentId) } },
+		{ $unwind: '$students.payments.installments' },
+		{ $match: { 'students.payments.installments._id': ObjectId(installmentId) } },
+		{ $replaceRoot: { newRoot: '$students.payments.installments' } }
+	]).then(data => res.send(data)).catch(err => console.error(err))
+});
+
+route.post('/:tuitionId/student/:studentId/payment/:paymentId/installment', (req, res) => {
+	const { tuitionId, studentId, paymentId } = req.params;
+	const _id = new ObjectId();
+	req.body._id = _id;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'students.$[i].payments.$[j].installments': req.body } }, { arrayFilters: [{ 'i._id': ObjectId(studentId) }, { 'j._id': ObjectId(paymentId) }], new: true })
+		.then(tuition => {
+			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
+			const payment = _.find(student.payments, { _id: ObjectId(paymentId) });
+			res.send(_.find(payment.installments, { _id }));
+		}).catch(err => console.error(err))
+});
+
+route.put('/:tuitionId/student/:studentId/payment/:paymentId/installment/:installmentId', (req, res) => {
+	const { tuitionId, studentId, paymentId, installmentId } = req.params;
+
+	prependToObjKey(req.body, 'students.$[i].payments.$[j].installments.$[k].');
+
+	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(studentId) }, { 'j._id': ObjectId(paymentId) }, { 'k._id': ObjectId(installmentId) }], new: true })
+		.then(tuition => {
+			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
+			const payment = _.find(student.payments, { _id: ObjectId(paymentId) });
+			res.send(_.find(payment.installments, { _id: ObjectId(installmentId) }));
+		}).catch(err => console.error(err));
+});
+
+route.delete('/:tuitionId/student/:studentId/payment/:paymentId/installment/all', (req, res) => {
+	const { tuitionId, studentId, paymentId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { 'students.$[i].payments.$[j].installments': [] }, { arrayFilters: [{ 'i._id': ObjectId(studentId) }, { 'j._id': ObjectId(paymentId) }] })
+		.then(() => res.send([])).catch(err => console.error(err))
+});
+
+route.delete('/:tuitionId/student/:studentId/payment/:paymentId/installment/:installmentId', (req, res) => {
+	const { tuitionId, studentId, paymentId, installmentId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $pull: { 'students.$[i].payments.$[j].installments': { _id: ObjectId(installmentId) } } }, { arrayFilters: [{ 'i._id': ObjectId(studentId) }, { 'j._id': ObjectId(paymentId) }] })
+		.then(tuition => {
+			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
+			const payment = _.find(student.payments, { _id: ObjectId(paymentId) });
+			res.send(_.find(payment.installments, { _id: ObjectId(installmentId) }));
+		}).catch(err => console.error(err))
 });
 
 // Courses
