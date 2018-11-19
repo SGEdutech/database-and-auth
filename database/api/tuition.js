@@ -266,7 +266,6 @@ route.post('/:tuitionId/student', (req, res) => {
 	let idOfStudentToBeAdded;
 	let updateQuery;
 	let options;
-	console.log(req.body);
 
 	if (Array.isArray(req.body.students)) {
 		isArray = true;
@@ -874,7 +873,6 @@ route.post('/:tuitionId/discount', (req, res) => {
 	const { tuitionId } = req.params;
 	const _id = new ObjectId();
 	req.body._id = _id
-	console.log(req.body);
 
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { discounts: req.body } }, { new: true })
 		.then(tuition => res.send(_.find(tuition.discounts, { _id })))

@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const { required } = require('../../config.json').MONGO;
 
 const PaymentSchema = new Schema({
-	courseId: Schema.Types.ObjectId,
+	courseFee: Schema.Types.ObjectId,
 	discountAmount: Number,
 	discountReason: String,
 	feeCollected: Number,
@@ -18,9 +18,9 @@ const PaymentSchema = new Schema({
 
 const StudentSchema = new Schema({
 	eduatlasId: String,
-	rollNumber: { type: String, required },
-	name: { type: String, required },
-	email: { type: String, required },
+	rollNumber: { type: String, lowercase: true, required },
+	name: { type: String, lowercase: true, required },
+	email: { type: String, lowercase: true, required },
 	address: String,
 	contactNumber: String,
 	payments: [PaymentSchema]

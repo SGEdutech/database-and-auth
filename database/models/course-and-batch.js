@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const { required } = require('../../config.json').MONGO;
 
 const ScheduleSchema = new Schema({
-	date: Date,
+	date: { type: Date, required },
 	fromTime: Number,
 	toTime: Number,
 	topic: { type: String, required },
@@ -12,14 +12,14 @@ const ScheduleSchema = new Schema({
 });
 
 const BatchSchema = new Schema({
-	code: String,
+	code: { type: String, lowercase: true, required },
 	description: String,
 	students: [Schema.Types.ObjectId],
 	schedules: [ScheduleSchema]
 });
 
 const CourseSchema = new Schema({
-	code: { type: String, required },
+	code: { type: String, lowercase: true, required },
 	fees: { type: Number, required },
 	gstPercentage: { type: Number, min: 0, max: 100 },
 	description: String,

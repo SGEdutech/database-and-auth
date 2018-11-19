@@ -11,7 +11,6 @@ route.get('/claimed', (req, res) => {
 	req.user.claims.forEach(listingInfo => {
 		if (listingInfo.listingCategory === 'tuition') claimedTuitions.push(ObjectId(listingInfo.listingId));
 	});
-	console.log(claimedTuitions);
 
 	Notification.aggregate([
 		{ $match: { senderId: { $in: claimedTuitions } } }
