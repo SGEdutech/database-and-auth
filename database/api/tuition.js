@@ -533,16 +533,6 @@ route.get('/:tuitionId/student/:studentId/payment/all', (req, res) => {
 		}).catch(err => console.error(err))
 });
 
-route.get('/:tuitionId/student/:studentId/payment/all', (req, res) => {
-	const { tuitionId, studentId } = req.params;
-
-	Tuition.findById(tuitionId)
-		.then(tuition => {
-			const student = _.find(tuition.students, { _id: studentId });
-			res.send(student.payments)
-		}).catch(err => console.error(err))
-});
-
 route.get('/:tuitionId/student/:studentId/payment/:paymentId', (req, res) => {
 	const { tuitionId, studentId, paymentId } = req.params;
 
