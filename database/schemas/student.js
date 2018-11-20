@@ -15,6 +15,7 @@ const InstallmentSchema = new Schema({
 });
 
 const PaymentSchema = new Schema({
+	courseName: String,
 	courseFee: Number,
 	discountAmount: Number,
 	discountReason: String,
