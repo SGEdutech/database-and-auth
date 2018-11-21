@@ -10,7 +10,6 @@ const InstallmentSchema = new Schema({
 	chequeNumber: String,
 	cardNumber: String,
 	transactionId: String,
-	nextInstallment: Date,
 	createdAt: { type: Date, default: Date.now }
 });
 
