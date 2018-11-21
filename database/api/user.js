@@ -72,7 +72,7 @@ route.get('/classes', (req, res) => {
 	]).then(data => res.send(data)).catch(err => console.error(err));
 });
 
-route.get('/payment', (req, res) => {
+route.get('/payments', (req, res) => {
 	if (req.user === undefined) throw new Error('User not logged in');
 
 	Tuition.aggregate([
