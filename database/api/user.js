@@ -81,6 +81,7 @@ route.get('/payments', (req, res) => {
 		{ $unwind: '$students' },
 		{ $match: { 'students.email': req.user.primaryEmail } },
 		{ $unwind: '$students.payments' },
+		{ $addFields: { 'students.payments.tuitionId': '$_id' } },
 		{ $replaceRoot: { newRoot: '$students.payments' } }
 	]).then(payment => res.send(payment)).catch(err => console.error(err));
 });
