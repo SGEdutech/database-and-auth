@@ -12,6 +12,7 @@ const tuitionDbFunctions = new DbAPIClass(Tuition);
 const promotedHomeDbFunctions = new DbAPIClass(PromotedHome);
 const promotedSearchDbFunctions = new DbAPIClass(PromotedSearch);
 const promotedRelatedDbFunctions = new DbAPIClass(PromotedRelated);
+const sendMail = require('../../scripts/send-mail');
 
 function getPromotedDbFunAndDemandedAdvertisements(queryObject) {
 	let promotedDbFunction;
@@ -982,6 +983,28 @@ route.delete('/:tuitionId/discount/:discountId', (req, res) => {
 	Tuition.findByIdAndUpdate(tuitionId, { $pull: { discounts: { _id: ObjectId(discountId) } } })
 		.then(tuition => res.send(_.find(tuition.discounts, { _id: ObjectId(discountId) })))
 		.catch(err => console.error(err))
+});
+
+route.post('/:tuitionId/mail', (req, res) => {
+	const { tuitionId } = req.params;
+	let { name, phoneNumber, email, message } = req.body;
+
+	name = name || 'not provided';
+	phoneNumber = phoneNumber || 'not provided';
+	email = email || 'not provided';
+	message = message || 'not provided';
+
+	const mailTemplate = `<p>${name} wants to connect with you</p>
+	<p>Phone Number- ${phoneNumber}</p>
+	<p>Email- ${email}</p>
+	<p>Message- ${message}</p>
+	`;
+
+	Tuition.findById(tuitionId).select('email').then(tuition => {
+		const emailOfTuition = tuition.email;
+		sendMail(emailOfTuition, 'Lead', mailTemplate);
+		res.end();
+	});
 });
 
 module.exports = route;
