@@ -78,10 +78,10 @@ route.get('/registeration-info', (req, res) => {
 
 	Tuition.aggregate([
 		{ $match: { students: { $elemMatch: { email: req.user.primaryEmail } } } },
-		{ $project: { students: 1 } },
+		{ $project: { students: 1, name: 1 } },
 		{ $unwind: '$students' },
 		{ $match: { 'students.email': req.user.primaryEmail } },
-		{ $addFields: { 'students.tuitionId': '$_id' } },
+		{ $addFields: { 'students.tuitionId': '$_id', 'students.tuitionName': '$name' } },
 		{ $replaceRoot: { newRoot: '$students' } }
 	]).then(studentDetails => res.send(studentDetails)).catch(err => console.error(err));
 })
