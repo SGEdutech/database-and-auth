@@ -14,7 +14,7 @@ const InstallmentSchema = new Schema({
 });
 
 const PaymentSchema = new Schema({
-	courseId: { type: String, lowercase: true },
+	courseId: { type: Schema.Types.ObjectId, lowercase: true },
 	courseFee: { type: Number, required },
 	discountAmount: Number,
 	discountReason: String,
