@@ -18,11 +18,7 @@ const ImportantDateSchema = new Schema({ title: String, date: Date });
 const ReviewSchema = new Schema({
 	likes: { type: Number, default: 0 },
 	rating: { type: Number, required: true },
-	owner: {
-		type: String,
-		unique: true,
-		sparse: true
-	},
+	owner: Schema.Types.ObjectId,
 	description: String
 });
 
