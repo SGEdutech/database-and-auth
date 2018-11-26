@@ -81,8 +81,9 @@ route.get('/registeration-info', (req, res) => {
 		{ $project: { students: 1 } },
 		{ $unwind: '$students' },
 		{ $match: { 'students.email': req.user.primaryEmail } },
+		{ $addFields: { 'students.tuitionId': '$_id' } },
 		{ $replaceRoot: { newRoot: '$students' } }
-	]).then(studentDetails => res.send(studentDetails[0])).catch(err => console.error(err));
+	]).then(studentDetails => res.send(studentDetails)).catch(err => console.error(err));
 })
 
 route.get('/payments', (req, res) => {
