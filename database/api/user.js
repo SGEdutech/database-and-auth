@@ -72,6 +72,19 @@ route.get('/classes', (req, res) => {
 	]).then(data => res.send(data)).catch(err => console.error(err));
 });
 
+// FIXME: Lot of unnessary information
+route.get('/registeration-info', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	Tuition.aggregate([
+		{ $match: { students: { $elemMatch: { email: req.user.primaryEmail } } } },
+		{ $project: { students: 1 } },
+		{ $unwind: '$students' },
+		{ $match: { 'students.email': req.user.primaryEmail } },
+		{ $replaceRoot: { newRoot: '$students' } }
+	]).then(studentDetails => res.send(studentDetails[0])).catch(err => console.error(err));
+})
+
 route.get('/payments', (req, res) => {
 	if (req.user === undefined) throw new Error('User not logged in');
 

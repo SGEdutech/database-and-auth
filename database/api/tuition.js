@@ -375,7 +375,7 @@ route.post('/:tuitionId/student/:studentId/payment', (req, res) => {
 	const { tuitionId, studentId } = req.params;
 	const _id = new ObjectId();
 	req.body._id = _id;
-	console.log(req.body);
+
 	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), students: { $elemMatch: { _id: studentId } } }, { $push: { 'students.$.payments': req.body } }, { new: true })
 		.then(tuition => {
 			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
