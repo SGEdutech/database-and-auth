@@ -38,14 +38,13 @@ route.get('/user-notification', (req, res) => {
 });
 
 route.post('/', (req, res) => {
-
 	if (req.body.receivers === undefined) throw new Error('Recievers not provided');
 	if (Array.isArray(req.body.receivers) === false) throw new Error('Recievers is not an array');
 	req.body.receivers = req.body.receivers.map(reciever => {
 		return { userEmail: reciever };
 	});
 
-	Notification.create(req.body).then(data => res.send(data)).catch(err => console.error(err));
+	Notification.create(req.body).then(newNotification => res.send(newNotification)).catch(err => console.error(err));
 });
 
 route.put('/user-read', (req, res) => {
