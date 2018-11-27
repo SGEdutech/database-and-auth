@@ -311,7 +311,8 @@ route.post('/:tuitionId/student', (req, res) => {
 	Tuition.findByIdAndUpdate(tuitionId, updateQuery, options)
 		.then(tuition => {
 			// FIXME: Make email templates file
-			const emailTemplate = `<p>${tuition.name} has added you in their study monitor</p>`;
+			const emailTemplate = `<p>${tuition.name} has added you in their study monitor</p>
+			<p>To view login or signup in <a href="https://eduatlas.com">Eduatlas</a>`;
 			if (isArray) {
 				const studentsAdded = tuition.students.filter(student => idsOfAddedStudents.indexOf(student._id.toString()) !== -1);
 				res.send(studentsAdded);
