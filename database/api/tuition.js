@@ -13,6 +13,7 @@ const promotedHomeDbFunctions = new DbAPIClass(PromotedHome);
 const promotedSearchDbFunctions = new DbAPIClass(PromotedSearch);
 const promotedRelatedDbFunctions = new DbAPIClass(PromotedRelated);
 const sendMail = require('../../scripts/send-mail');
+const { prod } = require('../../config.json');
 
 function getPromotedDbFunAndDemandedAdvertisements(queryObject) {
 	let promotedDbFunction;
@@ -317,12 +318,12 @@ route.post('/:tuitionId/student', (req, res) => {
 				const studentsAdded = tuition.students.filter(student => idsOfAddedStudents.indexOf(student._id.toString()) !== -1);
 				res.send(studentsAdded);
 				const emailIdsOfStudentsAdded = studentsAdded.map(student => student.email);
-				sendMail(emailIdsOfStudentsAdded, 'Add: Study Monitor', emailTemplate);
+				if (prod) sendMail(emailIdsOfStudentsAdded, 'Add: Study Monitor', emailTemplate);
 			} else {
 				const studentAdded = _.find(tuition.students, { _id: idOfStudentToBeAdded });
 				res.send(studentAdded);
 				const studentEmail = studentAdded.email;
-				sendMail(studentEmail, 'Add: Study Monitor', emailTemplate);
+				if (prod) sendMail(studentEmail, 'Add: Study Monitor', emailTemplate);
 			}
 		}).catch(err => console.error(err));
 });
@@ -354,7 +355,7 @@ route.delete('/:tuitionId/student/:studentId', (req, res) => {
 			const emailTemplate = `<p>${tuition.name} has removed you from their study monitor</p>`;
 			const studentDeleted = _.find(tuition.students, { _id: ObjectId(studentId) });
 			res.send(studentDeleted);
-			sendMail(studentDeleted.email, 'Remove: Study Monitor', emailTemplate);
+			if (prod) sendMail(studentDeleted.email, 'Remove: Study Monitor', emailTemplate);
 		}).catch(err => console.error(err));
 });
 
