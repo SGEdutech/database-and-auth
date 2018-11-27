@@ -24,6 +24,7 @@ const {
 const { required, select } = require('../../config.json').MONGO;
 
 const TuitionSchema = new Schema({
+	// FIXME: Name must be saved in lowercase and parsed later
 	name: { type: String, required },
 	category: { type: String, required },
 	fromAge: { type: Number, min: [0, 'Age can\'t be negative'], max: [100, 'Too old to attend tuition'] },

@@ -228,7 +228,7 @@ route.delete('/:_id', (req, res) => {
 		.catch(err => console.error(err));
 });
 
-// Get all students
+// Get all claimed students
 route.get('/student/claimed', (req, res) => {
 	if (req.body === undefined) throw new Error('User not logged in!');
 
@@ -310,10 +310,18 @@ route.post('/:tuitionId/student', (req, res) => {
 
 	Tuition.findByIdAndUpdate(tuitionId, updateQuery, options)
 		.then(tuition => {
+			// FIXME: Make email templates file
+			const emailTemplate = `<p>${tuition.name} has added you in their study monitor</p>`;
 			if (isArray) {
-				res.send(tuition.students.filter(student => idsOfAddedStudents.indexOf(student._id.toString()) !== -1));
+				const studentsAdded = tuition.students.filter(student => idsOfAddedStudents.indexOf(student._id.toString()) !== -1);
+				res.send(studentsAdded);
+				const emailIdsOfStudentsAdded = studentsAdded.map(student => student.email);
+				sendMail(emailIdsOfStudentsAdded, 'Add: Study Monitor', emailTemplate);
 			} else {
-				res.send(_.find(tuition.students, { _id: idOfStudentToBeAdded }))
+				const studentAdded = _.find(tuition.students, { _id: idOfStudentToBeAdded });
+				res.send(studentAdded);
+				const studentEmail = studentAdded.email;
+				sendMail(studentEmail, 'Add: Study Monitor', emailTemplate);
 			}
 		}).catch(err => console.error(err));
 });
