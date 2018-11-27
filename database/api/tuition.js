@@ -348,8 +348,13 @@ route.delete('/:tuitionId/student/:studentId', (req, res) => {
 	const { tuitionId, studentId } = req.params;
 
 	Tuition.findByIdAndUpdate(tuitionId, { $pull: { 'students': { _id: ObjectId(studentId) }, 'courses.$[].batches.$[].students': studentId } })
-		.then(tuition => res.send(_.find(tuition.students, { _id: ObjectId(studentId) })))
-		.catch(err => console.error(err));
+		.then(tuition => {
+			// FIXME: Make seperate files for templates
+			const emailTemplate = `<p>${tuition.name} has removed you from their study monitor</p>`;
+			const studentDeleted = _.find(tuition.students, { _id: ObjectId(studentId) });
+			res.send(studentDeleted);
+			sendMail(studentDeleted.email, 'Remove: Study Monitor', emailTemplate);
+		}).catch(err => console.error(err));
 });
 
 // Student Payment
