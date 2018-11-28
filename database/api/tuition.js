@@ -312,8 +312,8 @@ route.post('/:tuitionId/student', (req, res) => {
 	Tuition.findByIdAndUpdate(tuitionId, updateQuery, options)
 		.then(tuition => {
 			// FIXME: Make email templates file
-			const emailTemplate = `<p>${tuition.name} has added you in their study monitor</p>
-			<p>To view login or signup in <a href="https://eduatlas.com">Eduatlas</a>`;
+			const emailTemplate = `<p>${tuition.name} has added you in their study monitor. Login in to <a href="https://eduatlas.com">Eduatlas</a> to get updates and notifications from your institute.</p>
+			<p>To login or signup for FREE click here <a href="https://eduatlas.com">Eduatlas</a></p>`;
 			if (isArray) {
 				const studentsAdded = tuition.students.filter(student => idsOfAddedStudents.indexOf(student._id.toString()) !== -1);
 				res.send(studentsAdded);
@@ -352,8 +352,11 @@ route.delete('/:tuitionId/student/:studentId', (req, res) => {
 	Tuition.findByIdAndUpdate(tuitionId, { $pull: { 'students': { _id: ObjectId(studentId) }, 'courses.$[].batches.$[].students': studentId } })
 		.then(tuition => {
 			// FIXME: Make seperate files for templates
-			const emailTemplate = `<p>${tuition.name} has removed you from their study monitor</p>`;
 			const studentDeleted = _.find(tuition.students, { _id: ObjectId(studentId) });
+			const emailTemplate = `<p>Hi ${studentDeleted.name}</p>
+			<p>${tuition.name} has removed you from their study monitor. If this is a mistake, please get in touch with your institution.</p>
+			<p>Regards,</p>
+			<p>Team Eduatlas.</p>`;
 			res.send(studentDeleted);
 			if (prod) sendMail(studentDeleted.email, 'Remove: Study Monitor', emailTemplate);
 		}).catch(err => console.error(err));
