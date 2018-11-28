@@ -15,6 +15,12 @@ const promotedRelatedDbFunctions = new DbAPIClass(PromotedRelated);
 const sendMail = require('../../scripts/send-mail');
 const { prod } = require('../../config.json');
 
+function titleCase(str) {
+	const splitStr = str.toLowerCase().split(' ');
+	splitStr.forEach((word, index) => splitStr[index] = splitStr[index].charAt(0).toUpperCase() + splitStr[index].substring(1));
+	return splitStr.join(' ');
+}
+
 function getPromotedDbFunAndDemandedAdvertisements(queryObject) {
 	let promotedDbFunction;
 	let demandedAdvertisements = 0;
@@ -353,7 +359,8 @@ route.delete('/:tuitionId/student/:studentId', (req, res) => {
 		.then(tuition => {
 			// FIXME: Make seperate files for templates
 			const studentDeleted = _.find(tuition.students, { _id: ObjectId(studentId) });
-			const emailTemplate = `<p>Hi ${studentDeleted.name}</p>
+			const studentName = titleCase(studentDeleted.name);
+			const emailTemplate = `<p>Hi <span style="text-transform: capitalize">${studentDeleted.name}</span></p>
 			<p>${tuition.name} has removed you from their study monitor. If this is a mistake, please get in touch with your institution.</p>
 			<p>Regards,</p>
 			<p>Team Eduatlas.</p>`;
