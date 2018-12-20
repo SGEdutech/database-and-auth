@@ -107,11 +107,27 @@ function notificationMiddleware(req, res, next) {
 	uploadNotification(req, res, err => err ? console.error(err) : next());
 }
 
+const resourcesStorage = multer.diskStorage({
+	destination: './resources/userPics',
+	filename: nameThatBitch
+});
+
+const uploadResources = multer({
+	storage: resourcesStorage,
+	// limits: {fileSize: 1024 * 1024},  // Unit Bytes
+	fileFilter: checkFileType
+}).any();
+
+function resourcesMiddleware(req, res, next) {
+	uploadResources(req, res, err => err ? console.error(err) : next());
+}
+
 exports = module.exports = {
 	eventPicsMiddleware,
 	schoolPicsMiddleware,
 	tuitionPicsMiddleware,
 	userCoverPicMiddleware,
 	solutionPdfMiddleware,
-	notificationMiddleware
+	notificationMiddleware,
+	resourcesMiddleware
 };
