@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const { required } = require('../config.json').MONGO;
 
 const ContactSchema = new Schema({
 	name: String,
@@ -17,7 +18,7 @@ const ImportantDateSchema = new Schema({ title: String, date: Date });
 
 const ReviewSchema = new Schema({
 	likes: { type: Number, default: 0 },
-	rating: { type: Number, required: true },
+	rating: { type: Number, required },
 	owner: Schema.Types.ObjectId,
 	description: String
 });
@@ -62,6 +63,12 @@ const DiscountSchema = new Schema({
 	isPercent: { type: Boolean, default: false }
 });
 
+const ResourceSchema = new Schema({
+	path: { type: String, required },
+	topic: { type: String, required },
+	description: String
+});
+
 exports = module.exports = {
 	ContactSchema,
 	ReviewsOwnedSchema,
@@ -73,5 +80,6 @@ exports = module.exports = {
 	TimeAndDateSchema,
 	CoursesOfferedSchema,
 	ClaimSchema,
-	DiscountSchema
+	DiscountSchema,
+	ResourceSchema
 };

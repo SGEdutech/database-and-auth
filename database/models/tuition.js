@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
-const secondarySchemas = require('../secondary-schemas');
-const ReviewSchema = secondarySchemas.ReviewSchema;
-const TeamSchema = secondarySchemas.TeamSchema;
-const FacilitiesAndBraggingSchema = secondarySchemas.FacilitiesAndBraggingSchema;
-const TimeAndDateSchema = secondarySchemas.TimeAndDateSchema;
-const CoursesOfferedSchema = secondarySchemas.CoursesOfferedSchema;
-const DiscountSchema = secondarySchemas.DiscountSchema;
+const {
+	ReviewSchema,
+	TeamSchema,
+	FacilitiesAndBraggingSchema,
+	TimeAndDateSchema,
+	CoursesOfferedSchema,
+	DiscountSchema,
+	ResourceSchema
+} = require('../secondary-schemas');
 const ViewsOrHitsSchema = require('../views-or-hits-schema');
 const CourseSchema = require('./course-and-batch');
 const StudentSchema = require('../schemas/student');
@@ -57,6 +58,7 @@ const TuitionSchema = new Schema({
 	courses: [CourseSchema],
 	discounts: [DiscountSchema],
 	forums: [ForumSchama],
+	resources: [ResourceSchema],
 	views: ViewsOrHitsSchema,
 	hits: ViewsOrHitsSchema,
 	bookmarks: Number,
