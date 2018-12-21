@@ -6,7 +6,7 @@ function nameThatBitch(req, file, cb) {
 	cb(null, fileNameInfo.name + '-' + Date.now() + fileNameInfo.ext);
 }
 
-function checkFileType(req, file, cb) {
+function checkImageFileType(req, file, cb) {
 	const allowedFileTypes = /jpeg|jpg|png|gif|svg/i;
 	const isExtensionValid = allowedFileTypes.test(path.extname(file.originalname));
 	const isMimeValid = allowedFileTypes.test(file.mimetype);
@@ -25,7 +25,7 @@ const eventPicsStorage = multer.diskStorage({
 const uploadEventPics = multer({
 	storage: eventPicsStorage,
 	// limits: {fileSize: 1024 * 1024},  // Unit Bytes
-	fileFilter: checkFileType
+	fileFilter: checkImageFileType
 }).any();
 
 function eventPicsMiddleware(req, res, next) {
@@ -40,7 +40,7 @@ const schoolPicsStorage = multer.diskStorage({
 const uploadSchoolPics = multer({
 	storage: schoolPicsStorage,
 	// limits: {fileSize: 1024 * 1024},  // Unit Bytes
-	fileFilter: checkFileType
+	fileFilter: checkImageFileType
 }).any();
 
 function schoolPicsMiddleware(req, res, next) {
@@ -55,7 +55,7 @@ const tuitionPicsStorage = multer.diskStorage({
 const uploadTuitionPics = multer({
 	storage: tuitionPicsStorage,
 	// limits: {fileSize: 1024 * 1024},  // Unit Bytes
-	fileFilter: checkFileType
+	fileFilter: checkImageFileType
 }).any();
 
 function tuitionPicsMiddleware(req, res, next) {
@@ -70,7 +70,7 @@ const userPicsStorage = multer.diskStorage({
 const uploadUserPics = multer({
 	storage: userPicsStorage,
 	// limits: {fileSize: 1024 * 1024},  // Unit Bytes
-	fileFilter: checkFileType
+	fileFilter: checkImageFileType
 }).any();
 
 function userCoverPicMiddleware(req, res, next) {
@@ -108,14 +108,13 @@ function notificationMiddleware(req, res, next) {
 }
 
 const resourcesStorage = multer.diskStorage({
-	destination: './resources/userPics',
+	destination: './images/resources',
 	filename: nameThatBitch
 });
 
 const uploadResources = multer({
-	storage: resourcesStorage,
+	storage: resourcesStorage
 	// limits: {fileSize: 1024 * 1024},  // Unit Bytes
-	fileFilter: checkFileType
 }).any();
 
 function resourcesMiddleware(req, res, next) {
