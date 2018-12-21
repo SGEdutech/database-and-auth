@@ -5,3 +5,4 @@ package-lock.json
 database/patch.js
 mail-config.json
 \.vscode/
+images

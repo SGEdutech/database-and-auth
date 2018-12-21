@@ -1,7 +1,9 @@
 const route = require('express').Router();
+const path = require('path');
 const { ObjectId } = require('mongoose').Types;
 const _ = require('lodash');
 const escapeRegex = require('../../scripts/escape-regex');
+const { deleteThisShit } = require('../../scripts/fsunlink.js');
 const DbAPIClass = require('../api-functions');
 const Tuition = require('../models/tuition');
 const Notification = require('../models/notification');
@@ -199,7 +201,7 @@ route.post('/add/:_id/:arrayName', (req, res) => {
 		.catch(err => console.error(err));
 });
 
-route.post('/', (req, res) => {
+route.post('/new', (req, res) => {
 	tuitionDbFunctions.addCollection(req.body).then(data => res.send(data))
 		.catch(err => console.error(err));
 });
@@ -549,7 +551,7 @@ route.get('/:tuitionId/course', (req, res) => {
 
 route.post('/:tuitionId/course', (req, res) => {
 	const { tuitionId } = req.params;
-	_id = new ObjectId();
+	const _id = new ObjectId();
 	req.body._id = _id;
 
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { courses: req.body } }, { new: true })
