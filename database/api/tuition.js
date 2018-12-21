@@ -1034,4 +1034,78 @@ route.post('/:tuitionId/mail', (req, res) => {
 	});
 });
 
+// Resources
+route.get('/:tuitionId/resource/all', (req, res) => {
+	const { tuitionId } = req.params;
+	Tuition.findById(tuitionId).select('resources')
+		.then(tuition => res.send(tuition.resources))
+		.catch(err => console.error(err));
+});
+
+route.get('/resource/claimed', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+	const claimedTuitions = [];
+	req.user.claims.forEach(listingInfo => {
+		if (listingInfo.listingCategory === 'tuition') claimedTuitions.push(ObjectId(listingInfo.listingId));
+	});
+
+	Tuition.aggregate([
+		{ $match: { _id: { $in: claimedTuitions } } },
+		{ $project: { resources: 1 } },
+		{ $unwind: '$resources' },
+		{ $addFields: { 'resources.tuitionId': '$_id' } },
+		{ $project: { _id: false } },
+		{ $replaceRoot: { newRoot: '$resources' } }
+	]).then(courses => res.send(courses)).catch(err => console.error(err))
+})
+
+route.get('/:tuitionId/resource', (req, res) => {
+	const { tuitionId } = req.params;
+	const resourceId = req.query._id;
+	Tuition.findById(tuitionId).select('courses')
+		.then(tuition => res.send(_.find(tuition.resources, { _id: ObjectId(resourceId) })))
+		.catch(err => console.error(err));
+});
+
+// FIXME: Memory leak if someone sends files with different input name
+// FIXME: Unwanted parameters in req.body
+route.post('/:tuitionId/resource', (req, res) => {
+	const { tuitionId } = req.params;
+
+	const _id = new ObjectId();
+	req.body._id = _id;
+
+	if (req.files.length === 0) throw new Error('No resourcec found');
+	if (req.files.length !== 1) throw new Error('More than one files provided');
+	req.body.path = req.files[0].path;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { resources: req.body } }, { new: true })
+		.then(tuition => res.send(_.find(tuition.resources, { _id })))
+		.catch(err => console.error(err));
+});
+
+route.put('/:tuitionId/resource/:resourceId', (req, res) => {
+	const { tuitionId, resourceId } = req.params;
+
+	prependToObjKey(req.body, 'resources.$.');
+
+	// Mongoose automaticly calls $set for object in second argument
+	Tuition.findOneAndUpdate({ '_id': tuitionId, 'resources._id': resourceId }, req.body, { new: true })
+		.then(tuition => res.send(_.find(tuition.resources, { _id: ObjectId(resourceId) })))
+		.catch(err => console.error(err));
+});
+
+// FIXME: Handle the case of delete file failure
+route.delete('/:tuitionId/resource/:resourceId', (req, res) => {
+	const { tuitionId, resourceId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { $pull: { resources: { _id: resourceId } } })
+		.then(tuition => {
+			const deletedResource = _.find(tuition.resources, { _id: ObjectId(resourceId) });
+			// Test
+			deleteThisShit(path.join(process.cwd(), deletedResource.path));
+			res.send(deletedResource);
+		}).catch(err => console.error(err))
+});
+
 module.exports = route;
