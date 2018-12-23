@@ -1035,7 +1035,7 @@ route.post('/:tuitionId/mail', (req, res) => {
 });
 
 // Resources
-route.get('/:tuitionId/resource/all', (req, res) => {
+route.get('/:tuitionId/reesource/all', (req, res) => {
 	const { tuitionId } = req.params;
 	Tuition.findById(tuitionId).select('resources')
 		.then(tuition => res.send(tuition.resources))
@@ -1103,8 +1103,8 @@ route.delete('/:tuitionId/resource/:resourceId', (req, res) => {
 		.then(tuition => {
 			const deletedResource = _.find(tuition.resources, { _id: ObjectId(resourceId) });
 			// Test
-			deleteThisShit(path.join(process.cwd(), deletedResource.path));
 			res.send(deletedResource);
+			return deleteThisShit(path.join(process.cwd(), deletedResource.path));
 		}).catch(err => console.error(err))
 });
 
