@@ -1,7 +1,7 @@
 const sendMail = require('./send-mail');
 const path = require('path');
 const Printer = require('pdfmake');
-const { docDefinition } = require('../pdf-markup.json');
+// const { docDefinition } = require('../pdf-markup.json');
 
 // fonts are available in the test-env/tests/fonts path, this is a helper
 function fontPath(file) {
@@ -19,8 +19,6 @@ const fontDescriptors = {
 };
 const printer = new Printer(fontDescriptors);
 
-const pdfDocument = printer.createPdfKitDocument(docDefinition);
-
 // Turn the stream into a Buffer
 // Usage: getDoc(pdfDoc, function (err, buffer, pages) { const base64 = buffer.toString('base64'); /* app logic */ });
 function getDoc(pdfDoc) {
@@ -36,14 +34,18 @@ function getDoc(pdfDoc) {
 	});
 }
 
-async function sendReciept() {
+async function sendReciept(mail, docDef) {
+	if (mail === undefined) throw new Error('Mail is not provided');
+	if (docDef === undefined) throw new Error('Document defination is not provided');
 	try {
+		const pdfDocument = printer.createPdfKitDocument(docDef);
 		const pdfBuffer = await getDoc(pdfDocument);
 		// console.log(pdfBuffer);
-		sendMail('ashish@thebrainlab.in', 'Some Subject', 'Some Message', { content: pdfBuffer, filename: 'reciept.pdf', contentType: 'application/pdf' })
+		await sendMail(mail, 'Reciept', 'PFA', { content: pdfBuffer, filename: 'reciept.pdf', contentType: 'application/pdf' })
+		return new Promise(resolve => resolve());
 	} catch (err) {
-		console.error(err);
+		return new Promise((resolve, reject) => reject(err));
 	}
 }
 
-sendReciept()
+module.exports = sendReciept;

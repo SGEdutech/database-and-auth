@@ -100,6 +100,21 @@ route.get('/payments', (req, res) => {
 	]).then(payment => res.send(payment)).catch(err => console.error(err));
 });
 
+route.get('/resources', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	Tuition.aggregate([
+		{ $match: { students: { $elemMatch: { email: req.user.primaryEmail } } } },
+		{ $project: { resources: 1, name: 1 } },
+		{ $unwind: '$resources' },
+		{ $unwind: '$resources.students' },
+		{ $match: { 'resources.students': req.user.primaryEmail } },
+		{ $addFields: { 'resources.tuitionId': '$_id', 'resources.tuitionName': '$name' } },
+		{ $replaceRoot: { newRoot: '$resources' } },
+		{ $project: { students: 0 } }
+	]).then(resources => res.send(resources)).catch(err => console.error(err));
+});
+
 route.get('/reviews', (req, res) => {
 	if (req.user === undefined) throw new Error('User not logged in');
 
