@@ -3,7 +3,7 @@ const path = require('path');
 const { ObjectId } = require('mongoose').Types;
 const _ = require('lodash');
 const escapeRegex = require('../../scripts/escape-regex');
-const { deleteThisShit } = require('../../scripts/fsunlink.js');
+const deleteThisShit = require('../../scripts/fsunlink.js');
 const DbAPIClass = require('../api-functions');
 const Tuition = require('../models/tuition');
 const Notification = require('../models/notification');
@@ -15,6 +15,7 @@ const promotedHomeDbFunctions = new DbAPIClass(PromotedHome);
 const promotedSearchDbFunctions = new DbAPIClass(PromotedSearch);
 const promotedRelatedDbFunctions = new DbAPIClass(PromotedRelated);
 const sendMail = require('../../scripts/send-mail');
+const sendReciept = require('../../scripts/send-reciept');
 const { prod } = require('../../config.json');
 
 function titleCase(str) {
@@ -1106,6 +1107,13 @@ route.delete('/:tuitionId/resource/:resourceId', (req, res) => {
 			res.send(deletedResource);
 			return deleteThisShit(path.join(process.cwd(), deletedResource.path));
 		}).catch(err => console.error(err))
+});
+
+route.post('/email-reciept', (req, res) => {
+	if (req.body.docDef === undefined) throw new Error('Document defination not provided');
+	if (req.body.email === undefined) throw new Error('Email not provided');
+
+	sendReciept(req.body.email, JSON.parse(req.body.docDef)).then(data => res.send(data)).catch(err => console.error(err));
 });
 
 module.exports = route;
