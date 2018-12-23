@@ -213,8 +213,8 @@ route.put('/update/:idOfCollection/:arrayName/:idOfNestedObject', (req, res) => 
 });
 
 route.put('/:_id', (req, res) => {
-	tuitionDbFunctions.updateOneRow(req.params, req.body)
-		.then(data => res.send(data))
+	Tuition.findByIdAndUpdate(req.params, req.body, { new: true })
+		.then(tuition => res.send(tuition))
 		.catch(err => console.error(err));
 });
 

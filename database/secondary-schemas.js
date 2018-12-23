@@ -65,7 +65,8 @@ const DiscountSchema = new Schema({
 
 const ResourceSchema = new Schema({
 	path: { type: String, required },
-	topic: { type: String, required },
+	title: { type: String, required },
+	students: [String],
 	description: String
 });
 
