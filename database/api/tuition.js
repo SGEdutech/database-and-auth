@@ -202,7 +202,7 @@ route.post('/add/:_id/:arrayName', (req, res) => {
 		.catch(err => console.error(err));
 });
 
-route.post('/new', (req, res) => {
+route.post('/', (req, res) => {
 	tuitionDbFunctions.addCollection(req.body).then(data => res.send(data))
 		.catch(err => console.error(err));
 });
