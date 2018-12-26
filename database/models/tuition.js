@@ -62,7 +62,7 @@ const TuitionSchema = new Schema({
 	views: ViewsOrHitsSchema,
 	hits: ViewsOrHitsSchema,
 	bookmarks: Number,
-	recieptConfigBusinessName: { type: String, required },
+	recieptConfigBusinessName: { type: String },
 	recieptConfigAddressLine1: String,
 	recieptConfigAddressLine2: String,
 	recieptConfigCity: String,
