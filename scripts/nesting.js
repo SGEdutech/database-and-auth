@@ -2,13 +2,14 @@ const path = require('path');
 
 function nestingMiddleware(req, res, next) {
 	const bodyObj = req.body;
-
 	if (bodyObj === undefined) next();
 
 	let keys = Object.keys(bodyObj);
 
 	keys.forEach(key => {
 		if (bodyObj[key] === '') delete bodyObj[key];
+		// Hard coding to delete certain keys
+		if (bodyObj[key] === 'empty') bodyObj[key] = '';
 	});
 
 	keys = Object.keys(bodyObj);
