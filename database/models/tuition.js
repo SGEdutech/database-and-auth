@@ -13,6 +13,7 @@ const ViewsOrHitsSchema = require('../views-or-hits-schema');
 const CourseSchema = require('./course-and-batch');
 const StudentSchema = require('../schemas/student');
 const ForumSchama = require('../schemas/forum');
+const LeadsSchema = require('../schemas/leads');
 
 const {
 	isMaxStrLength,
@@ -69,6 +70,7 @@ const TuitionSchema = new Schema({
 	recieptConfigState: String,
 	recieptConfigPinCode: String,
 	recieptConfigGstNumber: String,
+	leads: [LeadsSchema],
 	signedBy: String,
 	claimedBy: String,
 	updatedOn: { type: Date, default: Date.now }
