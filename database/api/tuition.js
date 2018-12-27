@@ -989,12 +989,11 @@ route.post('/:tuitionId/lead/:leadId/comment', (req, res) => {
 	const { tuitionId, leadId } = req.params;
 
 	const comment = req.body.comment;
+	const _id = new ObjectId();
+	comment._id = _id;
 	delete req.body.comment;
 
 	prependToObjKey(req.body, 'leads.$.');
-
-	const _id = new ObjectId();
-	req.body._id = _id;
 
 	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), leads: { $elemMatch: { _id: ObjectId(leadId) } } }, { $push: { 'leads.$.comments': comment }, $set: req.body }, { new: true })
 		.then(tuition => {
