@@ -1008,10 +1008,10 @@ route.put('/:tuitionId/lead/:leadId/comment/:commentId', (req, res) => {
 		}).catch(err => console.error(err));
 });
 
-route.delete('/:tuitionId/forum/:leadId/comment/:commentId', (req, res) => {
+route.delete('/:tuitionId/lead/:leadId/comment/:commentId', (req, res) => {
 	const { tuitionId, leadId, commentId } = req.params;
 
-	Tuition.findOneAndUpdate({ _id: tuitionId, leads: { $elemMatch: { _id: leadId } } }, { $pull: { 'forums.$.comments': { _id: commentId } } })
+	Tuition.findOneAndUpdate({ _id: tuitionId, leads: { $elemMatch: { _id: ObjectId(leadId) } } }, { $pull: { 'leads.$.comments': { _id: commentId } } })
 		.then(tuition => {
 			const lead = _.find(tuition.leads, { _id: ObjectId(leadId) });
 			res.send(_.find(lead.comments, { _id: ObjectId(commentId) }))
@@ -1146,13 +1146,13 @@ route.get('/resource/claimed', (req, res) => {
 		{ $addFields: { 'resources.tuitionId': '$_id' } },
 		{ $project: { _id: false } },
 		{ $replaceRoot: { newRoot: '$resources' } }
-	]).then(courses => res.send(courses)).catch(err => console.error(err))
+	]).then(resources => res.send(resources)).catch(err => console.error(err))
 })
 
 route.get('/:tuitionId/resource', (req, res) => {
 	const { tuitionId } = req.params;
 	const resourceId = req.query._id;
-	Tuition.findById(tuitionId).select('courses')
+	Tuition.findById(tuitionId).select('resources')
 		.then(tuition => res.send(_.find(tuition.resources, { _id: ObjectId(resourceId) })))
 		.catch(err => console.error(err));
 });
