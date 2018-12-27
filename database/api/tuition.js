@@ -984,12 +984,19 @@ route.delete('/:tuitionId/lead/:leadId', (req, res) => {
 });
 
 // Lead comment
+// Also updates next followup and status
 route.post('/:tuitionId/lead/:leadId/comment', (req, res) => {
 	const { tuitionId, leadId } = req.params;
+
+	const comment = req.body.comment;
+	delete req.body.comment;
+
+	prependToObjKey(req.body, 'leads.$.');
+
 	const _id = new ObjectId();
 	req.body._id = _id;
 
-	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), leads: { $elemMatch: { _id: ObjectId(leadId) } } }, { $push: { 'leads.$.comments': req.body } }, { new: true })
+	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), leads: { $elemMatch: { _id: ObjectId(leadId) } } }, { $push: { 'leads.$.comments': comment }, $set: req.body }, { new: true })
 		.then(tuition => {
 			const leads = _.find(tuition.leads, { _id: ObjectId(leadId) });
 			res.send(_.find(leads.comments, { _id }))
