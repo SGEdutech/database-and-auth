@@ -2,6 +2,7 @@ const route = require('express').Router();
 const path = require('path');
 const { ObjectId } = require('mongoose').Types;
 const _ = require('lodash');
+const removeWords = require('remove-words');
 const escapeRegex = require('../../scripts/escape-regex');
 const deleteThisShit = require('../../scripts/fsunlink.js');
 const DbAPIClass = require('../api-functions');
@@ -188,6 +189,55 @@ route.get('/search', (req, res) => {
 
 	Promise.all([promotedDataPromise, poorDataPromise]).then(dataArr => res.send(dataArr[0].concat(dataArr[1])))
 		.catch(err => console.error(err));
+});
+
+route.get('/relevent', async (req, res) => {
+	try {
+		const query = req.query.search;
+		const queryRegex = new RegExp(query, 'i');
+		const queryWithoutStopWordArr = removeWords(query);
+		const keyWordRegexArr = queryWithoutStopWordArr.map(keyWord => new RegExp(keyWord, 'i'));
+		const limit = req.query.limit || 0;
+		const skip = req.query.skip || 0;
+
+		delete req.query.search;
+		delete req.query.limit;
+		delete req.query.skip;
+
+		let fuzzySearch = await Tuition.aggregate([
+			{ $match: req.query },
+			{
+				$facet: {
+					fuzzyNameSearch: [{ $match: { name: queryRegex } }],
+					keyWordAdd1Search: [{ $match: { addressLine1: { $in: keyWordRegexArr } } }],
+					keyWordAdd2Search: [{ $match: { addressLine2: { $in: keyWordRegexArr } } }],
+					keyWordNameSearch: [{ $match: { name: { $in: keyWordRegexArr } } }],
+					description: [{ $match: { description: { $in: keyWordRegexArr } } }],
+					category: [{ $match: { category: { $in: keyWordRegexArr } } }]
+				}
+			}
+		]);
+
+		fuzzySearch = fuzzySearch[0];
+
+		fuzzySearch = [
+			...fuzzySearch.fuzzyNameSearch,
+			...fuzzySearch.keyWordAdd1Search,
+			...fuzzySearch.keyWordAdd2Search,
+			...fuzzySearch.keyWordNameSearch,
+			...fuzzySearch.description
+		]
+
+		// Removing duplicates
+		fuzzySearch = fuzzySearch.filter((tuition, index) => index === fuzzySearch.findIndex(anotherTuition => anotherTuition.name === tuition.name));
+
+		fuzzySearch.splice(0, skip);
+		if (limit) fuzzySearch.splice(limit);
+
+		res.send(fuzzySearch);
+	} catch (err) {
+		console.error(err);
+	}
 });
 
 route.get('/super-admin', (req, res) => {

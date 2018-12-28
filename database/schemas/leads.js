@@ -13,6 +13,7 @@ const LeadsSchema = new Schema({
 	phone: { type: Number, required },
 	message: String,
 	comments: [LeadsComments],
+	// FIXME: Enum not working
 	status: { type: String, enum: ['active', 'closed', 'enrolled'], default: 'active' },
 	nextFollowUp: Date,
 	createdAt: { type: Date, default: Date.now }
