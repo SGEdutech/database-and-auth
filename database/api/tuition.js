@@ -200,9 +200,13 @@ route.get('/relevent', async (req, res) => {
 		const limit = req.query.limit || 0;
 		const skip = req.query.skip || 0;
 
+		const queryKeys = Object.keys(req.query);
+		queryKeys.forEach(key => req.query[key] = new RegExp(req.query[key], 'i'));
+
 		delete req.query.search;
 		delete req.query.limit;
 		delete req.query.skip;
+
 
 		let fuzzySearch = await Tuition.aggregate([
 			{ $match: req.query },
