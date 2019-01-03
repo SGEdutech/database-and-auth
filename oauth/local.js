@@ -4,7 +4,6 @@ const LocalStrategy = require('passport-local');
 const User = require('../database/models/user');
 const DatabaseAPIClass = require('../database/api-functions');
 const APIHelperFunctions = new DatabaseAPIClass(User);
-const sendWelcomeMail = require('../scripts/send-welcome-mail');
 
 passport.serializeUser((userid, done) => {
 	//userid will be stuffed in cookie
@@ -14,14 +13,12 @@ passport.serializeUser((userid, done) => {
 passport.deserializeUser((userid, done) => {
 	//reimplement it using FindById function of mongoose
 	APIHelperFunctions.getSpecificData({ '_id': userid })
-		.then((user) => {
+		.then(user => {
 			if (!user) {
 				done(new Error('no such user'));
 			}
 			done(null, user);
-		}).catch((err) => {
-			done(err);
-		});
+		}).catch(err => done(err));
 });
 
 passport.use(new LocalStrategy((username, password, done) => {
@@ -49,9 +46,9 @@ route.post('/login', passport.authenticate('local'
 	    failureRedirect: '/login-page.html',
 	    successRedirect: '/User-dashboard.html',
 	}*/
-), function(req, res) {
+), (req, res) => {
 	APIHelperFunctions.getSpecificData({ _id: req.user })
-		.then(user => res.send(user));
+		.then(user => res.send(user)).catch(err => console.error(err));
 });
 
 route.use('/logout', (req, res) => {
@@ -67,16 +64,11 @@ route.post('/signup', (req, res) => {
 				// disable sign-up button till username is unique
 				// create AJAX request(refresh button) from frontend to check for username uniqueness
 			} else {
-
 				APIHelperFunctions.addCollection(req.body)
-					.then(data => {
-						sendWelcomeMail(data.primaryEmail);
-						res.redirect('/');
-					});
+					.then(data => res.redirect('/')).catch(err => console.error(err));
 			}
 		})
 		.catch(err => console.error(err));
-
 });
 
 exports = module.exports = {
