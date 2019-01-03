@@ -8,6 +8,7 @@ const tuitionDbFunctions = new DbAPIClass(Tuition);
 const School = require('../models/school');
 const schoolDbFunctions = new DbAPIClass(School);
 const sendWelcomeMail = require('../../scripts/send-welcome-mail');
+const { isProd } = require('../../config.json');
 
 route.get('/info', (req, res) => res.send(req.user));
 
@@ -155,7 +156,7 @@ route.get('/', (req, res) => {
 route.post('/', (req, res) => {
 	userDbFunctions.addCollection(req.body)
 		.then(user => {
-			sendWelcomeMail(user.primaryEmail);
+			if (isProd) sendWelcomeMail(user.primaryEmail);
 			res.send(user);
 		}).catch(err => console.error(err));
 });

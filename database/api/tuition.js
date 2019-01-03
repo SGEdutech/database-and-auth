@@ -17,7 +17,7 @@ const promotedSearchDbFunctions = new DbAPIClass(PromotedSearch);
 const promotedRelatedDbFunctions = new DbAPIClass(PromotedRelated);
 const sendMail = require('../../scripts/send-mail');
 const sendReciept = require('../../scripts/send-reciept');
-const { prod } = require('../../config.json');
+const { isProd } = require('../../config.json');
 
 function titleCase(str) {
 	const splitStr = str.toLowerCase().split(' ');
@@ -381,12 +381,12 @@ route.post('/:tuitionId/student', (req, res) => {
 				const studentsAdded = tuition.students.filter(student => idsOfAddedStudents.indexOf(student._id.toString()) !== -1);
 				res.send(studentsAdded);
 				const emailIdsOfStudentsAdded = studentsAdded.map(student => student.email);
-				if (prod) sendMail(emailIdsOfStudentsAdded, 'Add: Study Monitor', emailTemplate);
+				if (isProd) sendMail(emailIdsOfStudentsAdded, 'Add: Study Monitor', emailTemplate);
 			} else {
 				const studentAdded = _.find(tuition.students, { _id: idOfStudentToBeAdded });
 				res.send(studentAdded);
 				const studentEmail = studentAdded.email;
-				if (prod) sendMail(studentEmail, 'Add: Study Monitor', emailTemplate);
+				if (isProd) sendMail(studentEmail, 'Add: Study Monitor', emailTemplate);
 			}
 		}).catch(err => console.error(err));
 });
@@ -422,7 +422,7 @@ route.delete('/:tuitionId/student/:studentId', (req, res) => {
 			<p>Regards,</p>
 			<p>Team Eduatlas.</p>`;
 			res.send(studentDeleted);
-			if (prod) sendMail(studentDeleted.email, 'Remove: Study Monitor', emailTemplate);
+			if (isProd) sendMail(studentDeleted.email, 'Remove: Study Monitor', emailTemplate);
 		}).catch(err => console.error(err));
 });
 
