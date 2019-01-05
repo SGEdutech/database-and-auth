@@ -7,7 +7,8 @@ const {
 	TimeAndDateSchema,
 	CoursesOfferedSchema,
 	DiscountSchema,
-	ResourceSchema
+	ResourceSchema,
+	GallerySchema
 } = require('../secondary-schemas');
 const ViewsOrHitsSchema = require('../views-or-hits-schema');
 const CourseSchema = require('./course-and-batch');
@@ -52,7 +53,7 @@ const TuitionSchema = new Schema({
 	facilities: String,
 	img_tuitionCoverPic: String,
 	students: [StudentSchema],
-	gallery: [String],
+	gallery: [GallerySchema],
 	bragging: [FacilitiesAndBraggingSchema],
 	reviews: [ReviewSchema],
 	coursesOffered: [CoursesOfferedSchema],

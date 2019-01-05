@@ -23,7 +23,11 @@ const ReviewSchema = new Schema({
 	description: String
 });
 
-const GallerySchema = new Schema({ img_path: String, album: String });
+const GallerySchema = new Schema({
+	imageName: { type: String, required },
+	img_path: { type: String, required },
+	album: String
+});
 
 const FacilitiesAndBraggingSchema = new Schema({
 	title: String,
@@ -67,7 +71,8 @@ const ResourceSchema = new Schema({
 	path: { type: String, required },
 	title: { type: String, required },
 	students: [String],
-	description: String
+	description: String,
+	category: { type: String, enum: ['assignment', 'study meterial', 'other'], default: 'other' }
 });
 
 exports = module.exports = {
