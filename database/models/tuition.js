@@ -52,6 +52,7 @@ const TuitionSchema = new Schema({
 	instaLink: String,
 	facilities: String,
 	img_tuitionCoverPic: String,
+	tags: String,
 	students: [StudentSchema],
 	gallery: [GallerySchema],
 	bragging: [FacilitiesAndBraggingSchema],
