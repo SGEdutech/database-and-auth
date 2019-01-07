@@ -1225,10 +1225,11 @@ route.post('/:tuitionId/resource', (req, res) => {
 	const _id = new ObjectId();
 	req.body._id = _id;
 
-	if (req.files.length === 0) throw new Error('No resourcec found');
-	if (req.files.length !== 1) throw new Error('More than one files provided');
-	req.body.path = req.files[0].path;
-
+	if (req.body.type !== 'video') {
+		if (req.files.length === 0) throw new Error('No rosource found');
+		req.body.path = req.files[0].path;
+	}
+	
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { resources: req.body } }, { new: true })
 		.then(tuition => res.send(_.find(tuition.resources, { _id })))
 		.catch(err => console.error(err));
