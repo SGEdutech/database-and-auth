@@ -68,11 +68,12 @@ const DiscountSchema = new Schema({
 });
 
 const ResourceSchema = new Schema({
-	path: { type: String, required },
-	title: { type: String, required },
+	path: String,
+	title: String,
 	students: [String],
 	description: String,
-	category: { type: String, enum: ['assignment', 'study meterial', 'other'], default: 'other' }
+	type: { type: String, enum: ['refrence meterial', 'homework', 'tests', 'video'], default: 'refrence meterial' },
+	ytUrl: String
 });
 
 exports = module.exports = {
