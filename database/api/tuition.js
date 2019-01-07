@@ -193,31 +193,29 @@ route.get('/search', (req, res) => {
 
 route.get('/relevent', async (req, res) => {
 	try {
-		const query = req.query.search;
-		const queryRegex = new RegExp(query, 'i');
-		const queryWithoutStopWordArr = removeWords(query);
-		const keyWordRegexArr = queryWithoutStopWordArr.map(keyWord => new RegExp(keyWord, 'i'));
+		// /^$/ is regex that matches nothing! Optimise!
+		const search = req.query.search || '$^';
+		const location = req.query.location || '$^';
+		const searchRegex = new RegExp(search, 'i');
+		const searchWordsRegexArr = search.split(' ').map(word => new RegExp(word, 'i'));
+		const locationWordRegexArr = location.split(' ').map(word => new RegExp(word, 'i'));
 		const limit = req.query.limit || 0;
 		const skip = req.query.skip || 0;
-
-		const queryKeys = Object.keys(req.query);
-		queryKeys.forEach(key => req.query[key] = new RegExp(req.query[key], 'i'));
 
 		delete req.query.search;
 		delete req.query.limit;
 		delete req.query.skip;
 
-
 		let fuzzySearch = await Tuition.aggregate([
-			{ $match: req.query },
 			{
 				$facet: {
-					fuzzyNameSearch: [{ $match: { name: queryRegex } }],
-					keyWordAdd1Search: [{ $match: { addressLine1: { $in: keyWordRegexArr } } }],
-					keyWordAdd2Search: [{ $match: { addressLine2: { $in: keyWordRegexArr } } }],
-					keyWordNameSearch: [{ $match: { name: { $in: keyWordRegexArr } } }],
-					description: [{ $match: { description: { $in: keyWordRegexArr } } }],
-					category: [{ $match: { category: { $in: keyWordRegexArr } } }]
+					TagSearch: [{ $match: { tags: { $in: searchWordsRegexArr } } }],
+					NameSearch: [{ $match: { name: searchRegex } }],
+					Add1Search: [{ $match: { addressLine1: { $in: locationWordRegexArr } } }],
+					Add2Search: [{ $match: { addressLine2: { $in: locationWordRegexArr } } }],
+					citySearch: [{ $match: { city: { $in: locationWordRegexArr } } }],
+					districtSearch: [{ $match: { district: { $in: locationWordRegexArr } } }],
+					stateSearch: [{ $match: { state: { $in: locationWordRegexArr } } }]
 				}
 			}
 		]);
@@ -225,11 +223,13 @@ route.get('/relevent', async (req, res) => {
 		fuzzySearch = fuzzySearch[0];
 
 		fuzzySearch = [
-			...fuzzySearch.fuzzyNameSearch,
-			...fuzzySearch.keyWordAdd1Search,
-			...fuzzySearch.keyWordAdd2Search,
-			...fuzzySearch.keyWordNameSearch,
-			...fuzzySearch.description
+			...fuzzySearch.TagSearch,
+			...fuzzySearch.NameSearch,
+			...fuzzySearch.Add1Search,
+			...fuzzySearch.Add2Search,
+			...fuzzySearch.citySearch,
+			...fuzzySearch.districtSearch,
+			...fuzzySearch.stateSearch
 		]
 
 		// Removing duplicates
@@ -1229,7 +1229,7 @@ route.post('/:tuitionId/resource', (req, res) => {
 		if (req.files.length === 0) throw new Error('No rosource found');
 		req.body.path = req.files[0].path;
 	}
-	
+
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { resources: req.body } }, { new: true })
 		.then(tuition => res.send(_.find(tuition.resources, { _id })))
 		.catch(err => console.error(err));
