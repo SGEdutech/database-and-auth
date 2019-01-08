@@ -8,6 +8,7 @@ const tuitionDbFunctions = new DbAPIClass(Tuition);
 const School = require('../models/school');
 const schoolDbFunctions = new DbAPIClass(School);
 const sendWelcomeMail = require('../../scripts/send-welcome-mail');
+const { ObjectId } = require('mongoose').Types;
 const { isProd } = require('../../config.json');
 
 route.get('/info', (req, res) => res.send(req.user));
@@ -117,34 +118,23 @@ route.get('/resources', (req, res) => {
 	]).then(resources => res.send(resources)).catch(err => console.error(err));
 });
 
-route.get('/reviews', (req, res) => {
-	if (req.user === undefined) throw new Error('User not logged in');
+route.get('/reviews', async (req, res) => {
+	try {
+		if (req.user === undefined) throw new Error('User not logged in');
 
-	const userReviews = [];
+		const aggretionQuery = [
+			{ $project: { reviews: 1 } },
+			{ $unwind: '$reviews' },
+			{ $match: { 'reviews.owner': ObjectId(req.user._id) } },
+			{ $replaceRoot: { newRoot: '$reviews' } }
+		];
 
-	function filterUserReviews(collections, category) {
-		collections.forEach(collection => {
-			collection.reviews.forEach(review => {
-				if (review.owner === req.user._id) {
-					review.category = category;
-					userReviews.push(review);
-				}
-			})
-		})
+		const promiseArr = [Tuition.aggregate(aggretionQuery), School.aggregate(aggretionQuery)];
+		const [tuitionReviews, schoolReviews] = await Promise.all(promiseArr);
+		res.send({ tuitionReviews, schoolReviews });
+	} catch (error) {
+		console.error(error);
 	}
-
-	Promise.all([
-		tuitionDbFunctions.getAllData({
-			demands: 'name reviews'
-		}),
-		schoolDbFunctions.getAllData({
-			demands: 'name reviews'
-		})
-	]).then(tuitionsAndSchoolCollection => {
-		filterUserReviews(tuitionsAndSchoolCollection[0], 'tuition');
-		filterUserReviews(tuitionsAndSchoolCollection[1], 'school');
-		res.send(userReviews);
-	})
 })
 
 route.get('/', (req, res) => {
