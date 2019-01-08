@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const Schema = require('mongoose').Schema;
 const { required, select } = require('../../config.json').MONGO;
 
 const LeadsComments = new Schema({
@@ -16,6 +15,7 @@ const LeadsSchema = new Schema({
 	// FIXME: Enum not working
 	status: { type: String, enum: ['active', 'closed', 'enrolled'], default: 'active' },
 	nextFollowUp: Date,
+	courseId: Schema.Types.ObjectId,
 	createdAt: { type: Date, default: Date.now }
 });
 
