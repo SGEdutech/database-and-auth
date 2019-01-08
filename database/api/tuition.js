@@ -196,8 +196,7 @@ route.get('/relevent', async (req, res) => {
 	try {
 		// Optimise!
 		const search = req.query.search || '';
-		// /^$/ is regex that matches nothing! Optimise!
-		const location = req.query.location || '$^';
+		const location = req.query.location || '';
 		const searchWordsRegexArr = search.split(' ').map(word => new RegExp(word, 'i'));
 		const locationWordRegexArr = location.split(' ').map(word => new RegExp(word, 'i'));
 		const limit = req.query.limit || 0;
