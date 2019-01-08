@@ -191,12 +191,13 @@ route.get('/search', (req, res) => {
 		.catch(err => console.error(err));
 });
 
+// Opimise
 route.get('/relevent', async (req, res) => {
 	try {
+		// Optimise!
+		const search = req.query.search || '';
 		// /^$/ is regex that matches nothing! Optimise!
-		const search = req.query.search || '$^';
 		const location = req.query.location || '$^';
-		const searchRegex = new RegExp(search, 'i');
 		const searchWordsRegexArr = search.split(' ').map(word => new RegExp(word, 'i'));
 		const locationWordRegexArr = location.split(' ').map(word => new RegExp(word, 'i'));
 		const limit = req.query.limit || 0;
@@ -206,39 +207,31 @@ route.get('/relevent', async (req, res) => {
 		delete req.query.limit;
 		delete req.query.skip;
 
-		let fuzzySearch = await Tuition.aggregate([
-			{
-				$facet: {
-					TagSearch: [{ $match: { tags: { $in: searchWordsRegexArr } } }],
-					NameSearch: [{ $match: { name: searchRegex } }],
-					Add1Search: [{ $match: { addressLine1: { $in: locationWordRegexArr } } }],
-					Add2Search: [{ $match: { addressLine2: { $in: locationWordRegexArr } } }],
-					citySearch: [{ $match: { city: { $in: locationWordRegexArr } } }],
-					districtSearch: [{ $match: { district: { $in: locationWordRegexArr } } }],
-					stateSearch: [{ $match: { state: { $in: locationWordRegexArr } } }]
-				}
+		const result = await Tuition.aggregate([
+		{
+			$match: {
+				$or: [
+					{ addressLine1: { $in: locationWordRegexArr } },
+					{ addressLine2: { $in: locationWordRegexArr } },
+					{ city: { $in: locationWordRegexArr } },
+					{ district: { $in: locationWordRegexArr } },
+					{ state: { $in: locationWordRegexArr } }
+				]
 			}
-		]);
+		},
+		{
+			$match: {
+				$or: [
+					{ tags: { $in: searchWordsRegexArr } },
+					{ name: { $in: searchWordsRegexArr } },
+				]
+			}
+		}]);
 
-		fuzzySearch = fuzzySearch[0];
+		result.splice(0, skip);
+		if (limit) result.splice(limit);
 
-		fuzzySearch = [
-			...fuzzySearch.TagSearch,
-			...fuzzySearch.NameSearch,
-			...fuzzySearch.Add1Search,
-			...fuzzySearch.Add2Search,
-			...fuzzySearch.citySearch,
-			...fuzzySearch.districtSearch,
-			...fuzzySearch.stateSearch
-		]
-
-		// Removing duplicates
-		fuzzySearch = fuzzySearch.filter((tuition, index) => index === fuzzySearch.findIndex(anotherTuition => anotherTuition.name === tuition.name));
-
-		fuzzySearch.splice(0, skip);
-		if (limit) fuzzySearch.splice(limit);
-
-		res.send(fuzzySearch);
+		res.send(result);
 	} catch (err) {
 		console.error(err);
 	}
