@@ -123,9 +123,10 @@ route.get('/reviews', async (req, res) => {
 		if (req.user === undefined) throw new Error('User not logged in');
 
 		const aggretionQuery = [
-			{ $project: { reviews: 1 } },
+			{ $project: { reviews: 1, name: 1 } },
 			{ $unwind: '$reviews' },
 			{ $match: { 'reviews.owner': ObjectId(req.user._id) } },
+			{ $addFields: { 'reviews.tuitionId': '$_id', 'reviews.tuitionName': '$name' } },
 			{ $replaceRoot: { newRoot: '$reviews' } }
 		];
 
