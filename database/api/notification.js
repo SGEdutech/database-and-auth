@@ -54,6 +54,10 @@ route.put('/user-read', (req, res) => {
 
 	Notification.updateMany({ _id: { $in: idsOfNotificationsToBeMarkedAsRead }, receivers: { $elemMatch: { userEmail } } }, { 'receivers.$.readAt': Date.now() })
 		.then(data => res.send(data)).catch(err => console.error(err))
-})
+});
+
+route.delete('/all', (req, res) => {
+	Notification.deleteMany({}).then(data => res.send(data)).catch(err => console.error(err));
+});
 
 module.exports = route;
