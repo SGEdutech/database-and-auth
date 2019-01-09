@@ -14,7 +14,9 @@ const InstallmentSchema = new Schema({
 });
 
 const PaymentSchema = new Schema({
-	courseId: { type: Schema.Types.ObjectId, lowercase: true },
+	courseId: Schema.Types.ObjectId,
+	courseFee: Number,
+	courseGstPercentage: Number,
 	discountAmount: Number,
 	discountReason: String,
 	nextInstallmentDate: Date,
