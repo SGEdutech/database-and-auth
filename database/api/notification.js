@@ -56,6 +56,13 @@ route.put('/user-read', (req, res) => {
 		.then(data => res.send(data)).catch(err => console.error(err))
 });
 
+route.delete('/user-notification', (req, res) => {
+	if (req.user === undefined) throw new Error('User not logged in');
+
+	Notification.updateMany({}, { $pull: { receivers: { userEmail: req.user.primaryEmail } } })
+		.then(data => res.send(data)).catch(err => console.error(err));
+});
+
 route.delete('/all', (req, res) => {
 	Notification.deleteMany({}).then(data => res.send(data)).catch(err => console.error(err));
 });
