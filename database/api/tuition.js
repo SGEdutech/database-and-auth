@@ -269,7 +269,7 @@ route.get('/dashboard/:_id', (req, res) => {
 				{ $replaceRoot: { newRoot: '$courses' } }
 			]
 		},
-	}]).then(data => res.send(data)).catch(err => console.error(err));
+	}]).then(data => res.send(data[0])).catch(err => console.error(err));
 });
 
 route.post('/add/:_id/:arrayName', (req, res) => {
