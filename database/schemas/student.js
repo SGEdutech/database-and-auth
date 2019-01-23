@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const { required } = require('../../config.json').MONGO;
 
 const InstallmentSchema = new Schema({
-	feeCollected: Number,
+	feeCollected: { type: Number, required },
 	modeOfPayment: String,
 	bank: String,
 	dateOfCheque: Date,
@@ -15,8 +15,8 @@ const InstallmentSchema = new Schema({
 
 const PaymentSchema = new Schema({
 	courseId: Schema.Types.ObjectId,
-	courseFee: Number,
-	courseGstPercentage: Number,
+	courseFee: { type: Number, required },
+	courseGstPercentage: { type: Number, default: 0 },
 	discountAmount: Number,
 	discountReason: String,
 	nextInstallmentDate: Date,

@@ -74,7 +74,7 @@ function prependToObjKey(obj, prependStr) {
 	keys.forEach(key => {
 		obj[prependStr + key] = obj[key];
 		delete obj[key];
-	})
+	});
 }
 
 route.get('/all', (req, res) => {
@@ -238,7 +238,38 @@ route.get('/relevent', async (req, res) => {
 
 route.get('/super-admin', (req, res) => {
 	Tuition.find({ signedBy: { $regex: new RegExp(req.query.signedBy, 'i') }, updated: { $gte: req.query.fromDate, $lt: req.query.toDate } })
-		.then(tuitions => res.send(tuitions)).catch(err => console.error(err))
+		.then(tuitions => res.send(tuitions)).catch(err => console.error(err));
+});
+
+route.get('/dashboard/:_id', (req, res) => {
+	const { _id } = req.params;
+
+	Tuition.aggregate([
+	{
+		$facet: {
+			students: [
+				{ $match: { _id: ObjectId(_id) } },
+				{ $project: { students: 1, _id: 0 } },
+				{ $unwind: '$students' },
+				{ $replaceRoot: { newRoot: '$students' } }
+			],
+			courses: [
+				{ $match: { _id: ObjectId(_id) } },
+				{ $project: { courses: 1, _id: 0 } },
+				{ $unwind: '$courses' },
+				{ $addFields: { 'courses.batches': { $size: '$courses.batches' } } },
+				{ $replaceRoot: { newRoot: '$courses' } }
+			],
+			batches: [
+				{ $match: { _id: ObjectId(_id) } },
+				{ $project: { courses: 1, _id: 0 } },
+				{ $unwind: '$courses' },
+				{ $unwind: '$courses.batches' },
+				{ $addFields: { 'courses.batches.schedules': { $size: '$courses.batches.schedules' }, 'courses.batches.courseId': '$courses._id' } },
+				{ $replaceRoot: { newRoot: '$courses' } }
+			]
+		},
+	}]).then(data => res.send(data)).catch(err => console.error(err));
 });
 
 route.post('/add/:_id/:arrayName', (req, res) => {
@@ -560,7 +591,7 @@ route.delete('/:tuitionId/student/:studentId/payment/:paymentId/installment/:ins
 			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
 			const payment = _.find(student.payments, { _id: ObjectId(paymentId) });
 			res.send(_.find(payment.installments, { _id: ObjectId(installmentId) }));
-		}).catch(err => console.error(err))
+		}).catch(err => console.error(err));
 });
 
 // Courses
@@ -653,7 +684,7 @@ route.get('/batch/claimed', (req, res) => {
 		{ $addFields: { 'courses.batches.tuitionId': '$_id', 'courses.batches.courseId': '$courses._id', 'courses.batches.courseCode': '$courses.code' } },
 		{ $replaceRoot: { newRoot: '$courses.batches' } }
 	]).then(data => res.send(data)).catch(err => console.error(err));
-})
+});
 
 route.get('/:tuitionId/batch', (req, res) => {
 	if (req.query._id === undefined) throw new Error('Batch id not provided')
@@ -668,7 +699,7 @@ route.get('/:tuitionId/batch', (req, res) => {
 		{ $unwind: '$courses.batches' },
 		{ $match: { 'courses.batches._id': ObjectId(batchId) } }
 	]).then(batchArr => batchArr.length === 1 ? res.send(batchArr[0]) : res.status(400).end()).catch(err => console.error(err));
-})
+});
 
 route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 	const { tuitionId, courseId } = req.params;
@@ -682,7 +713,7 @@ route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			res.send(_.find(course.batches, { _id }))
 		}).catch(err => console.error(err))
-})
+});
 
 route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
