@@ -266,7 +266,7 @@ route.get('/dashboard/:_id', (req, res) => {
 				{ $unwind: '$courses' },
 				{ $unwind: '$courses.batches' },
 				{ $addFields: { 'courses.batches.schedules': { $size: '$courses.batches.schedules' }, 'courses.batches.courseId': '$courses._id' } },
-				{ $replaceRoot: { newRoot: '$courses' } }
+				{ $replaceRoot: { newRoot: '$courses.batches' } }
 			]
 		},
 	}]).then(data => res.send(data[0])).catch(err => console.error(err));
