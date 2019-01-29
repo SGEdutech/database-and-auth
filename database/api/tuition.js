@@ -711,7 +711,9 @@ route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $push: { 'courses.$.batches': req.body } }, { new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
-			const batch = _.find(course.batches, { _id });
+			let batch = _.find(course.batches, { _id });
+			// Type of batch is mongoose docs not vanilla object
+			batch = batch.toObject();
 			batch.courseId = course._id;
 			batch.courseCode = course.code;
 			res.send(batch);
@@ -730,7 +732,8 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
-			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			let batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			batch = batch.toObject();
 			batch.courseId = course._id;
 			batch.courseCode = course.code;
 			res.send(batch);
@@ -743,7 +746,8 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $pull: { 'courses.$.batches': { _id: batchId } } })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
-			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			let batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			batch = batch.toObject();
 			batch.courseId = course._id;
 			batch.courseCode = course.code;
 			res.send(batch);
