@@ -265,7 +265,7 @@ route.get('/dashboard/:_id', (req, res) => {
 				{ $project: { courses: 1, _id: 0 } },
 				{ $unwind: '$courses' },
 				{ $unwind: '$courses.batches' },
-				{ $addFields: { 'courses.batches.schedules': { $size: '$courses.batches.schedules' }, 'courses.batches.courseId': '$courses._id' } },
+				{ $addFields: { 'courses.batches.schedules': { $size: '$courses.batches.schedules' }, 'courses.batches.courseId': '$courses._id', 'courses.batches.courseCode': '$courses.code' } },
 				{ $replaceRoot: { newRoot: '$courses.batches' } }
 			]
 		},
