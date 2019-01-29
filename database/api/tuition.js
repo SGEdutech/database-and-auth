@@ -623,7 +623,7 @@ route.get('/course/claimed', (req, res) => {
 		{ $project: { _id: false } },
 		{ $replaceRoot: { newRoot: '$courses' } }
 	]).then(courses => res.send(courses)).catch(err => console.error(err))
-})
+});
 
 route.get('/:tuitionId/course', (req, res) => {
 	const { tuitionId } = req.params;
@@ -639,8 +639,12 @@ route.post('/:tuitionId/course', (req, res) => {
 	req.body._id = _id;
 
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { courses: req.body } }, { new: true })
-		.then(tuition => res.send(_.find(tuition.courses, { _id })))
-		.catch(err => console.error(err));
+		.then(tuition => {
+			let course = _.find(tuition.courses, { _id });
+			course = course.toObject();
+			course.numberOfBatches = course.batches.length;
+			res.send(course);
+		}).catch(err => console.error(err));
 });
 
 route.put('/:tuitionId/course/:courseId', (req, res) => {
@@ -648,17 +652,25 @@ route.put('/:tuitionId/course/:courseId', (req, res) => {
 
 	prependToObjKey(req.body, 'courses.$.');
 
-	// Mongoose automaticly calls $set for object in second argument
 	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, req.body, { new: true })
-		.then(tuition => res.send(_.find(tuition.courses, { _id: ObjectId(courseId) })))
-		.catch(err => console.error(err));
+		.then(tuition => {
+			let course = _.find(tuition.courses, { _id: ObjectId(courseId) });
+			course = course.toObject();
+			course.numberOfBatches = course.batches.length;
+			res.send(course);
+		}).catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/course/:courseId', (req, res) => {
 	const { tuitionId, courseId } = req.params;
 
 	Tuition.findByIdAndUpdate(tuitionId, { $pull: { courses: { _id: courseId } } })
-		.then(tuition => res.send(_.find(tuition.courses, { _id: ObjectId(courseId) }))).catch(err => console.error(err))
+		.then(tuition => {
+			let course = res.send(_.find(tuition.courses, { _id: ObjectId(courseId) }));
+			course = course.toObject();
+			course.numberOfBatches = course.batches.length;
+			res.send(course);
+		}).catch(err => console.error(err));
 });
 
 // Batches
