@@ -257,7 +257,7 @@ route.get('/:tuitionId/dashboard', (req, res) => {
 				{ $match: { _id: ObjectId(tuitionId) } },
 				{ $project: { courses: 1, _id: 0 } },
 				{ $unwind: '$courses' },
-				{ $addFields: { 'courses.batches': { $size: '$courses.batches' } } },
+				{ $addFields: { 'courses.numberOfBatches': { $size: '$courses.batches' } } },
 				{ $replaceRoot: { newRoot: '$courses' } }
 			],
 			batches: [
