@@ -241,32 +241,38 @@ route.get('/super-admin', (req, res) => {
 		.then(tuitions => res.send(tuitions)).catch(err => console.error(err));
 });
 
-route.get('/dashboard/:_id', (req, res) => {
-	const { _id } = req.params;
+route.get('/:tuitionId/dashboard', (req, res) => {
+	const { tuitionId } = req.params;
 
 	Tuition.aggregate([
 	{
 		$facet: {
 			students: [
-				{ $match: { _id: ObjectId(_id) } },
+				{ $match: { _id: ObjectId(tuitionId) } },
 				{ $project: { students: 1, _id: 0 } },
 				{ $unwind: '$students' },
 				{ $replaceRoot: { newRoot: '$students' } }
 			],
 			courses: [
-				{ $match: { _id: ObjectId(_id) } },
+				{ $match: { _id: ObjectId(tuitionId) } },
 				{ $project: { courses: 1, _id: 0 } },
 				{ $unwind: '$courses' },
 				{ $addFields: { 'courses.batches': { $size: '$courses.batches' } } },
 				{ $replaceRoot: { newRoot: '$courses' } }
 			],
 			batches: [
-				{ $match: { _id: ObjectId(_id) } },
+				{ $match: { _id: ObjectId(tuitionId) } },
 				{ $project: { courses: 1, _id: 0 } },
 				{ $unwind: '$courses' },
 				{ $unwind: '$courses.batches' },
 				{ $addFields: { 'courses.batches.schedules': { $size: '$courses.batches.schedules' }, 'courses.batches.courseId': '$courses._id', 'courses.batches.courseCode': '$courses.code' } },
 				{ $replaceRoot: { newRoot: '$courses.batches' } }
+			],
+			discounts: [
+				{ $match: { _id: ObjectId(tuitionId) } },
+				{ $project: { discounts: 1, _id: 0 } },
+				{ $unwind: '$discounts' },
+				{ $replaceRoot: { newRoot: '$discounts' } }
 			]
 		},
 	}]).then(data => res.send(data[0])).catch(err => console.error(err));
