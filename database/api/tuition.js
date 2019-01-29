@@ -711,8 +711,11 @@ route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $push: { 'courses.$.batches': req.body } }, { new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
-			res.send(_.find(course.batches, { _id }))
-		}).catch(err => console.error(err))
+			const batch = _.find(course.batches, { _id });
+			batch.courseId = course._id;
+			batch.courseCode = course.code;
+			res.send(batch);
+		}).catch(err => console.error(err));
 });
 
 route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
@@ -727,7 +730,10 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
-			res.send(_.find(course.batches, { _id: ObjectId(batchId) }));
+			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			batch.courseId = course._id;
+			batch.courseCode = course.code;
+			res.send(batch);
 		}).catch(err => console.error(err));
 });
 
@@ -737,7 +743,10 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $pull: { 'courses.$.batches': { _id: batchId } } })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
-			res.send(_.find(course.batches, { _id: ObjectId(batchId) }));
+			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
+			batch.courseId = course._id;
+			batch.courseCode = course.code;
+			res.send(batch);
 		}).catch(err => console.error(err))
 });
 
