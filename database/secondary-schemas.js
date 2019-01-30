@@ -62,7 +62,7 @@ const CoursesOfferedSchema = new Schema({
 });
 
 const DiscountSchema = new Schema({
-	code: { type: String, lowercase: true },
+	code: { type: String, lowercase: true, required },
 	amount: { type: Number, required },
 	isPercent: { type: Boolean, default: false }
 });
