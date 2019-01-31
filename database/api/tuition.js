@@ -491,7 +491,10 @@ route.post('/:tuitionId/student/:studentId/payment', (req, res) => {
 	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), students: { $elemMatch: { _id: studentId } } }, { $push: { 'students.$.payments': req.body } }, { new: true })
 		.then(tuition => {
 			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
-			res.send(_.find(student.payments, { _id }));
+			let payment = _.find(student.payments, { _id });
+			payment = payment.toObject();
+			payment.studentId = student._id;
+			res.send(payment);
 		}).catch(err => console.error(err));
 });
 
@@ -503,7 +506,10 @@ route.put('/:tuitionId/student/:studentId/payment/:paymentId', (req, res) => {
 	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(studentId) }, { 'j._id': ObjectId(paymentId) }], new: true })
 		.then(tuition => {
 			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
-			res.send(_.find(student.payments, { _id: ObjectId(paymentId) }));
+			let payment = _.find(student.payments, { _id: ObjectId(paymentId) });
+			payment = payment.toObject();
+			payment.studentId = student._id;
+			res.send(payment);
 		}).catch(err => console.error(err));
 });
 
@@ -520,7 +526,10 @@ route.delete('/:tuitionId/student/:studentId/payment/:paymentId', (req, res) => 
 	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), students: { $elemMatch: { _id: ObjectId(studentId) } } }, { $pull: { 'students.$.payments': { _id: ObjectId(paymentId) } } })
 		.then(tuition => {
 			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
-			res.send(_.find(student.payments, { _id: ObjectId(paymentId) }));
+			let payment = _.find(student.payments, { _id: ObjectId(paymentId) });
+			payment = payment.toObject();
+			payment.studentId = student._id;
+			res.send(payment);
 		}).catch(err => console.error(err));
 });
 
@@ -565,7 +574,11 @@ route.post('/:tuitionId/student/:studentId/payment/:paymentId/installment', (req
 		.then(tuition => {
 			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
 			const payment = _.find(student.payments, { _id: ObjectId(paymentId) });
-			res.send(_.find(payment.installments, { _id }));
+			let installment = _.find(payment.installments, { _id });
+			installment = installment.toObject();
+			installment.studentId = student._id;
+			installment.paymentId = payment._id;
+			res.send(installment);
 		}).catch(err => console.error(err));
 });
 
@@ -578,7 +591,11 @@ route.put('/:tuitionId/student/:studentId/payment/:paymentId/installment/:instal
 		.then(tuition => {
 			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
 			const payment = _.find(student.payments, { _id: ObjectId(paymentId) });
-			res.send(_.find(payment.installments, { _id: ObjectId(installmentId) }));
+			let installment = _.find(payment.installments, { _id: ObjectId(installmentId) });
+			installment = installment.toObject();
+			installment.studentId = student._id;
+			installment.paymentId = payment._id;
+			res.send(installment);
 		}).catch(err => console.error(err));
 });
 
@@ -596,7 +613,11 @@ route.delete('/:tuitionId/student/:studentId/payment/:paymentId/installment/:ins
 		.then(tuition => {
 			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
 			const payment = _.find(student.payments, { _id: ObjectId(paymentId) });
-			res.send(_.find(payment.installments, { _id: ObjectId(installmentId) }));
+			let installment = _.find(payment.installments, { _id: ObjectId(installmentId) });
+			installment = installment.toObject();
+			installment.studentId = student._id;
+			installment.paymentId = payment._id;
+			res.send(installment);
 		}).catch(err => console.error(err));
 });
 
