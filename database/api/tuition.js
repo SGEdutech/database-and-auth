@@ -58,7 +58,7 @@ function getPromotedData(queryObject) {
 			.then(promotedInfos => {
 				const promotedListingIdArr = [];
 				promotedInfos.forEach(promotedInfo => promotedListingIdArr.push(promotedInfo.listingId));
-				return tuitionDbFunctions.getDataFromMultipleIds(promotedListingIdArr, queryObject)
+				return tuitionDbFunctions.getDataFromMultipleIds(promotedListingIdArr, queryObject);
 			})
 			.then(data => resolve(data)).catch(err => reject(err));
 	});
@@ -114,7 +114,7 @@ route.get('/claimed', (req, res) => {
 	});
 
 	Tuition.find({ _id: { $in: claimedTuitions } }).then(tuitions => res.send(tuitions))
-		.catch(err => console.error(err))
+		.catch(err => console.error(err));
 });
 
 route.get('/', (req, res) => {
@@ -222,7 +222,7 @@ route.get('/relevent', async (req, res) => {
 			$match: {
 				$or: [
 					{ tags: { $in: searchWordsRegexArr } },
-					{ name: { $in: searchWordsRegexArr } },
+					{ name: { $in: searchWordsRegexArr } }
 				]
 			}
 		}]);
@@ -274,7 +274,7 @@ route.get('/:tuitionId/dashboard', (req, res) => {
 				{ $unwind: '$discounts' },
 				{ $replaceRoot: { newRoot: '$discounts' } }
 			]
-		},
+		}
 	}]).then(data => res.send(data[0])).catch(err => console.error(err));
 });
 
@@ -376,7 +376,7 @@ route.post('/:tuitionId/student', (req, res) => {
 			const { courseId, batchId } = req.body.batchInfo;
 
 			updateQuery = { $push: { 'students': { $each: req.body.students }, 'courses.$[i].batches.$[j].students': { $each: idsOfAddedStudents } } };
-			options = { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true }
+			options = { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true };
 		} else {
 			updateQuery = { $push: { students: { $each: req.body.students } } };
 			options = { new: true };
@@ -394,7 +394,7 @@ route.post('/:tuitionId/student', (req, res) => {
 			const { courseId, batchId } = req.body.batchInfo;
 
 			updateQuery = { $push: { 'students': req.body, 'courses.$[i].batches.$[j].students': _id } };
-			options = { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true }
+			options = { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true };
 		} else {
 			updateQuery = { $push: { 'students': req.body } };
 			options = { new: true };
@@ -423,7 +423,7 @@ route.post('/:tuitionId/student', (req, res) => {
 route.put('/:tuitionId/student/:studentId', (req, res) => {
 	const { tuitionId, studentId } = req.params;
 
-	prependToObjKey(req.body, 'students.$.')
+	prependToObjKey(req.body, 'students.$.');
 
 	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), students: { $elemMatch: { _id: ObjectId(studentId) } } }, req.body, { new: true })
 		.then(tuition => res.send(_.find(tuition.students, { _id: ObjectId(studentId) })))
@@ -435,7 +435,7 @@ route.delete('/:tuitionId/student/all', (req, res) => {
 
 	Tuition.findByIdAndUpdate(tuitionId, { students: [] })
 		.then(tuition => res.send(tuition.students))
-		.catch(err => console.error(err))
+		.catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/student/:studentId', (req, res) => {
@@ -492,7 +492,7 @@ route.post('/:tuitionId/student/:studentId/payment', (req, res) => {
 		.then(tuition => {
 			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
 			res.send(_.find(student.payments, { _id }));
-		}).catch(err => console.error(err))
+		}).catch(err => console.error(err));
 });
 
 route.put('/:tuitionId/student/:studentId/payment/:paymentId', (req, res) => {
@@ -537,7 +537,7 @@ route.get('/:tuitionId/student/:studentId/payment/:paymentId/installment/all', (
 		{ $match: { 'students.payments._id': ObjectId(paymentId) } },
 		{ $unwind: '$students.payments.installments' },
 		{ $replaceRoot: { newRoot: '$students.payments.installments' } }
-	]).then(data => res.send(data)).catch(err => console.error(err))
+	]).then(data => res.send(data)).catch(err => console.error(err));
 });
 
 route.get('/:tuitionId/student/:studentId/payment/:paymentId/installment/:installmentId', (req, res) => {
@@ -553,7 +553,7 @@ route.get('/:tuitionId/student/:studentId/payment/:paymentId/installment/:instal
 		{ $unwind: '$students.payments.installments' },
 		{ $match: { 'students.payments.installments._id': ObjectId(installmentId) } },
 		{ $replaceRoot: { newRoot: '$students.payments.installments' } }
-	]).then(data => res.send(data)).catch(err => console.error(err))
+	]).then(data => res.send(data)).catch(err => console.error(err));
 });
 
 route.post('/:tuitionId/student/:studentId/payment/:paymentId/installment', (req, res) => {
@@ -566,7 +566,7 @@ route.post('/:tuitionId/student/:studentId/payment/:paymentId/installment', (req
 			const student = _.find(tuition.students, { _id: ObjectId(studentId) });
 			const payment = _.find(student.payments, { _id: ObjectId(paymentId) });
 			res.send(_.find(payment.installments, { _id }));
-		}).catch(err => console.error(err))
+		}).catch(err => console.error(err));
 });
 
 route.put('/:tuitionId/student/:studentId/payment/:paymentId/installment/:installmentId', (req, res) => {
@@ -586,7 +586,7 @@ route.delete('/:tuitionId/student/:studentId/payment/:paymentId/installment/all'
 	const { tuitionId, studentId, paymentId } = req.params;
 
 	Tuition.findByIdAndUpdate(tuitionId, { 'students.$[i].payments.$[j].installments': [] }, { arrayFilters: [{ 'i._id': ObjectId(studentId) }, { 'j._id': ObjectId(paymentId) }] })
-		.then(() => res.send([])).catch(err => console.error(err))
+		.then(() => res.send([])).catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/student/:studentId/payment/:paymentId/installment/:installmentId', (req, res) => {
@@ -622,7 +622,7 @@ route.get('/course/claimed', (req, res) => {
 		{ $addFields: { 'courses.tuitionId': '$_id' } },
 		{ $project: { _id: false } },
 		{ $replaceRoot: { newRoot: '$courses' } }
-	]).then(courses => res.send(courses)).catch(err => console.error(err))
+	]).then(courses => res.send(courses)).catch(err => console.error(err));
 });
 
 route.get('/:tuitionId/course', (req, res) => {
@@ -705,7 +705,7 @@ route.get('/batch/claimed', (req, res) => {
 });
 
 route.get('/:tuitionId/batch', (req, res) => {
-	if (req.query._id === undefined) throw new Error('Batch id not provided')
+	if (req.query._id === undefined) throw new Error('Batch id not provided');
 
 	const { tuitionId } = req.params;
 	const batchId = req.query._id;
@@ -769,7 +769,7 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 			batch.courseId = course._id;
 			batch.courseCode = course.code;
 			res.send(batch);
-		}).catch(err => console.error(err))
+		}).catch(err => console.error(err));
 });
 
 route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
@@ -782,7 +782,7 @@ route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => 
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
 			res.send(batch.students);
-		}).catch(err => console.error(err))
+		}).catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
@@ -868,7 +868,7 @@ route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule', (req, res) =>
 route.put('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (req, res) => {
 	const { tuitionId, courseId, batchId, scheduleId } = req.params;
 
-	prependToObjKey(req.body, 'courses.$[i].batches.$[j].schedules.$[k].')
+	prependToObjKey(req.body, 'courses.$[i].batches.$[j].schedules.$[k].');
 
 	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }, { 'k._id': ObjectId(scheduleId) }], new: true })
 		.then(tuition => {
@@ -961,7 +961,7 @@ route.get('/forum/claimed', (req, res) => {
 		{ $addFields: { 'forums.tuitionId': '$_id' } },
 		{ $replaceRoot: { newRoot: '$forums' } }
 	]).then(forums => res.send(forums)).catch(err => console.error(err));
-})
+});
 
 route.get('/:tuitionId/forum', (req, res) => {
 	const { tuitionId } = req.params;
@@ -1011,7 +1011,7 @@ route.post('/:tuitionId/forum/:forumId/comment', (req, res) => {
 	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), forums: { $elemMatch: { _id: ObjectId(forumId) } } }, { $push: { 'forums.$.comments': req.body } }, { new: true })
 		.then(tuition => {
 			const forum = _.find(tuition.forums, { _id: ObjectId(forumId) });
-			res.send(_.find(forum.comments, { _id }))
+			res.send(_.find(forum.comments, { _id }));
 		}).catch(err => console.error(err));
 });
 
@@ -1023,7 +1023,7 @@ route.put('/:tuitionId/forum/:forumId/comment/:commentId', (req, res) => {
 	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(forumId) }, { 'j._id': ObjectId(commentId) }], new: true })
 		.then(tuition => {
 			const forum = _.find(tuition.forums, { _id: ObjectId(forumId) });
-			res.send(_.find(forum.comments, { _id: ObjectId(commentId) }))
+			res.send(_.find(forum.comments, { _id: ObjectId(commentId) }));
 		}).catch(err => console.error(err));
 });
 
@@ -1033,7 +1033,7 @@ route.delete('/:tuitionId/forum/:forumId/comment/:commentId', (req, res) => {
 	Tuition.findOneAndUpdate({ _id: tuitionId, forums: { $elemMatch: { _id: forumId } } }, { $pull: { 'forums.$.comments': { _id: commentId } } })
 		.then(tuition => {
 			const forum = _.find(tuition.forums, { _id: ObjectId(forumId) });
-			res.send(_.find(forum.comments, { _id: ObjectId(commentId) }))
+			res.send(_.find(forum.comments, { _id: ObjectId(commentId) }));
 		}).catch(err => console.error(err));
 });
 
@@ -1106,7 +1106,7 @@ route.post('/:tuitionId/lead/:leadId/comment', (req, res) => {
 	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), leads: { $elemMatch: { _id: ObjectId(leadId) } } }, { $push: { 'leads.$.comments': comment }, $set: req.body }, { new: true })
 		.then(tuition => {
 			const leads = _.find(tuition.leads, { _id: ObjectId(leadId) });
-			res.send(_.find(leads.comments, { _id }))
+			res.send(_.find(leads.comments, { _id }));
 		}).catch(err => console.error(err));
 });
 
@@ -1118,7 +1118,7 @@ route.put('/:tuitionId/lead/:leadId/comment/:commentId', (req, res) => {
 	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(leadId) }, { 'j._id': ObjectId(commentId) }], new: true })
 		.then(tuition => {
 			const lead = _.find(tuition.leads, { _id: ObjectId(leadId) });
-			res.send(_.find(lead.comments, { _id: ObjectId(commentId) }))
+			res.send(_.find(lead.comments, { _id: ObjectId(commentId) }));
 		}).catch(err => console.error(err));
 });
 
@@ -1128,7 +1128,7 @@ route.delete('/:tuitionId/lead/:leadId/comment/:commentId', (req, res) => {
 	Tuition.findOneAndUpdate({ _id: tuitionId, leads: { $elemMatch: { _id: ObjectId(leadId) } } }, { $pull: { 'leads.$.comments': { _id: commentId } } })
 		.then(tuition => {
 			const lead = _.find(tuition.leads, { _id: ObjectId(leadId) });
-			res.send(_.find(lead.comments, { _id: ObjectId(commentId) }))
+			res.send(_.find(lead.comments, { _id: ObjectId(commentId) }));
 		}).catch(err => console.error(err));
 });
 
@@ -1142,7 +1142,7 @@ route.get('/notification/claimed', (req, res) => {
 	});
 
 	Notification.aggregate([
-		{ $match: { senderId: { $in: claimedTuitions } } },
+		{ $match: { senderId: { $in: claimedTuitions } } }
 	]).then(notification => res.send(notification)).catch(err => console.error(err));
 });
 
@@ -1151,7 +1151,7 @@ route.get('/:tuitionId/discount/all', (req, res) => {
 	const { tuitionId } = req.params;
 
 	Tuition.findById(tuitionId).select('discounts')
-		.then(tuition => res.send(tuition.discounts)).catch(err => console.error(err))
+		.then(tuition => res.send(tuition.discounts)).catch(err => console.error(err));
 });
 
 route.get('/discount/claimed', (req, res) => {
@@ -1185,27 +1185,27 @@ route.get('/:tuitionId/discount', (req, res) => {
 route.post('/:tuitionId/discount', (req, res) => {
 	const { tuitionId } = req.params;
 	const _id = new ObjectId();
-	req.body._id = _id
+	req.body._id = _id;
 
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { discounts: req.body } }, { new: true })
 		.then(tuition => res.send(_.find(tuition.discounts, { _id })))
-		.catch(err => console.error(err))
+		.catch(err => console.error(err));
 });
 
 route.put('/:tuitionId/discount/:discountId', (req, res) => {
 	const { tuitionId, discountId } = req.params;
-	prependToObjKey(req.body, 'discounts.$.')
+	prependToObjKey(req.body, 'discounts.$.');
 
 	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), discounts: { $elemMatch: { _id: ObjectId(discountId) } } }, req.body, { new: true })
 		.then(tuition => res.send(_.find(tuition.discounts, { _id: ObjectId(discountId) })))
-		.catch(err => console.error(err))
+		.catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/discount/all', (req, res) => {
 	const { tuitionId } = req.params;
 
 	Tuition.findByIdAndUpdate(tuitionId, { discounts: [] })
-		.then(() => res.send([])).catch(err => console.error(err))
+		.then(() => res.send([])).catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/discount/:discountId', (req, res) => {
@@ -1213,7 +1213,7 @@ route.delete('/:tuitionId/discount/:discountId', (req, res) => {
 
 	Tuition.findByIdAndUpdate(tuitionId, { $pull: { discounts: { _id: ObjectId(discountId) } } })
 		.then(tuition => res.send(_.find(tuition.discounts, { _id: ObjectId(discountId) })))
-		.catch(err => console.error(err))
+		.catch(err => console.error(err));
 });
 
 route.post('/:tuitionId/mail', (req, res) => {
@@ -1260,8 +1260,8 @@ route.get('/resource/claimed', (req, res) => {
 		{ $addFields: { 'resources.tuitionId': '$_id' } },
 		{ $project: { _id: false } },
 		{ $replaceRoot: { newRoot: '$resources' } }
-	]).then(resources => res.send(resources)).catch(err => console.error(err))
-})
+	]).then(resources => res.send(resources)).catch(err => console.error(err));
+});
 
 route.get('/:tuitionId/resource', (req, res) => {
 	const { tuitionId } = req.params;
@@ -1310,7 +1310,7 @@ route.delete('/:tuitionId/resource/:resourceId', (req, res) => {
 			// Test
 			res.send(deletedResource);
 			return deleteThisShit(path.join(process.cwd(), deletedResource.path));
-		}).catch(err => console.error(err))
+		}).catch(err => console.error(err));
 });
 
 route.post('/email-reciept', (req, res) => {

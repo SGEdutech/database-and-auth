@@ -16,6 +16,7 @@ const InstallmentSchema = new Schema({
 const PaymentSchema = new Schema({
 	courseId: Schema.Types.ObjectId,
 	courseFee: { type: Number, required },
+	taxAmount: Number,
 	courseGstPercentage: { type: Number, default: 0 },
 	discountAmount: Number,
 	discountReason: String,
@@ -24,7 +25,6 @@ const PaymentSchema = new Schema({
 });
 
 const StudentSchema = new Schema({
-	eduatlasId: String,
 	rollNumber: { type: String, lowercase: true, required },
 	name: { type: String, lowercase: true, required },
 	email: { type: String, lowercase: true, required },
