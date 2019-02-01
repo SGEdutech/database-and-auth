@@ -14,7 +14,7 @@ const InstallmentSchema = new Schema({
 });
 
 const PaymentSchema = new Schema({
-	courseId: Schema.Types.ObjectId,
+	courseCode: { type: String, required },
 	courseFee: { type: Number, required },
 	taxAmount: Number,
 	courseGstPercentage: { type: Number, default: 0 },
