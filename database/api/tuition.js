@@ -241,6 +241,7 @@ route.get('/super-admin', (req, res) => {
 		.then(tuitions => res.send(tuitions)).catch(err => console.error(err));
 });
 
+// TODO: Filter unwanted data before sending
 route.get('/:tuitionId/dashboard', (req, res) => {
 	const { tuitionId } = req.params;
 
@@ -267,6 +268,15 @@ route.get('/:tuitionId/dashboard', (req, res) => {
 				{ $unwind: '$courses.batches' },
 				{ $addFields: { 'courses.batches.schedules': { $size: '$courses.batches.schedules' }, 'courses.batches.courseId': '$courses._id', 'courses.batches.courseCode': '$courses.code' } },
 				{ $replaceRoot: { newRoot: '$courses.batches' } }
+			],
+			schedules: [
+				{ $match: { _id: ObjectId(tuitionId) } },
+				{ $project: { courses: 1, _id: 0 } },
+				{ $unwind: '$courses' },
+				{ $unwind: '$courses.batches' },
+				{ $unwind: '$courses.batches.schedules' },
+				{ $addFields: { 'courses.batches.schedules.courseId': '$courses._id', 'courses.batches.schedules.batchId': '$courses.batches._id' } },
+				{ $replaceRoot: { newRoot: '$courses.batches.schedules' } }
 			],
 			discounts: [
 				{ $match: { _id: ObjectId(tuitionId) } },
