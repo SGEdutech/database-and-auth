@@ -879,8 +879,16 @@ route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule', (req, res) =>
 				_idArr = _idArr.map(_idElement => _idElement.toString());
 				// Can't change object key in batches.schedule because of some mongoose object bullshit
 				schedulesAdded = batch.schedules.filter(schedule => _idArr.indexOf(schedule._id.toString()) !== -1);
+				schedulesAdded.forEach(scheduleObj => {
+					scheduleObj.toObject();
+					scheduleObj.courseId = course._id;
+					scheduleObj.batchId = batch._id;
+				});
 			} else {
 				schedulesAdded = _.find(batch.schedules, { _id });
+				schedulesAdded.toObject();
+				schedulesAdded.courseId = course._id;
+				schedulesAdded.batchId = batch._id;
 			}
 			res.send(schedulesAdded);
 		}).catch(err => console.error(err));
@@ -895,7 +903,11 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (r
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
-			res.send(_.find(batch.schedules, { _id: ObjectId(scheduleId) }));
+			const schedule = _.find(batch.schedules, { _id: ObjectId(scheduleId) });
+			schedule.toObject();
+			schedule.courseId = course._id;
+			schedule.batch._id = batchId;
+			res.send(schedule);
 		}).catch(err => console.error(err));
 });
 
@@ -906,7 +918,11 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId',
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
-			res.send(_.find(batch.schedules, { _id: ObjectId(scheduleId) }));
+			const schedule = _.find(batch.schedules, { _id: ObjectId(scheduleId) });
+			schedule.toObject();
+			schedule.courseId = course._id;
+			schedule.batch._id = batchId;
+			res.send(schedule);
 		}).catch(err => console.error(err));
 });
 
