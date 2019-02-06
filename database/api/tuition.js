@@ -959,7 +959,8 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (r
 			let schedule = _.find(batch.schedules, { _id: ObjectId(scheduleId) });
 			schedule = schedule.toObject();
 			schedule.courseId = course._id;
-			schedule.batch._id = batchId;
+			schedule.batchId = batch._id;
+			res.send(schedule);
 		}).catch(err => console.error(err));
 });
 
