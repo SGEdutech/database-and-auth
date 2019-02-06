@@ -862,10 +862,17 @@ route.post('/:tuitionId/schedule', (req, res) => {
 	if (Array.isArray(req.body.schedules) === false) req.body.schedules = [req.body.schedules];
 	if (Array.isArray(req.body.batches) === false) req.body.batches = [req.body.batches];
 
+	const newScheduleIds = [];
+	const schedulesArr = req.body.schedules;
+	const batchesArr = req.body.batches;
+
+	schedulesArr.forEach(schedule => {
+		const _id = new ObjectId();
+		schedule._id = _id;
+		newScheduleIds.push(_id);
+	});
+
 	Tuition.findById(tuitionId).then(tuition => {
-		const schedulesArr = req.body.schedules;
-		const batchesArr = req.body.batches;
-		console.log(batchesArr);
 		tuition.courses.forEach(course => {
 			course.batches.forEach(batch => {
 				if (batchesArr.find(batchId => batchId === batch._id.toString()) === undefined) return;
@@ -873,7 +880,22 @@ route.post('/:tuitionId/schedule', (req, res) => {
 			});
 		});
 		return tuition.save();
-	}).then(data => res.send(data)).catch(err => console.error(err));
+	}).then(tuition => {
+		let addedSchedules = [];
+		tuition.courses.forEach(course => {
+			course.batches.forEach(batch => {
+				let addedBatchSchedules = batch.schedules.filter(schedule => Boolean(newScheduleIds.find(scheduleId => scheduleId.toString() === schedule._id.toString())));
+				// Converting mongoose object to js object to modify it
+				addedBatchSchedules = addedBatchSchedules.map(schedule => schedule.toObject());
+				addedBatchSchedules.forEach(schedule => {
+					schedule.courseId = course._id;
+					schedule.batchId = batch._id;
+				});
+				addedSchedules = [...addedSchedules, ...addedBatchSchedules];
+			});
+		});
+		res.send(addedSchedules);
+	}).catch(err => console.error(err));
 });
 
 route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule', (req, res) => {
