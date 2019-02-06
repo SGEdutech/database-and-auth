@@ -275,7 +275,7 @@ route.get('/:tuitionId/dashboard', (req, res) => {
 				{ $unwind: '$courses' },
 				{ $unwind: '$courses.batches' },
 				{ $unwind: '$courses.batches.schedules' },
-				{ $addFields: { 'courses.batches.schedules.courseId': '$courses._id', 'courses.batches.schedules.batchId': '$courses.batches._id' } },
+				{ $addFields: { 'courses.batches.schedules.courseId': '$courses._id', 'courses.batches.schedules.batchId': '$courses.batches._id', 'courses.batches.schedules.batchCode': '$courses.batches.code' } },
 				{ $replaceRoot: { newRoot: '$courses.batches.schedules' } }
 			],
 			discounts: [
@@ -890,6 +890,7 @@ route.post('/:tuitionId/schedule', (req, res) => {
 				addedBatchSchedules.forEach(schedule => {
 					schedule.courseId = course._id;
 					schedule.batchId = batch._id;
+					schedule.batchCode = batch.code;
 				});
 				addedSchedules = [...addedSchedules, ...addedBatchSchedules];
 			});
@@ -936,12 +937,14 @@ route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule', (req, res) =>
 					scheduleObj.toObject();
 					scheduleObj.courseId = course._id;
 					scheduleObj.batchId = batch._id;
+					scheduleObj.batchCode = batch.code;
 				});
 			} else {
 				schedulesAdded = _.find(batch.schedules, { _id });
 				schedulesAdded.toObject();
 				schedulesAdded.courseId = course._id;
 				schedulesAdded.batchId = batch._id;
+				schedulesAdded.batchCode = batch.code;
 			}
 			res.send(schedulesAdded);
 		}).catch(err => console.error(err));
@@ -960,6 +963,7 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (r
 			schedule = schedule.toObject();
 			schedule.courseId = course._id;
 			schedule.batchId = batch._id;
+			schedule.batchCode = batch.code;
 			res.send(schedule);
 		}).catch(err => console.error(err));
 });
@@ -976,6 +980,7 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId',
 			schedule = schedule.toObject();
 			schedule.courseId = course._id;
 			schedule.batchId = batch._id;
+			schedule.batchCode = batch.code;
 			res.send(schedule);
 		}).catch(err => console.error(err));
 });
