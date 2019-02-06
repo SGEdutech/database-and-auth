@@ -960,6 +960,7 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (r
 			schedule = schedule.toObject();
 			schedule.courseId = course._id;
 			schedule.batchId = batch._id;
+			res.send(schedule);
 		}).catch(err => console.error(err));
 });
 
