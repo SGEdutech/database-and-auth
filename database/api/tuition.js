@@ -956,14 +956,14 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (r
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
-			const schedule = _.find(batch.schedules, { _id: ObjectId(scheduleId) });
-			schedule.toObject();
+			let schedule = _.find(batch.schedules, { _id: ObjectId(scheduleId) });
+			schedule = schedule.toObject();
 			schedule.courseId = course._id;
 			schedule.batch._id = batchId;
-			res.send(schedule);
 		}).catch(err => console.error(err));
 });
 
+// TODO: Send valid data when id not found
 route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId', (req, res) => {
 	const { tuitionId, courseId, batchId, scheduleId } = req.params;
 
@@ -971,10 +971,10 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/schedule/:scheduleId',
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
-			const schedule = _.find(batch.schedules, { _id: ObjectId(scheduleId) });
-			schedule.toObject();
+			let schedule = _.find(batch.schedules, { _id: ObjectId(scheduleId) });
+			schedule = schedule.toObject();
 			schedule.courseId = course._id;
-			schedule.batch._id = batchId;
+			schedule.batchId = batch._id;
 			res.send(schedule);
 		}).catch(err => console.error(err));
 });
