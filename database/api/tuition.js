@@ -855,6 +855,27 @@ route.get('/schedule/claimed', (req, res) => {
 	]).then(schedules => res.send(schedules)).catch(err => console.error(err));
 });
 
+// TODO: Write mongo query
+route.post('/:tuitionId/schedule', (req, res) => {
+	const { tuitionId } = req.params;
+	if (req.body.schedules === undefined) throw new Error('Schedules not provided');
+	if (Array.isArray(req.body.schedules) === false) req.body.schedules = [req.body.schedules];
+	if (Array.isArray(req.body.batches) === false) req.body.batches = [req.body.batches];
+
+	Tuition.findById(tuitionId).then(tuition => {
+		const schedulesArr = req.body.schedules;
+		const batchesArr = req.body.batches;
+		console.log(batchesArr);
+		tuition.courses.forEach(course => {
+			course.batches.forEach(batch => {
+				if (batchesArr.find(batchId => batchId === batch._id.toString()) === undefined) return;
+				batch.schedules = [...batch.schedules, ...schedulesArr];
+			});
+		});
+		return tuition.save();
+	}).then(data => res.send(data)).catch(err => console.error(err));
+});
+
 route.post('/:tuitionId/course/:courseId/batch/:batchId/schedule', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
 	let _idArr = [];
