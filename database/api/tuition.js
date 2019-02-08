@@ -287,7 +287,7 @@ route.get('/:tuitionId/dashboard', (req, res) => {
 		}
 	}]).then(data => {
 		data = data[0];
-		data.user = req.user;
+		data.user = req.user || {};
 		res.send(data);
 	}).catch(err => console.error(err));
 });
