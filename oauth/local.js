@@ -65,7 +65,7 @@ route.post('/signup', (req, res) => {
 				// create AJAX request(refresh button) from frontend to check for username uniqueness
 			} else {
 				APIHelperFunctions.addCollection(req.body)
-					.then(data => res.redirect('/')).catch(err => console.error(err));
+					.then(data => res.end()).catch(err => console.error(err));
 			}
 		})
 		.catch(err => console.error(err));
