@@ -285,7 +285,11 @@ route.get('/:tuitionId/dashboard', (req, res) => {
 				{ $replaceRoot: { newRoot: '$discounts' } }
 			]
 		}
-	}]).then(data => res.send(data[0])).catch(err => console.error(err));
+	}]).then(data => {
+		data = data[0];
+		data.user = req.user;
+		res.send(data);
+	}).catch(err => console.error(err));
 });
 
 route.post('/add/:_id/:arrayName', (req, res) => {

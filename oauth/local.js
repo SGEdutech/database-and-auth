@@ -41,12 +41,7 @@ passport.use(new LocalStrategy((username, password, done) => {
 		});
 }));
 
-route.post('/login', passport.authenticate('local'
-	/*, {
-	    failureRedirect: '/login-page.html',
-	    successRedirect: '/User-dashboard.html',
-	}*/
-), (req, res) => {
+route.post('/login', passport.authenticate('local'), (req, res) => {
 	APIHelperFunctions.getSpecificData({ _id: req.user })
 		.then(user => res.send(user)).catch(err => console.error(err));
 });
@@ -57,6 +52,7 @@ route.use('/logout', (req, res) => {
 
 // post request to sign-up don't need passportJS
 route.post('/signup', (req, res) => {
+	// TODO: Write better code
 	APIHelperFunctions.getSpecificData({ primaryEmail: req.body.primaryEmail }) // regex to check if _id is valid mongo id- /^[0-9a-fA-F]{24}$/
 		.then(currentUser => {
 			if (currentUser) {
