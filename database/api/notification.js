@@ -38,11 +38,9 @@ route.get('/user-notification', (req, res) => {
 });
 
 route.post('/', (req, res) => {
-	if (req.body.receivers === undefined) throw new Error('Recievers not provided');
-	if (Array.isArray(req.body.receivers) === false) throw new Error('Recievers is not an array');
-	req.body.receivers = req.body.receivers.map(reciever => {
-		return { userEmail: reciever };
-	});
+	if (req.body.receivers === undefined) throw new Error('Receivers not provided');
+	if (Array.isArray(req.body.receivers) === false) req.body.receivers = [req.body.receivers];
+	req.body.receivers = req.body.receivers.map(reciever => ({ userEmail: reciever }));
 
 	Notification.create(req.body).then(newNotification => res.send(newNotification)).catch(err => console.error(err));
 });
@@ -53,7 +51,7 @@ route.put('/user-read', (req, res) => {
 	const userEmail = req.user.primaryEmail;
 
 	Notification.updateMany({ _id: { $in: idsOfNotificationsToBeMarkedAsRead }, receivers: { $elemMatch: { userEmail } } }, { 'receivers.$.readAt': Date.now() })
-		.then(data => res.send(data)).catch(err => console.error(err))
+		.then(data => res.send(data)).catch(err => console.error(err));
 });
 
 route.delete('/user-notification', (req, res) => {

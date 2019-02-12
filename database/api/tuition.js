@@ -242,10 +242,10 @@ route.get('/super-admin', (req, res) => {
 });
 
 // TODO: Filter unwanted data before sending
-route.get('/:tuitionId/dashboard', (req, res) => {
+route.get('/:tuitionId/dashboard', async (req, res) => {
 	const { tuitionId } = req.params;
 
-	Tuition.aggregate([
+	const tuitionQuery = Tuition.aggregate([
 	{
 		$facet: {
 			students: [
@@ -285,11 +285,25 @@ route.get('/:tuitionId/dashboard', (req, res) => {
 				{ $replaceRoot: { newRoot: '$discounts' } }
 			]
 		}
-	}]).then(data => {
-		data = data[0];
-		data.user = req.user || {};
-		res.send(data);
-	}).catch(err => console.error(err));
+	}]);
+
+	const notificationQuery = Notification.find({ senderId: tuitionId });
+
+	const promiseArr = [tuitionQuery, notificationQuery];
+
+	let [tuitionData, notificationData] = await Promise.all(promiseArr);
+
+	tuitionData = tuitionData[0];
+
+	tuitionData.notifications = notificationData;
+
+	res.send(tuitionData);
+
+	// .then(data => {
+	// 	data = data[0];
+	// 	data.user = req.user || {};
+	// 	res.send(data);
+	// }).catch(err => console.error(err));
 });
 
 route.post('/add/:_id/:arrayName', (req, res) => {
