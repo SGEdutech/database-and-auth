@@ -292,7 +292,7 @@ route.get('/:tuitionId/dashboard', async (req, res) => {
 	const [tuitionData, notificationData] = await Promise.all(promiseArr);
 	data = tuitionData[0];
 	data.notifications = notificationData;
-	data.userInfo = req.userInfo || {};
+	data.user = req.user || {};
 	res.send(data);
 });
 
