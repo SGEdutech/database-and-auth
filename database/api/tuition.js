@@ -288,22 +288,12 @@ route.get('/:tuitionId/dashboard', async (req, res) => {
 	}]);
 
 	const notificationQuery = Notification.find({ senderId: tuitionId });
-
 	const promiseArr = [tuitionQuery, notificationQuery];
-
-	let [tuitionData, notificationData] = await Promise.all(promiseArr);
-
-	tuitionData = tuitionData[0];
-
-	tuitionData.notifications = notificationData;
-
-	res.send(tuitionData);
-
-	// .then(data => {
-	// 	data = data[0];
-	// 	data.user = req.user || {};
-	// 	res.send(data);
-	// }).catch(err => console.error(err));
+	const [tuitionData, notificationData] = await Promise.all(promiseArr);
+	data = tuitionData[0];
+	data.notifications = notificationData;
+	data.userInfo = req.userInfo || {};
+	res.send(data);
 });
 
 route.post('/add/:_id/:arrayName', (req, res) => {
