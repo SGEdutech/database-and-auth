@@ -639,6 +639,97 @@ route.delete('/:tuitionId/student/:studentId/payment/:paymentId/installment/:ins
 		}).catch(err => console.error(err));
 });
 
+// Requests
+route.get('/:tuitionId/request/all', async (req, res) => {
+	try {
+		const { tuitionId } = req.params;
+
+		const tuition = await Tuition.findById(tuitionId);
+		if (Boolean(tuition) === false) {
+			res.end();
+			return;
+		}
+		res.send(tuition.requests);
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.get('/:tuitionId/request/:requestId', async (req, res) => {
+	try {
+		const { tuitionId, requestId } = req.params;
+
+		const tuition = await Tuition.findById(tuitionId);
+		if (Boolean(tuition) === false) {
+			res.end();
+			return;
+		}
+		res.send(_.find(tuition.requests, { _id: ObjectId(requestId) }));
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.post('/:tuitionId/request', async (req, res) => {
+	try {
+		const { tuitionId } = req.params;
+		const id = new ObjectId();
+		req.body._id = id;
+
+		const tuition = await Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), requests: { $not: { $elemMatch: { email: req.body.email } } }, students: { $not: { $elemMatch: { email: req.body.email } } } }, { $push: { requests: req.body } }, { new: true });
+		if (Boolean(tuition) === false) {
+			res.end();
+			return;
+		}
+		res.send(_.find(tuition.requests.toObject(), { _id: id }));
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.put('/:tuitionId/request/:requestId', async (req, res) => {
+	try {
+		const { tuitionId, requestId } = req.params;
+		prependToObjKey(req.body, 'requests.$.');
+		const tuition = await Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), requests: { $elemMatch: { _id: ObjectId(requestId) } } }, req.body, { new: true });
+		if (Boolean(tuition) === false) {
+			res.end();
+			return;
+		}
+		res.send(_.find(tuition.requests.toObject(), { _id: ObjectId(requestId) }));
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.delete('/:tuitionId/request/all', async (req, res) => {
+	try {
+		const { tuitionId } = req.params;
+		const tuition = await Tuition.findByIdAndUpdate(tuitionId, { requests: [] });
+		if (Boolean(tuition) === false) {
+			res.end();
+			return;
+		}
+		res.send([]);
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.delete('/:tuitionId/request/:requestId', async (req, res) => {
+	try {
+		const { tuitionId, requestId } = req.params;
+		const tuition = await Tuition.findByIdAndUpdate(tuitionId, { $pull: { requests: { _id: ObjectId(requestId) } } });
+		if (Boolean(tuition) === false) {
+			res.end();
+			return;
+		}
+		res.send(_.find(tuition.requests.toObject(), { _id: ObjectId(requestId) }));
+	} catch (error) {
+		console.error(error);
+	}
+});
+
 // Courses
 route.get('/:tuitionId/course/all', (req, res) => {
 	const { tuitionId } = req.params;
@@ -1398,7 +1489,6 @@ route.put('/:tuitionId/resource/:resourceId', (req, res) => {
 
 	prependToObjKey(req.body, 'resources.$.');
 
-	// Mongoose automaticly calls $set for object in second argument
 	Tuition.findOneAndUpdate({ '_id': tuitionId, 'resources._id': resourceId }, req.body, { new: true })
 		.then(tuition => res.send(_.find(tuition.resources, { _id: ObjectId(resourceId) })))
 		.catch(err => console.error(err));
