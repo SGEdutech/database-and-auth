@@ -14,7 +14,7 @@ route.get('/claimed', (req, res) => {
 
 	Notification.aggregate([
 		{ $match: { senderId: { $in: claimedTuitions } } }
-	]).then(notification => res.send(notification)).catch(err => console.error(err))
+	]).then(notification => res.send(notification)).catch(err => console.error(err));
 });
 
 route.get('/all', (req, res) => {

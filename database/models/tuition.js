@@ -8,7 +8,8 @@ const {
 	CoursesOfferedSchema,
 	DiscountSchema,
 	ResourceSchema,
-	GallerySchema
+	GallerySchema,
+	RequestSchema
 } = require('../secondary-schemas');
 const ViewsOrHitsSchema = require('../views-or-hits-schema');
 const CourseSchema = require('./course-and-batch');
@@ -65,13 +66,14 @@ const TuitionSchema = new Schema({
 	views: ViewsOrHitsSchema,
 	hits: ViewsOrHitsSchema,
 	bookmarks: Number,
-	recieptConfigBusinessName: { type: String },
+	recieptConfigBusinessName: String,
 	recieptConfigAddressLine1: String,
 	recieptConfigAddressLine2: String,
 	recieptConfigCity: String,
 	recieptConfigState: String,
 	recieptConfigPinCode: String,
 	recieptConfigGstNumber: String,
+	requests: [RequestSchema],
 	leads: [LeadsSchema],
 	signedBy: String,
 	claimedBy: String,

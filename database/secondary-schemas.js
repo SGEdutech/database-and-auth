@@ -76,6 +76,11 @@ const ResourceSchema = new Schema({
 	ytUrl: String
 });
 
+const RequestSchema = new Schema({
+	name: { type: String, required },
+	email: { type: String, required }
+});
+
 exports = module.exports = {
 	ContactSchema,
 	ReviewsOwnedSchema,
@@ -88,5 +93,6 @@ exports = module.exports = {
 	CoursesOfferedSchema,
 	ClaimSchema,
 	DiscountSchema,
-	ResourceSchema
+	ResourceSchema,
+	RequestSchema
 };
