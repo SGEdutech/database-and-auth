@@ -283,6 +283,12 @@ route.get('/:tuitionId/dashboard', async (req, res) => {
 					{ $project: { discounts: 1, _id: 0 } },
 					{ $unwind: '$discounts' },
 					{ $replaceRoot: { newRoot: '$discounts' } }
+				],
+				requests: [
+					{ $match: { _id: ObjectId(tuitionId) } },
+					{ $project: { requsest: 1, _id: 0 } },
+					{ $unwind: '$requsest' },
+					{ $replaceRoot: { newRoot: '$requsest' } }
 				]
 			}
 		}]);
