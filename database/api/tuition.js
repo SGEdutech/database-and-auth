@@ -207,25 +207,25 @@ route.get('/relevent', async (req, res) => {
 		delete req.query.skip;
 
 		const result = await Tuition.aggregate([
-		{
-			$match: {
-				$or: [
-					{ addressLine1: { $in: locationWordRegexArr } },
-					{ addressLine2: { $in: locationWordRegexArr } },
-					{ city: { $in: locationWordRegexArr } },
-					{ district: { $in: locationWordRegexArr } },
-					{ state: { $in: locationWordRegexArr } }
-				]
-			}
-		},
-		{
-			$match: {
-				$or: [
-					{ tags: { $in: searchWordsRegexArr } },
-					{ name: { $in: searchWordsRegexArr } }
-				]
-			}
-		}]);
+			{
+				$match: {
+					$or: [
+						{ addressLine1: { $in: locationWordRegexArr } },
+						{ addressLine2: { $in: locationWordRegexArr } },
+						{ city: { $in: locationWordRegexArr } },
+						{ district: { $in: locationWordRegexArr } },
+						{ state: { $in: locationWordRegexArr } }
+					]
+				}
+			},
+			{
+				$match: {
+					$or: [
+						{ tags: { $in: searchWordsRegexArr } },
+						{ name: { $in: searchWordsRegexArr } }
+					]
+				}
+			}]);
 
 		result.splice(0, skip);
 		if (limit) result.splice(limit);
@@ -246,46 +246,46 @@ route.get('/:tuitionId/dashboard', async (req, res) => {
 	const { tuitionId } = req.params;
 
 	const tuitionQuery = Tuition.aggregate([
-	{
-		$facet: {
-			students: [
-				{ $match: { _id: ObjectId(tuitionId) } },
-				{ $project: { students: 1, _id: 0 } },
-				{ $unwind: '$students' },
-				{ $replaceRoot: { newRoot: '$students' } }
-			],
-			courses: [
-				{ $match: { _id: ObjectId(tuitionId) } },
-				{ $project: { courses: 1, _id: 0 } },
-				{ $unwind: '$courses' },
-				{ $addFields: { 'courses.numberOfBatches': { $size: '$courses.batches' } } },
-				{ $replaceRoot: { newRoot: '$courses' } }
-			],
-			batches: [
-				{ $match: { _id: ObjectId(tuitionId) } },
-				{ $project: { courses: 1, _id: 0 } },
-				{ $unwind: '$courses' },
-				{ $unwind: '$courses.batches' },
-				{ $addFields: { 'courses.batches.schedules': { $size: '$courses.batches.schedules' }, 'courses.batches.courseId': '$courses._id', 'courses.batches.courseCode': '$courses.code' } },
-				{ $replaceRoot: { newRoot: '$courses.batches' } }
-			],
-			schedules: [
-				{ $match: { _id: ObjectId(tuitionId) } },
-				{ $project: { courses: 1, _id: 0 } },
-				{ $unwind: '$courses' },
-				{ $unwind: '$courses.batches' },
-				{ $unwind: '$courses.batches.schedules' },
-				{ $addFields: { 'courses.batches.schedules.courseId': '$courses._id', 'courses.batches.schedules.batchId': '$courses.batches._id', 'courses.batches.schedules.batchCode': '$courses.batches.code' } },
-				{ $replaceRoot: { newRoot: '$courses.batches.schedules' } }
-			],
-			discounts: [
-				{ $match: { _id: ObjectId(tuitionId) } },
-				{ $project: { discounts: 1, _id: 0 } },
-				{ $unwind: '$discounts' },
-				{ $replaceRoot: { newRoot: '$discounts' } }
-			]
-		}
-	}]);
+		{
+			$facet: {
+				students: [
+					{ $match: { _id: ObjectId(tuitionId) } },
+					{ $project: { students: 1, _id: 0 } },
+					{ $unwind: '$students' },
+					{ $replaceRoot: { newRoot: '$students' } }
+				],
+				courses: [
+					{ $match: { _id: ObjectId(tuitionId) } },
+					{ $project: { courses: 1, _id: 0 } },
+					{ $unwind: '$courses' },
+					{ $addFields: { 'courses.numberOfBatches': { $size: '$courses.batches' } } },
+					{ $replaceRoot: { newRoot: '$courses' } }
+				],
+				batches: [
+					{ $match: { _id: ObjectId(tuitionId) } },
+					{ $project: { courses: 1, _id: 0 } },
+					{ $unwind: '$courses' },
+					{ $unwind: '$courses.batches' },
+					{ $addFields: { 'courses.batches.schedules': { $size: '$courses.batches.schedules' }, 'courses.batches.courseId': '$courses._id', 'courses.batches.courseCode': '$courses.code' } },
+					{ $replaceRoot: { newRoot: '$courses.batches' } }
+				],
+				schedules: [
+					{ $match: { _id: ObjectId(tuitionId) } },
+					{ $project: { courses: 1, _id: 0 } },
+					{ $unwind: '$courses' },
+					{ $unwind: '$courses.batches' },
+					{ $unwind: '$courses.batches.schedules' },
+					{ $addFields: { 'courses.batches.schedules.courseId': '$courses._id', 'courses.batches.schedules.batchId': '$courses.batches._id', 'courses.batches.schedules.batchCode': '$courses.batches.code' } },
+					{ $replaceRoot: { newRoot: '$courses.batches.schedules' } }
+				],
+				discounts: [
+					{ $match: { _id: ObjectId(tuitionId) } },
+					{ $project: { discounts: 1, _id: 0 } },
+					{ $unwind: '$discounts' },
+					{ $replaceRoot: { newRoot: '$discounts' } }
+				]
+			}
+		}]);
 
 	const notificationQuery = Notification.find({ senderId: tuitionId });
 	const promiseArr = [tuitionQuery, notificationQuery];
@@ -339,6 +339,7 @@ route.delete('/:_id', (req, res) => {
 		.catch(err => console.error(err));
 });
 
+// TODO: Delete batch students when student is deleted
 // Get all claimed students
 route.get('/student/claimed', (req, res) => {
 	if (req.body === undefined) throw new Error('User not logged in!');
@@ -371,6 +372,7 @@ route.get('/:tuitionId/student', (req, res) => {
 	]).then(data => res.send(data)).catch(err => console.error(err));
 });
 
+// TODO :Sort this mess out
 route.post('/:tuitionId/student', (req, res) => {
 	const { tuitionId } = req.params;
 	let isArray;
@@ -381,10 +383,12 @@ route.post('/:tuitionId/student', (req, res) => {
 
 	if (Array.isArray(req.body.students)) {
 		isArray = true;
+		const emailsOfStudentAdded = [];
 		req.body.students.forEach(studentToBeAdded => {
 			const _id = new ObjectId();
 			studentToBeAdded._id = _id;
 			idsOfAddedStudents.push(_id.toString());
+			emailsOfStudentAdded.push(studentToBeAdded.email);
 		});
 
 		if (req.body.batchInfo) {
@@ -393,10 +397,10 @@ route.post('/:tuitionId/student', (req, res) => {
 
 			const { courseId, batchId } = req.body.batchInfo;
 
-			updateQuery = { $push: { 'students': { $each: req.body.students }, 'courses.$[i].batches.$[j].students': { $each: idsOfAddedStudents } } };
+			updateQuery = { $push: { 'students': { $each: req.body.students }, 'courses.$[i].batches.$[j].students': { $each: idsOfAddedStudents } }, $pull: { requests: { email: { $in: emailsOfStudentAdded } } } };
 			options = { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true };
 		} else {
-			updateQuery = { $push: { students: { $each: req.body.students } } };
+			updateQuery = { $push: { students: { $each: req.body.students } }, $pull: { requests: { email: { $in: emailsOfStudentAdded } } } };
 			options = { new: true };
 		}
 	} else {
@@ -410,11 +414,12 @@ route.post('/:tuitionId/student', (req, res) => {
 			if (req.body.batchInfo.batchId === undefined) throw new Error('Course Id not provided');
 
 			const { courseId, batchId } = req.body.batchInfo;
+			delete req.body.batchInfo;
 
-			updateQuery = { $push: { 'students': req.body, 'courses.$[i].batches.$[j].students': _id } };
+			updateQuery = { $push: { 'students': req.body, 'courses.$[i].batches.$[j].students': _id }, $pull: { requests: { email: req.body.email } } };
 			options = { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true };
 		} else {
-			updateQuery = { $push: { 'students': req.body } };
+			updateQuery = { $push: { 'students': req.body }, $pull: { requests: { email: req.body.email } } };
 			options = { new: true };
 		}
 	}
