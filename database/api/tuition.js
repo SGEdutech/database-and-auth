@@ -378,7 +378,7 @@ route.get('/:tuitionId/student', (req, res) => {
 	]).then(data => res.send(data)).catch(err => console.error(err));
 });
 
-// TODO :Sort this mess out
+// TODO: Sort this mess out
 route.post('/:tuitionId/student', (req, res) => {
 	const { tuitionId } = req.params;
 	let isArray;
@@ -386,6 +386,7 @@ route.post('/:tuitionId/student', (req, res) => {
 	let idOfStudentToBeAdded;
 	let updateQuery;
 	let options;
+	let batchIdOfStudent;
 
 	if (Array.isArray(req.body.students)) {
 		isArray = true;
@@ -402,6 +403,7 @@ route.post('/:tuitionId/student', (req, res) => {
 			if (req.body.batchInfo.batchId === undefined) throw new Error('Course Id not provided');
 
 			const { courseId, batchId } = req.body.batchInfo;
+			batchIdOfStudent = batchId;
 
 			updateQuery = { $push: { 'students': { $each: req.body.students }, 'courses.$[i].batches.$[j].students': { $each: idsOfAddedStudents } }, $pull: { requests: { email: { $in: emailsOfStudentAdded } } } };
 			options = { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true };
@@ -420,6 +422,7 @@ route.post('/:tuitionId/student', (req, res) => {
 			if (req.body.batchInfo.batchId === undefined) throw new Error('Course Id not provided');
 
 			const { courseId, batchId } = req.body.batchInfo;
+			batchIdOfStudent = batchId;
 			delete req.body.batchInfo;
 
 			updateQuery = { $push: { 'students': req.body, 'courses.$[i].batches.$[j].students': _id }, $pull: { requests: { email: req.body.email } } };
@@ -436,12 +439,16 @@ route.post('/:tuitionId/student', (req, res) => {
 			const emailTemplate = `<p>${tuition.name} has added you in their study monitor. Login in to <a href="https://eduatlas.com">Eduatlas</a> to get updates and notifications from your institute.</p>
 			<p>To login or signup for FREE click here <a href="https://eduatlas.com">Eduatlas</a></p>`;
 			if (isArray) {
-				const studentsAdded = tuition.students.filter(student => idsOfAddedStudents.indexOf(student._id.toString()) !== -1);
+				let studentsAdded = tuition.students.filter(student => idsOfAddedStudents.indexOf(student._id.toString()) !== -1);
+				studentsAdded = studentsAdded.map(student => student.toObject());
+				studentsAdded.forEach(student => student.batchAdded = batchIdOfStudent);
 				res.send(studentsAdded);
 				const emailIdsOfStudentsAdded = studentsAdded.map(student => student.email);
 				if (isProd) sendMail(emailIdsOfStudentsAdded, 'Add: Study Monitor', emailTemplate);
 			} else {
-				const studentAdded = _.find(tuition.students, { _id: idOfStudentToBeAdded });
+				let studentAdded = _.find(tuition.students, { _id: idOfStudentToBeAdded });
+				studentAdded = studentAdded.toObject();
+				studentAdded.batchAdded = batchIdOfStudent;
 				res.send(studentAdded);
 				const studentEmail = studentAdded.email;
 				if (isProd) sendMail(studentEmail, 'Add: Study Monitor', emailTemplate);
