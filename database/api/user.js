@@ -4,9 +4,7 @@ const DbAPIClass = require('../api-functions');
 const userDbFunctions = new DbAPIClass(User);
 const { claimListing, unclaimListing } = require('../validation-scripts/user-claim');
 const Tuition = require('../models/tuition');
-const tuitionDbFunctions = new DbAPIClass(Tuition);
 const School = require('../models/school');
-const schoolDbFunctions = new DbAPIClass(School);
 const sendWelcomeMail = require('../../scripts/send-welcome-mail');
 const { ObjectId } = require('mongoose').Types;
 const { isProd } = require('../../config.json');
@@ -87,7 +85,7 @@ route.get('/registeration-info', (req, res) => {
 		{ $addFields: { 'students.tuitionId': '$_id', 'students.tuitionName': '$name' } },
 		{ $replaceRoot: { newRoot: '$students' } }
 	]).then(studentDetails => res.send(studentDetails)).catch(err => console.error(err));
-})
+});
 
 route.get('/payments', (req, res) => {
 	if (req.user === undefined) throw new Error('User not logged in');
@@ -136,7 +134,7 @@ route.get('/reviews', async (req, res) => {
 	} catch (error) {
 		console.error(error);
 	}
-})
+});
 
 route.get('/', (req, res) => {
 	userDbFunctions.getSpecificData(req.query)
@@ -163,7 +161,7 @@ route.post('/add-claim', (req, res) => {
 
 	claimListing(userId, { listingCategory, listingId })
 		.then(() => res.end('done')).catch(err => console.error(err));
-})
+});
 
 route.post('/add/:id/:arrayName', (req, res) => {
 	const elementToBePushed = req.body.string || req.body;
@@ -227,7 +225,7 @@ route.delete('/remove-claim', (req, res) => {
 	const { listingCategory, listingId } = req.body;
 	unclaimListing(userId, { listingCategory, listingId })
 		.then(() => res.end('done')).catch(err => console.error(err));
-})
+});
 
 route.delete('/:_id', (req, res) => {
 	userDbFunctions.deleteOneRow(req.params)
