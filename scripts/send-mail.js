@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
 function sendMail(recipients, subject, message, attachment) {
 	if (recipients === undefined) throw new Error('Recipient must be provided');
 	if (typeof recipients !== 'string' && Array.isArray(recipients) === false) throw new Error('Recipients must be an object or an array'); 
-	if (attachment !== undefined) {
+	if (attachment) {
 		if (typeof attachment !== 'object') throw new Error('Attachment must be an object');
 		if (attachment.content === undefined) throw new Error('Attachment must have content');
 	}
