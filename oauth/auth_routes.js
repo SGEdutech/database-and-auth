@@ -3,7 +3,7 @@ const route = require('express')
 
 route.get('/logout', (req, res) => {
 	req.logout();
-	res.redirect('/login')
+	res.redirect('/login');
 });
 
 const routes = {

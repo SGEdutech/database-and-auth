@@ -63,10 +63,7 @@ route.post('/signup', (req, res) => {
 				APIHelperFunctions.addCollection(req.body)
 					.then(data => res.end()).catch(err => console.error(err));
 			}
-		})
-		.catch(err => console.error(err));
+		}).catch(err => console.error(err));
 });
 
-exports = module.exports = {
-	route
-};
+exports = module.exports = { route };

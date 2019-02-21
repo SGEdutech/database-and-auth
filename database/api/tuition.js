@@ -399,6 +399,27 @@ route.get('/:tuitionId/student', (req, res) => {
 	]).then(data => res.send(data)).catch(err => console.error(err));
 });
 
+// Edit reciept config
+route.put('/:tuitionId/reciept', async (req, res) => {
+	try {
+		const { tuitionId } = req.params;
+		const recieptFieldsRegex = new RegExp('^recieptConfigBusinessName$|^recieptConfigAddressLine1$|^recieptConfigAddressLine2$|^recieptConfigCity$|^recieptConfigState$|^recieptConfigPinCode$|^recieptConfigGstNumber$');
+		const reqBodyKeys = Object.keys(req.body);
+		reqBodyKeys.forEach(key => {
+			if (recieptFieldsRegex.test(key) === false) throw new Error('Keys other than reciept config found');
+		});
+		const tuition = await Tuition.findByIdAndUpdate(tuitionId, req.body, { new: true });
+		const tuitionKeys = Object.keys(tuition);
+		// Deleting everything excecpt reciept config fields
+		tuitionKeys.forEach(key => {
+			if (recieptFieldsRegex.test(key) === false) delete tuition.key;
+		});
+		res.send(tuition);
+	} catch (error) {
+		console.error(error);
+	}
+});
+
 // TODO: Sort this mess out
 route.post('/:tuitionId/student', (req, res) => {
 	const { tuitionId } = req.params;
