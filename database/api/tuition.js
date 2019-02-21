@@ -431,10 +431,6 @@ route.post('/:tuitionId/student', (req, res) => {
 			batchIdOfStudent = batchId;
 			delete req.body.batchInfo;
 
-			if (req.body.courseCode && req.body.courseFee) {
-				req.body.payments = [{ courseCode: req.body.courseCode, courseFee: req.body.courseFee }];
-			}
-
 			updateQuery = { $push: { 'students': req.body, 'courses.$[i].batches.$[j].students': _id }, $pull: { requests: { email: req.body.email } } };
 			options = { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true };
 		} else {
