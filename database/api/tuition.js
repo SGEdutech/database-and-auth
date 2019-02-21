@@ -248,6 +248,21 @@ route.get('/:tuitionId/dashboard', async (req, res) => {
 	const tuitionQuery = Tuition.aggregate([
 		{
 			$facet: {
+				tuitionInfo: [
+					{ $match: { _id: ObjectId(tuitionId) } },
+					{
+						$project: {
+							recieptConfigBusinessName: 1,
+							recieptConfigAddressLine1: 1,
+							recieptConfigAddressLine2: 1,
+							recieptConfigCity: 1,
+							recieptConfigState: 1,
+							recieptConfigPinCode: 1,
+							recieptConfigGstNumber: 1,
+							_id: 0
+						}
+					}
+				],
 				students: [
 					{ $match: { _id: ObjectId(tuitionId) } },
 					{ $project: { students: 1, _id: 0 } },
