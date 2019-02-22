@@ -34,7 +34,7 @@ function getDoc(pdfDoc) {
 	});
 }
 
-async function sendReciept(mail, docDef) {
+async function sendReceipt(mail, docDef) {
 	if (mail === undefined) throw new Error('Mail is not provided');
 	if (docDef === undefined) throw new Error('Document defination is not provided');
 	try {
@@ -48,4 +48,4 @@ async function sendReciept(mail, docDef) {
 	}
 }
 
-module.exports = sendReciept;
+module.exports = sendReceipt;

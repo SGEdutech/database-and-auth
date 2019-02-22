@@ -16,7 +16,7 @@ const promotedHomeDbFunctions = new DbAPIClass(PromotedHome);
 const promotedSearchDbFunctions = new DbAPIClass(PromotedSearch);
 const promotedRelatedDbFunctions = new DbAPIClass(PromotedRelated);
 const sendMail = require('../../scripts/send-mail');
-const sendReciept = require('../../scripts/send-reciept');
+const sendreceipt = require('../../scripts/send-receipt');
 const { isProd } = require('../../config.json');
 
 function titleCase(str) {
@@ -245,7 +245,7 @@ route.post('/email-receipt', (req, res) => {
 	if (req.body.docDef === undefined) throw new Error('Document defination not provided');
 	if (req.body.email === undefined) throw new Error('Email not provided');
 
-	sendReciept(req.body.email, JSON.parse(req.body.docDef)).then(data => res.send(data)).catch(err => console.error(err));
+	sendreceipt(req.body.email, JSON.parse(req.body.docDef)).then(data => res.send(data)).catch(err => console.error(err));
 });
 
 // TODO: Filter unwanted data before sending
@@ -259,13 +259,13 @@ route.get('/:tuitionId/dashboard', async (req, res) => {
 					{ $match: { _id: ObjectId(tuitionId) } },
 					{
 						$project: {
-							recieptConfigBusinessName: 1,
-							recieptConfigAddressLine1: 1,
-							recieptConfigAddressLine2: 1,
-							recieptConfigCity: 1,
-							recieptConfigState: 1,
-							recieptConfigPinCode: 1,
-							recieptConfigGstNumber: 1,
+							receiptConfigBusinessName: 1,
+							receiptConfigAddressLine1: 1,
+							receiptConfigAddressLine2: 1,
+							receiptConfigCity: 1,
+							receiptConfigState: 1,
+							receiptConfigPinCode: 1,
+							receiptConfigGstNumber: 1,
 							_id: 0
 						}
 					}
@@ -406,20 +406,20 @@ route.get('/:tuitionId/student', (req, res) => {
 	]).then(data => res.send(data)).catch(err => console.error(err));
 });
 
-// Edit reciept config
-route.put('/:tuitionId/reciept', async (req, res) => {
+// Edit receipt config
+route.put('/:tuitionId/receipt', async (req, res) => {
 	try {
 		const { tuitionId } = req.params;
-		const recieptFieldsRegex = new RegExp('^recieptConfigBusinessName$|^recieptConfigAddressLine1$|^recieptConfigAddressLine2$|^recieptConfigCity$|^recieptConfigState$|^recieptConfigPinCode$|^recieptConfigGstNumber$');
+		const receiptFieldsRegex = new RegExp('^receiptConfigBusinessName$|^receiptConfigAddressLine1$|^receiptConfigAddressLine2$|^receiptConfigCity$|^receiptConfigState$|^receiptConfigPinCode$|^receiptConfigGstNumber$');
 		const reqBodyKeys = Object.keys(req.body);
 		reqBodyKeys.forEach(key => {
-			if (recieptFieldsRegex.test(key) === false) throw new Error('Keys other than reciept config found');
+			if (receiptFieldsRegex.test(key) === false) throw new Error('Keys other than receipt config found');
 		});
 		const tuition = await Tuition.findByIdAndUpdate(tuitionId, req.body, { new: true });
 		const tuitionKeys = Object.keys(tuition);
-		// Deleting everything excecpt reciept config fields
+		// Deleting everything excecpt receipt config fields
 		tuitionKeys.forEach(key => {
-			if (recieptFieldsRegex.test(key) === false) delete tuition.key;
+			if (receiptFieldsRegex.test(key) === false) delete tuition.key;
 		});
 		res.send(tuition);
 	} catch (error) {
