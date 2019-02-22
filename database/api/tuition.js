@@ -241,7 +241,7 @@ route.get('/super-admin', (req, res) => {
 		.then(tuitions => res.send(tuitions)).catch(err => console.error(err));
 });
 
-route.post('/email-reciept', (req, res) => {
+route.post('/email-receipt', (req, res) => {
 	if (req.body.docDef === undefined) throw new Error('Document defination not provided');
 	if (req.body.email === undefined) throw new Error('Email not provided');
 
