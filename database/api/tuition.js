@@ -973,9 +973,9 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
 	// Can't think of a better name
-	const removeElements = Array.isArray(req.body.students) ? { $each: req.body.students } : req.body.students;
+	const studentToPush = Array.isArray(req.body.students) ? { $each: req.body.students } : req.body.students;
 
-	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].students': removeElements } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
+	Tuition.findByIdAndUpdate(tuitionId, { $push: { 'courses.$[i].batches.$[j].students': studentToPush } }, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
