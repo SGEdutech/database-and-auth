@@ -241,6 +241,13 @@ route.get('/super-admin', (req, res) => {
 		.then(tuitions => res.send(tuitions)).catch(err => console.error(err));
 });
 
+route.post('/email-reciept', (req, res) => {
+	if (req.body.docDef === undefined) throw new Error('Document defination not provided');
+	if (req.body.email === undefined) throw new Error('Email not provided');
+
+	sendReciept(req.body.email, JSON.parse(req.body.docDef)).then(data => res.send(data)).catch(err => console.error(err));
+});
+
 // TODO: Filter unwanted data before sending
 route.get('/:tuitionId/dashboard', async (req, res) => {
 	const { tuitionId } = req.params;
@@ -1565,13 +1572,6 @@ route.delete('/:tuitionId/resource/:resourceId', (req, res) => {
 			res.send(deletedResource);
 			return deleteThisShit(path.join(process.cwd(), deletedResource.path));
 		}).catch(err => console.error(err));
-});
-
-route.post('/email-reciept', (req, res) => {
-	if (req.body.docDef === undefined) throw new Error('Document defination not provided');
-	if (req.body.email === undefined) throw new Error('Email not provided');
-
-	sendReciept(req.body.email, JSON.parse(req.body.docDef)).then(data => res.send(data)).catch(err => console.error(err));
 });
 
 module.exports = route;
