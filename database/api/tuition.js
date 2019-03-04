@@ -963,7 +963,7 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
 
-	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $pull: { 'courses.$.batches': { _id: batchId }, 'tests.$[].batcheIds': ObjectId(batchId) } })
+	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $pull: { 'courses.$.batches': { _id: batchId }, 'tests.$[].batchIds': ObjectId(batchId) } })
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			let batch = _.find(course.batches, { _id: ObjectId(batchId) });
