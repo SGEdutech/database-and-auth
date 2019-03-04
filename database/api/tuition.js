@@ -1572,4 +1572,71 @@ route.delete('/:tuitionId/resource/:resourceId', (req, res) => {
 		}).catch(err => console.error(err));
 });
 
+// Tests
+route.get('/:tuitionId/test/all', async (req, res) => {
+	try {
+		const { tuitionId } = req.params;
+		const tests = await Tuition.aggregate([
+			{ $match: { _id: ObjectId(tuitionId) } },
+			{ $project: { tests: 1 } },
+			{ $unwind: '$tests' },
+			{ $replaceRoot: { newRoot: '$tests' } }
+		]);
+		res.send(tests);
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+// Can only query with _id
+route.get('/:tuitionId/test', async (req, res) => {
+	try {
+		const { tuitionId } = req.params;
+		const { _id: testId } = req.query;
+		const tests = await Tuition.aggregate([
+			{ $match: { _id: ObjectId(tuitionId) } },
+			{ $project: { tests: 1 } },
+			{ $unwind: '$tests' },
+			{ $replaceRoot: { newRoot: '$tests' } },
+			{ $match: { _id: ObjectId(testId) } }
+		]);
+		res.send(tests);
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.post('/:tuitionId/test', async (req, res) => {
+	try {
+		const { tuitionId } = req.params;
+		const _id = new ObjectId();
+		req.body._id = _id;
+		const updatedTuition = await Tuition.findByIdAndUpdate(tuitionId, { $push: { tests: req.body } }, { new: true });
+		res.send(_.find(updatedTuition.tests, { _id }));
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.put('/:tuitionId/test/:testId', async (req, res) => {
+	try {
+		const { testId, tuitionId } = req.params;
+		prependToObjKey(req.body, 'tests.$.');
+		const updatedTuition = await Tuition.findOneAndUpdate({ '_id': tuitionId, 'tests._id': testId }, req.body, { new: true });
+		res.send(_.find(updatedTuition.tests, { _id: ObjectId(testId) }));
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.delete('/:tuitionId/test/:testId', async (req, res) => {
+	try {
+		const { testId, tuitionId } = req.params;
+		const oldTuition = await Tuition.findByIdAndUpdate(tuitionId, { $pull: { tests: { _id: ObjectId(testId) } } });
+		res.send(_.find(oldTuition.tests, { _id: ObjectId(testId) }));
+	} catch (error) {
+		console.error(error);
+	}
+});
+
 module.exports = route;
