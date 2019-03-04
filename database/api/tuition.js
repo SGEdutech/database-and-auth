@@ -531,7 +531,6 @@ route.delete('/:tuitionId/student/:studentId', (req, res) => {
 		.then(tuition => {
 			// FIXME: Make seperate files for templates
 			const studentDeleted = _.find(tuition.students, { _id: ObjectId(studentId) });
-			const studentName = titleCase(studentDeleted.name);
 			const emailTemplate = `<p>Hi <span style="text-transform: capitalize">${studentDeleted.name}</span></p>
 			<p>${tuition.name} has removed you from their study monitor. If this is a mistake, please get in touch with your institution.</p>
 			<p>Regards,</p>
@@ -835,7 +834,6 @@ route.post('/:tuitionId/course', (req, res) => {
 	const { tuitionId } = req.params;
 	const _id = new ObjectId();
 	req.body._id = _id;
-
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { courses: req.body } }, { new: true })
 		.then(tuition => {
 			let course = _.find(tuition.courses, { _id });
@@ -1538,7 +1536,6 @@ route.get('/:tuitionId/resource', (req, res) => {
 // FIXME: Unwanted parameters in req.body
 route.post('/:tuitionId/resource', (req, res) => {
 	const { tuitionId } = req.params;
-
 	const _id = new ObjectId();
 	req.body._id = _id;
 

@@ -16,6 +16,7 @@ const CourseSchema = require('./course-and-batch');
 const StudentSchema = require('../schemas/student');
 const ForumSchama = require('../schemas/forum');
 const LeadsSchema = require('../schemas/leads');
+const TestSchema = require('../schemas/test-schema');
 
 const {
 	isMaxStrLength,
@@ -63,6 +64,7 @@ const TuitionSchema = new Schema({
 	discounts: [DiscountSchema],
 	forums: [ForumSchama],
 	resources: [ResourceSchema],
+	tests: [TestSchema],
 	views: ViewsOrHitsSchema,
 	hits: ViewsOrHitsSchema,
 	bookmarks: Number,
