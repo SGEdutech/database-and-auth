@@ -4,6 +4,12 @@ const LocalStrategy = require('passport-local');
 const User = require('../database/models/user');
 const DatabaseAPIClass = require('../database/api-functions');
 const APIHelperFunctions = new DatabaseAPIClass(User);
+const {
+	addRegestrationIdToGroup,
+	createNotificationGroup,
+	getNotificationKey,
+	removeRegestrationIdFromGroup
+} = require('../scripts/firebase');
 
 passport.serializeUser((userid, done) => {
 	//userid will be stuffed in cookie
@@ -41,13 +47,40 @@ passport.use(new LocalStrategy((username, password, done) => {
 		});
 }));
 
-route.post('/login', passport.authenticate('local'), (req, res) => {
-	APIHelperFunctions.getSpecificData({ _id: req.user })
-		.then(user => res.send(user)).catch(err => console.error(err));
+route.post('/login', passport.authenticate('local'), async (req, res) => {
+	try {
+		APIHelperFunctions.getSpecificData({ _id: req.user }).then(user => res.send(user)).catch(err => console.error(err));
+		const { registrationDetails } = req.body;
+		if (registrationDetails) {
+			const { registrationToken, tuitionId } = registrationDetails;
+			const notificationKeyName = tuitionId + '-' + req.body.username;
+			try {
+				const { notification_key: notificationKey } = await getNotificationKey(notificationKeyName);
+				addRegestrationIdToGroup(notificationKey, notificationKeyName, registrationToken);
+			} catch (error) {
+				if (error.response.data.error === 'notification_key not found') {
+					createNotificationGroup(notificationKeyName, registrationToken);
+				}
+			}
+		}
+	} catch (error) {
+		console.error(error.response.data);
+	}
 });
 
-route.use('/logout', (req, res) => {
-	req.session.destroy(() => res.send({ done: true })); //Inside a callback… bulletproof!
+route.use('/logout', async (req, res) => {
+	req.session.destroy(() => res.send({ done: true }));
+	const { registrationDetails } = req.body;
+	if (registrationDetails) {
+		const { registrationToken, tuitionId } = registrationDetails;
+		const notificationKeyName = tuitionId + '-' + req.body.email;
+		try {
+			const { notification_key: notificationKey } = await getNotificationKey(notificationKeyName);
+			removeRegestrationIdFromGroup(notificationKey, notificationKeyName, registrationToken);
+		} catch (error) {
+			console.error(error);
+		}
+	}
 });
 
 // post request to sign-up don't need passportJS
@@ -56,9 +89,7 @@ route.post('/signup', (req, res) => {
 	APIHelperFunctions.getSpecificData({ primaryEmail: req.body.primaryEmail }) // regex to check if _id is valid mongo id- /^[0-9a-fA-F]{24}$/
 		.then(currentUser => {
 			if (currentUser) {
-				res.status(400).send('email already linked with a account');
-				// disable sign-up button till username is unique
-				// create AJAX request(refresh button) from frontend to check for username uniqueness
+				res.status(400).send('Email already linked with a account');
 			} else {
 				APIHelperFunctions.addCollection(req.body)
 					.then(data => res.end()).catch(err => console.error(err));
