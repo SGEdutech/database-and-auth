@@ -68,7 +68,7 @@ async function sendNotificationToAGroup(body, notificationKeyName, title) {
 		const data = {
 			priority: 'HIGH',
 			notification: { title, body },
-			to: [notificationKey]
+			to: notificationKey
 		};
 		const response = await axios.post('https://fcm.googleapis.com/fcm/send', data, config);
 		return response.data;
