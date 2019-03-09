@@ -49,7 +49,7 @@ route.post('/', async (req, res) => {
 	try {
 		receiversArray.forEach(receiverEmail => {
 			const notificationKeyName = senderId + '-' + receiverEmail;
-			sendNotificationToAGroup(message, notificationKeyName);
+			sendNotificationToAGroup(message, notificationKeyName, 'ANNOUNCEMENT');
 		});
 	} catch (error) {
 		console.error(error);
