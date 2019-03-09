@@ -61,5 +61,6 @@ exports = module.exports = {
 	addRegestrationIdToGroup,
 	createNotificationGroup,
 	getNotificationKey,
-	removeRegestrationIdFromGroup
+	removeRegestrationIdFromGroup,
+	sendNotificationToAGroup
 };
