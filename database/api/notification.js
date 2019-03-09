@@ -4,7 +4,7 @@ const Notification = require('../models/notification');
 const Tuition = require('../models/tuition');
 const DbAPIClass = require('../api-functions');
 const notificationDbFunctions = new DbAPIClass(Notification);
-const { sendNotificationToAGroup } = require('../../scripts/firebase');
+const { sendNotificationToAGroup, shoveRegistrationIdInAGroup } = require('../../scripts/firebase');
 
 route.get('/claimed', (req, res) => {
 	if (req.user === undefined) throw new Error('User not logged in');
@@ -51,6 +51,17 @@ route.post('/', async (req, res) => {
 			const notificationKeyName = senderId + '-' + receiverEmail;
 			sendNotificationToAGroup(message, notificationKeyName);
 		});
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.put('/refresh-registration-token', async (req, res) => {
+	try {
+		if (req.user === undefined) throw new Error('User not logged in');
+		const { registrationId, tuitionId } = req.body;
+		const notificationKeyName = tuitionId + '-' + req.user.primaryEmail;
+		return await shoveRegistrationIdInAGroup(notificationKeyName, registrationId);
 	} catch (error) {
 		console.error(error);
 	}
