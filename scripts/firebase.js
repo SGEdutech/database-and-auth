@@ -57,10 +57,26 @@ async function sendNotificationToAGroup(body, notificationKeyName, title) {
 	return response.data;
 }
 
+async function shoveRegistrationIdInAGroup(notificationKeyName, registrationToken) {
+	try {
+		try {
+			const { notification_key: notificationKey } = await getNotificationKey(notificationKeyName);
+			const response = await addRegestrationIdToGroup(notificationKey, notificationKeyName, registrationToken);
+			return response.data;
+		} catch (error) {
+			if (error.response.data.error === 'notification_key not found') {
+				const response = await createNotificationGroup(notificationKeyName, registrationToken);
+				return response.data;
+			}
+		}
+	} catch (error) {
+		console.error(error);
+	}
+}
+
 exports = module.exports = {
-	addRegestrationIdToGroup,
-	createNotificationGroup,
 	getNotificationKey,
 	removeRegestrationIdFromGroup,
-	sendNotificationToAGroup
+	sendNotificationToAGroup,
+	shoveRegistrationIdInAGroup
 };

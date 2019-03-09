@@ -5,10 +5,9 @@ const User = require('../database/models/user');
 const DatabaseAPIClass = require('../database/api-functions');
 const APIHelperFunctions = new DatabaseAPIClass(User);
 const {
-	addRegestrationIdToGroup,
-	createNotificationGroup,
 	getNotificationKey,
-	removeRegestrationIdFromGroup
+	removeRegestrationIdFromGroup,
+	shoveRegistrationIdInAGroup
 } = require('../scripts/firebase');
 
 passport.serializeUser((userid, done) => {
@@ -54,14 +53,7 @@ route.post('/login', passport.authenticate('local'), async (req, res) => {
 		if (registrationDetails) {
 			const { registrationToken, tuitionId } = registrationDetails;
 			const notificationKeyName = tuitionId + '-' + req.body.username;
-			try {
-				const { notification_key: notificationKey } = await getNotificationKey(notificationKeyName);
-				addRegestrationIdToGroup(notificationKey, notificationKeyName, registrationToken);
-			} catch (error) {
-				if (error.response.data.error === 'notification_key not found') {
-					createNotificationGroup(notificationKeyName, registrationToken);
-				}
-			}
+			shoveRegistrationIdInAGroup(notificationKeyName, registrationToken);
 		}
 	} catch (error) {
 		console.error(error.response.data);
