@@ -40,38 +40,35 @@ passport.use(new LocalStrategy((username, password, done) => {
 			}
 			//below line will pass user to serialize user phase
 			done(null, user._id);
-		})
-		.catch(err => {
-			done(err);
-		});
+		}).catch(err => done(err));
 }));
 
 route.post('/login', passport.authenticate('local'), async (req, res) => {
 	try {
-		APIHelperFunctions.getSpecificData({ _id: req.user }).then(user => res.send(user)).catch(err => console.error(err));
+		const user = await APIHelperFunctions.getSpecificData({ _id: req.user });
+		console.log(res);
+		res.send(user);
 		const { registrationDetails } = req.body;
-		if (registrationDetails) {
-			const { registrationToken, tuitionId } = registrationDetails;
-			const notificationKeyName = tuitionId + '-' + req.body.username;
-			shoveRegistrationIdInAGroup(notificationKeyName, registrationToken);
-		}
+		if (Boolean(registrationDetails) === false) return;
+		const { registrationToken, tuitionId } = registrationDetails;
+		const notificationKeyName = tuitionId + '-' + req.body.username;
+		shoveRegistrationIdInAGroup(notificationKeyName, registrationToken);
 	} catch (error) {
-		console.error(error.response.data);
+		console.error(error);
 	}
 });
 
 route.use('/logout', async (req, res) => {
 	req.session.destroy(() => res.send({ done: true }));
 	const { registrationDetails } = req.body;
-	if (registrationDetails) {
-		const { registrationToken, tuitionId } = registrationDetails;
-		const notificationKeyName = tuitionId + '-' + req.body.email;
-		try {
-			const { notification_key: notificationKey } = await getNotificationKey(notificationKeyName);
-			removeRegestrationIdFromGroup(notificationKey, notificationKeyName, registrationToken);
-		} catch (error) {
-			console.error(error);
-		}
+	if (Boolean(registrationDetails) === false) return;
+	const { registrationToken, tuitionId } = registrationDetails;
+	const notificationKeyName = tuitionId + '-' + req.body.email;
+	try {
+		const { notification_key: notificationKey } = await getNotificationKey(notificationKeyName);
+		removeRegestrationIdFromGroup(notificationKey, notificationKeyName, registrationToken);
+	} catch (error) {
+		console.error(error);
 	}
 });
 
