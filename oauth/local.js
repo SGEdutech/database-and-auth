@@ -46,8 +46,7 @@ passport.use(new LocalStrategy((username, password, done) => {
 route.post('/login', passport.authenticate('local'), async (req, res) => {
 	try {
 		const user = await APIHelperFunctions.getSpecificData({ _id: req.user });
-		console.log(res);
-		res.send(user);
+		setTimeout(() => res.send(user), 1000);
 		const { registrationDetails } = req.body;
 		if (Boolean(registrationDetails) === false) return;
 		const { registrationToken, tuitionId } = registrationDetails;
@@ -59,7 +58,9 @@ route.post('/login', passport.authenticate('local'), async (req, res) => {
 });
 
 route.use('/logout', async (req, res) => {
-	req.session.destroy(() => res.send({ done: true }));
+	req.session.destroy(() => {
+		setTimeout(() => res.send({ done: true }), 1000);
+	});
 	const { registrationDetails } = req.body;
 	if (Boolean(registrationDetails) === false) return;
 	const { registrationToken, tuitionId } = registrationDetails;
