@@ -43,8 +43,9 @@ async function _getNotificationKey(notificationKeyName) {
 
 async function removeRegestrationIdFromGroup(notificationKeyName, registrationToken) {
 	try {
-		const { notification_key: notificationKey } = await _getNotificationKey(notificationKeyName);
-		if (Boolean(notificationKey) === false) return;
+		const getNotificationKeyResponse = await _getNotificationKey(notificationKeyName);
+		if (Boolean(getNotificationKeyResponse) === false) return;
+		const { notification_key: notificationKey } = getNotificationKeyResponse;
 		const data = {
 			operation: 'remove',
 			notification_key: notificationKey,
@@ -76,8 +77,9 @@ async function sendNotificationToAGroup(body, notificationKeyName, title) {
 
 async function shoveRegistrationIdInAGroup(notificationKeyName, registrationToken) {
 	try {
-		const { notification_key: notificationKey } = await _getNotificationKey(notificationKeyName);
-		if (notificationKey) {
+		const getNotificationKeyResponse = await _getNotificationKey(notificationKeyName);
+		if (getNotificationKeyResponse) {
+			const { notification_key: notificationKey } = getNotificationKeyResponse;
 			const response = await _addRegestrationIdToGroup(notificationKey, notificationKeyName, registrationToken);
 			return response.data;
 		}
