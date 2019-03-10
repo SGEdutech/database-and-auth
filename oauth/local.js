@@ -58,7 +58,7 @@ route.post('/login', passport.authenticate('local'), async (req, res) => {
 });
 
 route.use('/logout', async (req, res) => {
-	req.session.destroy(res.send({ done: true }));
+	req.session.destroy(() => res.send({ done: true }));
 	const { registrationDetails } = req.body;
 	if (Boolean(registrationDetails) === false) return;
 	const { registrationToken, tuitionId } = registrationDetails;
