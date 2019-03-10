@@ -50,7 +50,8 @@ route.post('/login', passport.authenticate('local'), async (req, res) => {
 		const { registrationDetails } = req.body;
 		if (Boolean(registrationDetails) === false) return;
 		const { registrationToken, tuitionId } = registrationDetails;
-		const notificationKeyName = tuitionId + '-' + req.body.username;
+		const email = req.body.username.toLowerCase();
+		const notificationKeyName = tuitionId + '-' + email;
 		shoveRegistrationIdInAGroup(notificationKeyName, registrationToken);
 	} catch (error) {
 		console.error(error);
