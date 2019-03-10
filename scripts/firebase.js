@@ -61,8 +61,9 @@ async function removeRegestrationIdFromGroup(notificationKeyName, registrationTo
 
 async function sendNotificationToAGroup(body, notificationKeyName, title) {
 	try {
-		const { notification_key: notificationKey } = await _getNotificationKey(notificationKeyName);
-		if (Boolean(notificationKey) === false) return;
+		const getNotificationKeyResponse = await _getNotificationKey(notificationKeyName);
+		if (Boolean(getNotificationKeyResponse) === false) return;
+		const { notification_key: notificationKey } = getNotificationKeyResponse;
 		const data = {
 			priority: 'HIGH',
 			notification: { title, body },
