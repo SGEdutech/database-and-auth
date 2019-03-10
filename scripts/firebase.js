@@ -30,7 +30,7 @@ async function _createNotificationGroup(notificationKeyName, registrationToken) 
 	return response.data;
 }
 
-async function getNotificationKey(notificationKeyName) {
+async function _getNotificationKey(notificationKeyName) {
 	try {
 		const response = await axios.get(`https://fcm.googleapis.com/fcm/notification?notification_key_name=${notificationKeyName}`, config);
 		return response.data;
@@ -39,8 +39,9 @@ async function getNotificationKey(notificationKeyName) {
 	}
 }
 
-async function removeRegestrationIdFromGroup(notificationKey, notificationKeyName, registrationToken) {
+async function removeRegestrationIdFromGroup(notificationKeyName, registrationToken) {
 	try {
+		const { notification_key: notificationKey } = await _getNotificationKey(notificationKeyName);
 		const data = {
 			operation: 'remove',
 			notification_key: notificationKey,
@@ -56,7 +57,7 @@ async function removeRegestrationIdFromGroup(notificationKey, notificationKeyNam
 
 async function sendNotificationToAGroup(body, notificationKeyName, title) {
 	try {
-		const { notification_key: notificationKey } = await getNotificationKey(notificationKeyName);
+		const { notification_key: notificationKey } = await _getNotificationKey(notificationKeyName);
 		const data = {
 			priority: 'HIGH',
 			notification: { title, body },
@@ -72,7 +73,7 @@ async function sendNotificationToAGroup(body, notificationKeyName, title) {
 async function shoveRegistrationIdInAGroup(notificationKeyName, registrationToken) {
 	try {
 		try {
-			const { notification_key: notificationKey } = await getNotificationKey(notificationKeyName);
+			const { notification_key: notificationKey } = await _getNotificationKey(notificationKeyName);
 			const response = await _addRegestrationIdToGroup(notificationKey, notificationKeyName, registrationToken);
 			return response.data;
 		} catch (error) {
@@ -87,7 +88,6 @@ async function shoveRegistrationIdInAGroup(notificationKeyName, registrationToke
 }
 
 exports = module.exports = {
-	getNotificationKey,
 	removeRegestrationIdFromGroup,
 	sendNotificationToAGroup,
 	shoveRegistrationIdInAGroup

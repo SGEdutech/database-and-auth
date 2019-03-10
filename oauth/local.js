@@ -64,8 +64,7 @@ route.use('/logout', async (req, res) => {
 	const { registrationToken, tuitionId } = registrationDetails;
 	const notificationKeyName = tuitionId + '-' + req.body.email;
 	try {
-		const { notification_key: notificationKey } = await getNotificationKey(notificationKeyName);
-		removeRegestrationIdFromGroup(notificationKey, notificationKeyName, registrationToken);
+		removeRegestrationIdFromGroup(notificationKeyName, registrationToken);
 	} catch (error) {
 		console.error(error);
 	}
