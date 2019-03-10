@@ -9,33 +9,25 @@ const config = {
 	}
 };
 
-async function addRegestrationIdToGroup(notificationKey, notificationKeyName, registrationToken) {
-	try {
-		const data = {
-			operation: 'add',
-			notification_key: notificationKey,
-			notification_key_name: notificationKeyName,
-			registration_ids: [registrationToken]
-		};
-		const response = await axios.post('https://android.googleapis.com/gcm/notification', data, config);
-		return response.data;
-	} catch (error) {
-		console.error(error);
-	}
+async function _addRegestrationIdToGroup(notificationKey, notificationKeyName, registrationToken) {
+	const data = {
+		operation: 'add',
+		notification_key: notificationKey,
+		notification_key_name: notificationKeyName,
+		registration_ids: [registrationToken]
+	};
+	const response = await axios.post('https://android.googleapis.com/gcm/notification', data, config);
+	return response.data;
 }
 
-async function createNotificationGroup(notificationKeyName, registrationToken) {
-	try {
-		const data = {
-			operation: 'create',
-			notification_key_name: notificationKeyName,
-			registration_ids: [registrationToken]
-		};
-		const response = await axios.post('https://android.googleapis.com/gcm/notification', data, config);
-		return response.data;
-	} catch (error) {
-		console.error(error);
-	}
+async function _createNotificationGroup(notificationKeyName, registrationToken) {
+	const data = {
+		operation: 'create',
+		notification_key_name: notificationKeyName,
+		registration_ids: [registrationToken]
+	};
+	const response = await axios.post('https://android.googleapis.com/gcm/notification', data, config);
+	return response.data;
 }
 
 async function getNotificationKey(notificationKeyName) {
@@ -81,11 +73,11 @@ async function shoveRegistrationIdInAGroup(notificationKeyName, registrationToke
 	try {
 		try {
 			const { notification_key: notificationKey } = await getNotificationKey(notificationKeyName);
-			const response = await addRegestrationIdToGroup(notificationKey, notificationKeyName, registrationToken);
+			const response = await _addRegestrationIdToGroup(notificationKey, notificationKeyName, registrationToken);
 			return response.data;
 		} catch (error) {
 			if (error.response.data.error === 'notification_key not found') {
-				const response = await createNotificationGroup(notificationKeyName, registrationToken);
+				const response = await _createNotificationGroup(notificationKeyName, registrationToken);
 				return response.data;
 			}
 		}
