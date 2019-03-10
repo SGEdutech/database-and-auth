@@ -35,13 +35,16 @@ async function _getNotificationKey(notificationKeyName) {
 		const response = await axios.get(`https://fcm.googleapis.com/fcm/notification?notification_key_name=${notificationKeyName}`, config);
 		return response.data;
 	} catch (error) {
-		console.error(error);
+		if (error.response.data.error === 'notification_key not found') {
+			return null;
+		}
 	}
 }
 
 async function removeRegestrationIdFromGroup(notificationKeyName, registrationToken) {
 	try {
 		const { notification_key: notificationKey } = await _getNotificationKey(notificationKeyName);
+		if (Boolean(notificationKey) === false) return;
 		const data = {
 			operation: 'remove',
 			notification_key: notificationKey,
@@ -58,6 +61,7 @@ async function removeRegestrationIdFromGroup(notificationKeyName, registrationTo
 async function sendNotificationToAGroup(body, notificationKeyName, title) {
 	try {
 		const { notification_key: notificationKey } = await _getNotificationKey(notificationKeyName);
+		if (Boolean(notificationKey) === false) return;
 		const data = {
 			priority: 'HIGH',
 			notification: { title, body },
@@ -72,16 +76,13 @@ async function sendNotificationToAGroup(body, notificationKeyName, title) {
 
 async function shoveRegistrationIdInAGroup(notificationKeyName, registrationToken) {
 	try {
-		try {
-			const { notification_key: notificationKey } = await _getNotificationKey(notificationKeyName);
+		const { notification_key: notificationKey } = await _getNotificationKey(notificationKeyName);
+		if (notificationKey) {
 			const response = await _addRegestrationIdToGroup(notificationKey, notificationKeyName, registrationToken);
 			return response.data;
-		} catch (error) {
-			if (error.response.data.error === 'notification_key not found') {
-				const response = await _createNotificationGroup(notificationKeyName, registrationToken);
-				return response.data;
-			}
 		}
+		const response = await _createNotificationGroup(notificationKeyName, registrationToken);
+		return response.data;
 	} catch (error) {
 		console.error(error);
 	}
