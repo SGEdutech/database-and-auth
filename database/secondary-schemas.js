@@ -72,7 +72,7 @@ const ResourceSchema = new Schema({
 	title: String,
 	students: [String],
 	description: String,
-	type: { type: String, enum: ['refrence meterial', 'homework', 'tests', 'video'], default: 'refrence meterial' },
+	type: { type: String, enum: ['refrence material', 'homework', 'tests', 'video'], default: 'refrence material' },
 	ytUrl: String
 });
 

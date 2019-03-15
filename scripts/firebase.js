@@ -1,3 +1,4 @@
+// TODO: Handle destructureing errors
 const axios = require('axios');
 const { authorizationKey, projectId } = require('../config.json').FIREBASE;
 

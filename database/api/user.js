@@ -9,7 +9,7 @@ const sendWelcomeMail = require('../../scripts/send-welcome-mail');
 const { ObjectId } = require('mongoose').Types;
 const { isProd } = require('../../config.json');
 
-route.get('/info', (req, res) => res.send(req.user));
+route.get('/info', (req, res) => res.send(req.user || {}));
 
 // todo - fix this route
 route.get('/all', (req, res) => {
