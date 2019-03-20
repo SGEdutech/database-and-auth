@@ -32,7 +32,6 @@ async function claimListing(userID, listingInfo = {}) {
 		const listingModel = categoryToModel[listingCategory].model;
 
 		const listing = await listingModel.findById(listingId);
-		console.log(listing.claimedBy);
 		if (listing.claimedBy !== undefined) throw new Error('Listing already claimed')
 
 		transaction.update(listingModelName, listingId, { claimedBy: userID });
@@ -67,7 +66,7 @@ async function unclaimListing(userID, listingInfo = {}) {
 				if (claimedListing.listingCategory === listingCategory && claimedListing.listingId === listingId) {
 					isValidRequest = true;
 				}
-			})
+			});
 		}
 		if (isValidRequest === false) throw new Error('Bad request');
 
@@ -81,7 +80,7 @@ async function unclaimListing(userID, listingInfo = {}) {
 		console.error(err);
 		await transaction.rollback().catch(err1 => console.error(err1));
 		transaction.clean();
-		return new Promise((resolve, reject) => reject(new Error(err)))
+		return new Promise((resolve, reject) => reject(new Error(err)));
 	}
 }
 

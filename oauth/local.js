@@ -5,7 +5,6 @@ const User = require('../database/models/user');
 const DatabaseAPIClass = require('../database/api-functions');
 const APIHelperFunctions = new DatabaseAPIClass(User);
 const {
-	getNotificationKey,
 	removeRegestrationIdFromGroup,
 	shoveRegistrationIdInAGroup
 } = require('../scripts/firebase');
