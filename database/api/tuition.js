@@ -840,6 +840,7 @@ route.post('/:tuitionId/course', (req, res) => {
 	const { tuitionId } = req.params;
 	const _id = new ObjectId();
 	req.body._id = _id;
+
 	Tuition.findByIdAndUpdate(tuitionId, { $push: { courses: req.body } }, { new: true })
 		.then(tuition => {
 			let course = _.find(tuition.courses, { _id });
