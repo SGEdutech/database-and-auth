@@ -516,6 +516,9 @@ route.put('/:tuitionId/student/:studentId', (req, res) => {
 	const { tuitionId, studentId } = req.params;
 
 	prependToObjKey(req.body, 'students.$.');
+	if (req.body['students.$.email']) {
+		req.body['$pull'] = { requests: { email: req.body['students.$.email'] } };
+	}
 
 	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), students: { $elemMatch: { _id: ObjectId(studentId) } } }, req.body, { new: true })
 		.then(tuition => res.send(_.find(tuition.students, { _id: ObjectId(studentId) })))
