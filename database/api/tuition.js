@@ -999,7 +999,7 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) =
 		.then(tuition => {
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			const batch = _.find(course.batches, { _id: ObjectId(batchId) });
-			res.send(batch.students);
+			res.send({ batchId: batch._id, students: batch.students });
 		}).catch(err => console.error(err));
 });
 
