@@ -36,7 +36,7 @@ const TuitionSchema = new Schema({
 	toAge: { type: Number, min: [0, 'Age can\'t be negative'], max: [100, 'Too old to attend tuition'] },
 	addressLine1: String,
 	addressLine2: String,
-	city: { type: String, required },
+	city: String,
 	district: String,
 	state: String,
 	pin: Number,
