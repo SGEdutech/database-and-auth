@@ -442,7 +442,7 @@ route.post('/:tuitionId/student', (req, res) => {
 	let idOfStudentToBeAdded;
 	let updateQuery;
 	let options;
-	let batchIdOfStudent;
+	const studentToBatchMap = {};
 
 	if (Array.isArray(req.body.students)) {
 		isArray = true;
@@ -460,6 +460,7 @@ route.post('/:tuitionId/student', (req, res) => {
 				delete student.batchInfo;
 				return;
 			}
+			studentToBatchMap[student._id] = student.batchInfo.batchId;
 			courseAndBatchIds.push(student.batchInfo.courseId, student.batchInfo.batchId);
 		});
 		courseAndBatchIds = [...new Set(courseAndBatchIds)];
@@ -489,7 +490,7 @@ route.post('/:tuitionId/student', (req, res) => {
 			if (req.body.batchInfo.batchId === undefined) throw new Error('Course Id not provided');
 
 			const { courseId, batchId } = req.body.batchInfo;
-			batchIdOfStudent = batchId;
+			studentToBatchMap[_id] = batchId;
 			delete req.body.batchInfo;
 
 			updateQuery = { $push: { 'students': req.body, 'courses.$[i].batches.$[j].students': _id }, $pull: { requests: { email: req.body.email } } };
@@ -508,17 +509,19 @@ route.post('/:tuitionId/student', (req, res) => {
 			if (isArray) {
 				let studentsAdded = tuition.students.filter(student => idsOfAddedStudents.indexOf(student._id.toString()) !== -1);
 				studentsAdded = studentsAdded.map(student => student.toObject());
-				studentsAdded.forEach(student => student.batchAdded = batchIdOfStudent);
+				studentsAdded.forEach(student => student.batchAdded = studentToBatchMap[student._id]);
 				res.send(studentsAdded);
+				if (isProd === false) return;
 				const emailIdsOfStudentsAdded = studentsAdded.map(student => student.email);
-				if (isProd) sendMail(emailIdsOfStudentsAdded, 'Add: Study Monitor', emailTemplate);
+				sendMail(emailIdsOfStudentsAdded, 'Add: Study Monitor', emailTemplate);
 			} else {
 				let studentAdded = _.find(tuition.students, { _id: idOfStudentToBeAdded });
 				studentAdded = studentAdded.toObject();
-				studentAdded.batchAdded = batchIdOfStudent;
+				studentAdded.batchAdded = studentToBatchMap[studentAdded._id];
 				res.send(studentAdded);
+				if (isProd === false) return;
 				const studentEmail = studentAdded.email;
-				if (isProd) sendMail(studentEmail, 'Add: Study Monitor', emailTemplate);
+				sendMail(studentEmail, 'Add: Study Monitor', emailTemplate);
 			}
 		}).catch(err => console.error(err));
 });
