@@ -539,7 +539,7 @@ route.put('/:tuitionId/student/:studentId', (req, res) => {
 route.delete('/:tuitionId/student/all', (req, res) => {
 	const { tuitionId } = req.params;
 
-	Tuition.findByIdAndUpdate(tuitionId, { students: [] })
+	Tuition.findByIdAndUpdate(tuitionId, { 'students': [], 'courses.$[].batches.$[].students': [] })
 		.then(tuition => res.send(tuition.students))
 		.catch(err => console.error(err));
 });
