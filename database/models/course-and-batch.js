@@ -6,7 +6,7 @@ const ScheduleSchema = new Schema({
 	date: { type: Date, required },
 	fromTime: Number,
 	toTime: Number,
-	topic: { type: String, required },
+	topic: String,
 	faculty: String,
 	studentsAbsent: [Schema.Types.ObjectId]
 });
