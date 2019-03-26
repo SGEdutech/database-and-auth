@@ -453,20 +453,31 @@ route.post('/:tuitionId/student', (req, res) => {
 			idsOfAddedStudents.push(_id.toString());
 			emailsOfStudentAdded.push(studentToBeAdded.email);
 		});
-
-		if (req.body.batchInfo) {
-			if (req.body.batchInfo.courseId === undefined) throw new Error('Course Id not provided');
-			if (req.body.batchInfo.batchId === undefined) throw new Error('Course Id not provided');
-
-			const { courseId, batchId } = req.body.batchInfo;
-			batchIdOfStudent = batchId;
-
-			updateQuery = { $push: { 'students': { $each: req.body.students }, 'courses.$[i].batches.$[j].students': { $each: idsOfAddedStudents } }, $pull: { requests: { email: { $in: emailsOfStudentAdded } } } };
-			options = { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true };
-		} else {
-			updateQuery = { $push: { students: { $each: req.body.students } }, $pull: { requests: { email: { $in: emailsOfStudentAdded } } } };
-			options = { new: true };
-		}
+		let courseAndBatchIds = [];
+		req.body.students.forEach(student => {
+			if (Boolean(student.batchInfo) === false) return;
+			if (Boolean(student.batchInfo.courseId) === false || Boolean(student.batchInfo.batchId) === false) {
+				delete student.batchInfo;
+				return;
+			}
+			courseAndBatchIds.push(student.batchInfo.courseId, student.batchInfo.batchId);
+		});
+		courseAndBatchIds = [...new Set(courseAndBatchIds)];
+		const arrayFilterConfig = courseAndBatchIds.map(_id => {
+			const obj = {};
+			// The key has been prefixed as array filter key requires a alpha numric key begining with a lowercase letter
+			obj[`pre${_id}._id`] = ObjectId(_id);
+			return obj;
+		});
+		const pushQuery = { students: { $each: req.body.students } };
+		req.body.students.forEach(student => {
+			if (Boolean(student.batchInfo) === false) return;
+			const studentBatchInfo = student.batchInfo;
+			delete student.batchInfo;
+			pushQuery[`courses.$[pre${studentBatchInfo.courseId}].batches.$[pre${studentBatchInfo.batchId}].students`] = student._id;
+		});
+		updateQuery = { $push: pushQuery, $pull: { requests: { email: { $in: emailsOfStudentAdded } } } };
+		options = { arrayFilters: arrayFilterConfig, new: true };
 	} else {
 		isArray = false;
 		const _id = new ObjectId();
