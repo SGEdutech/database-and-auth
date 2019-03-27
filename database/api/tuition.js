@@ -475,7 +475,11 @@ route.post('/:tuitionId/student', (req, res) => {
 			if (Boolean(student.batchInfo) === false) return;
 			const studentBatchInfo = student.batchInfo;
 			delete student.batchInfo;
-			pushQuery[`courses.$[pre${studentBatchInfo.courseId}].batches.$[pre${studentBatchInfo.batchId}].students`] = student._id;
+			if (pushQuery[`courses.$[pre${studentBatchInfo.courseId}].batches.$[pre${studentBatchInfo.batchId}].students`]) {
+				pushQuery[`courses.$[pre${studentBatchInfo.courseId}].batches.$[pre${studentBatchInfo.batchId}].students`]['$each'].push(student._id);
+				return;
+			}
+			pushQuery[`courses.$[pre${studentBatchInfo.courseId}].batches.$[pre${studentBatchInfo.batchId}].students`] = { $each: [student._id] };
 		});
 		updateQuery = { $push: pushQuery, $pull: { requests: { email: { $in: emailsOfStudentAdded } } } };
 		options = { arrayFilters: arrayFilterConfig, new: true };
