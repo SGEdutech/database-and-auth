@@ -1564,6 +1564,10 @@ route.get('/:tuitionId/resource', (req, res) => {
 // FIXME: Unwanted parameters in req.body
 route.post('/:tuitionId/resource', (req, res) => {
 	const { tuitionId } = req.params;
+
+	// Cordova sends data in json
+	if (req.body.dataInJson) req.body = JSON.stringify(req.body.dataInJson);
+
 	const _id = new ObjectId();
 	req.body._id = _id;
 
