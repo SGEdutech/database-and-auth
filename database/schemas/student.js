@@ -21,7 +21,8 @@ const PaymentSchema = new Schema({
 	discountAmount: Number,
 	discountReason: String,
 	nextInstallmentDate: Date,
-	installments: [InstallmentSchema]
+	installments: [InstallmentSchema],
+	createdAt: { type: Date, default: Date.now }
 });
 
 const StudentSchema = new Schema({
