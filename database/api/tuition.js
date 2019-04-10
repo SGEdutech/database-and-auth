@@ -1598,7 +1598,6 @@ route.delete('/:tuitionId/resource/:resourceId', (req, res) => {
 	Tuition.findByIdAndUpdate(tuitionId, { $pull: { resources: { _id: resourceId } } })
 		.then(tuition => {
 			const deletedResource = _.find(tuition.resources, { _id: ObjectId(resourceId) });
-			// Test
 			res.send(deletedResource);
 			return deleteThisShit(path.join(process.cwd(), deletedResource.path));
 		}).catch(err => console.error(err));
@@ -1656,6 +1655,16 @@ route.put('/:tuitionId/test/:testId', async (req, res) => {
 		prependToObjKey(req.body, 'tests.$.');
 		const updatedTuition = await Tuition.findOneAndUpdate({ '_id': tuitionId, 'tests._id': testId }, req.body, { new: true });
 		res.send(_.find(updatedTuition.tests, { _id: ObjectId(testId) }));
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.delete('/:tuitionId/test/:testId/marks', async (req, res) => {
+	try {
+		const { testId, tuitionId } = req.params;
+		const oldTuition = await Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), tests: { $elemMatch: { _id: ObjectId(testId) } } }, { 'tests.$.reports': [] }, { new: true });
+		res.send(_.find(oldTuition.tests, { _id: ObjectId(testId) }));
 	} catch (error) {
 		console.error(error);
 	}

@@ -10,11 +10,14 @@ const ContactSchema = new Schema({
 
 const ReviewsOwnedSchema = new Schema({
 	category: String,
-	outerId: { type: String },
+	outerId: String,
 	innerId: String
 });
 
-const ImportantDateSchema = new Schema({ title: String, date: Date });
+const ImportantDateSchema = new Schema({
+	title: String,
+	date: Date
+});
 
 const ReviewSchema = new Schema({
 	likes: { type: Number, default: 0 },
