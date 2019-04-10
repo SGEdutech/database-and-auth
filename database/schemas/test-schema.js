@@ -11,6 +11,8 @@ const ReportSchema = new Schema({
 const TestSchema = new Schema({
 	name: { type: String, lowercase: true, required },
 	date: { type: Date, required },
+	fromTime: Number,
+	toTime: Number,
 	maxMarks: { type: Number, required },
 	batchIds: [Schema.Types.ObjectId],
 	reports: [ReportSchema]
