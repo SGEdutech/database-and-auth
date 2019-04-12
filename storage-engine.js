@@ -113,8 +113,8 @@ const resourcesStorage = multer.diskStorage({
 });
 
 const uploadResources = multer({
-	storage: resourcesStorage
-	// limits: {fileSize: 1024 * 1024},  // Unit Bytes
+	storage: resourcesStorage,
+	limits: { fileSize: 1024 * 1024 * 10 } // Unit Bytes
 }).any();
 
 function resourcesMiddleware(req, res, next) {
