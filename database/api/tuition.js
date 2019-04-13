@@ -1576,9 +1576,14 @@ route.post('/:tuitionId/resource', (req, res) => {
 		req.body.path = req.files[0].path;
 	}
 
-	Tuition.findByIdAndUpdate(tuitionId, { $push: { resources: req.body } }, { new: true })
-		.then(tuition => res.send(_.find(tuition.resources, { _id })))
-		.catch(err => console.error(err));
+	Tuition.findOneAndUpdate({ '_id': ObjectId(tuitionId), 'resources.9': { $exists: false } }, { $push: { resources: req.body } }, { new: true })
+		.then(tuition => {
+			if (tuition === null) {
+				console.error('Resource maxed out');
+				return;
+			}
+			res.send(_.find(tuition.resources, { _id }));
+		}).catch(err => console.error(err));
 });
 
 route.put('/:tuitionId/resource/:resourceId', (req, res) => {
