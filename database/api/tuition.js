@@ -1528,7 +1528,7 @@ route.post('/:tuitionId/mail', (req, res) => {
 });
 
 // Resources
-route.get('/:tuitionId/reesource/all', (req, res) => {
+route.get('/:tuitionId/resource/all', (req, res) => {
 	const { tuitionId } = req.params;
 	Tuition.findById(tuitionId).select('resources')
 		.then(tuition => res.send(tuition.resources))
