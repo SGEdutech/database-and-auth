@@ -1017,7 +1017,7 @@ route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 	const { tuitionId, courseId } = req.params;
 	const _id = new ObjectId();
 	req.body._id = _id;
-	if (req.body.code) req.body.code = req.body.code.trim();
+	if (req.body.code) req.body.code = req.body.code.toLowerCase().trim();
 
 	if (typeof req.body.students === 'string') req.body.students = [req.body.students];
 
