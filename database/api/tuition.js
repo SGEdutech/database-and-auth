@@ -891,7 +891,7 @@ route.post('/:tuitionId/course', (req, res) => {
 	const _id = new ObjectId();
 	req.body._id = _id;
 
-	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), courses: { $not: { $elemMatch: { code: req.body.code } } } }, { $push: { courses: req.body } }, { new: true })
+	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), courses: { $not: { $elemMatch: { code: req.body.code.trim() } } } }, { $push: { courses: req.body } }, { new: true })
 		.then(tuition => {
 			if (Boolean(tuition) === false) {
 				console.error('A Course with this code is already added');

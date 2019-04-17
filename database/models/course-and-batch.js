@@ -19,7 +19,7 @@ const BatchSchema = new Schema({
 });
 
 const CourseSchema = new Schema({
-	code: { type: String, lowercase: true, required },
+	code: { type: String, lowercase: true, trim: true, required },
 	fees: { type: Number, required },
 	gstPercentage: { type: Number, min: 0, max: 100 },
 	description: String,
