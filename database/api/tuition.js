@@ -1039,15 +1039,17 @@ route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 
 route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
-
-	//FIXME: Implement this diffently on frontend
-	if (typeof req.body.students === 'string') req.body.students = [req.body.students];
-	if (req.body.students === undefined) req.body.students = [];
+	if (req.body.code) req.body.code = req.body.code.toLowerCase().trim();
+	const searchQuery = req.body.code ? { '_id': ObjectId(tuitionId), 'courses.batches': { $not: { $elemMatch: { _id: { $ne: ObjectId(batchId) }, code: req.body.code } } } } : { _id: ObjectId(tuitionId) };
 
 	prependToObjKey(req.body, 'courses.$[i].batches.$[j].');
 
-	Tuition.findByIdAndUpdate(tuitionId, req.body, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
+	Tuition.findOneAndUpdate(searchQuery, req.body, { arrayFilters: [{ 'i._id': ObjectId(courseId) }, { 'j._id': ObjectId(batchId) }], new: true })
 		.then(tuition => {
+			if (Boolean(tuition) === false) {
+				console.error('A batch with this code already exists');
+				return;
+			}
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			let batch = _.find(course.batches, { _id: ObjectId(batchId) });
 			batch = batch.toObject();
