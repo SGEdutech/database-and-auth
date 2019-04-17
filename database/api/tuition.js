@@ -914,6 +914,7 @@ route.post('/:tuitionId/course', (req, res) => {
 
 route.put('/:tuitionId/course/:courseId', (req, res) => {
 	const { tuitionId, courseId } = req.params;
+	if (req.body.code) req.body.code = req.body.code.toLowerCase().trim();
 	const searchQuery = req.body.code ? { '_id': tuitionId, 'courses._id': courseId, 'courses': { $not: { $elemMatch: { _id: { $ne: ObjectId(courseId) }, code: req.body.code } } } } : { '_id': tuitionId, 'courses._id': courseId };
 
 	prependToObjKey(req.body, 'courses.$.');
