@@ -460,12 +460,17 @@ route.post('/:tuitionId/student', (req, res) => {
 		isArray = true;
 		const emailsOfStudentToBeAdded = [];
 		const rollNumberOfStudentsToBeAdded = [];
+		// Triming email and rollnumbers
+		req.body.students.forEach(student => {
+			if (student.email) student.email = student.email.trim();
+			if (student.rollNumber) student.rollNumber = student.rollNumber.trim();
+		});
 		req.body.students.forEach(studentToBeAdded => {
 			const _id = new ObjectId();
 			studentToBeAdded._id = _id;
 			idsOfAddedStudents.push(_id.toString());
-			emailsOfStudentToBeAdded.push(studentToBeAdded.email);
-			rollNumberOfStudentsToBeAdded.push(studentToBeAdded.rollNumber);
+			emailsOfStudentToBeAdded.push(studentToBeAdded.email.trim());
+			rollNumberOfStudentsToBeAdded.push(studentToBeAdded.rollNumber.trim());
 		});
 		findQuery = { _id: ObjectId(tuitionId), students: { $not: { $elemMatch: { email: { $in: emailsOfStudentToBeAdded }, rollNumber: { $in: rollNumberOfStudentsToBeAdded } } } } };
 		// Checking of email and roll number are duplicate when in production to avoid error in undefined values
@@ -508,6 +513,9 @@ route.post('/:tuitionId/student', (req, res) => {
 		updateQuery = { $push: pushQuery, $pull: { requests: { email: { $in: emailsOfStudentToBeAdded } } } };
 		options = { arrayFilters: arrayFilterConfig, new: true };
 	} else {
+		// Triming values so it can be used for validations too
+		if (req.body.email) req.body.email = req.body.email.trim();
+		if (req.body.rollNumber) req.body.rollNumber = req.body.rollNumber.trim();
 		isArray = false;
 		findQuery = { _id: ObjectId(tuitionId), students: { $not: { $elemMatch: { email: req.body.email, rollNumber: req.body.rollNumber } } } };
 		const _id = new ObjectId();
