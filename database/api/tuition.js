@@ -462,8 +462,8 @@ route.post('/:tuitionId/student', (req, res) => {
 		const rollNumberOfStudentsToBeAdded = [];
 		// Triming email and rollnumbers
 		req.body.students.forEach(student => {
-			if (student.email) student.email = student.email.trim();
-			if (student.rollNumber) student.rollNumber = student.rollNumber.trim();
+			if (student.email) student.email = student.email.toLowerCase().trim();
+			if (student.rollNumber) student.rollNumber = student.rollNumber.toLowerCase().trim();
 		});
 		req.body.students.forEach(studentToBeAdded => {
 			const _id = new ObjectId();
@@ -514,8 +514,8 @@ route.post('/:tuitionId/student', (req, res) => {
 		options = { arrayFilters: arrayFilterConfig, new: true };
 	} else {
 		// Triming values so it can be used for validations too
-		if (req.body.email) req.body.email = req.body.email.trim();
-		if (req.body.rollNumber) req.body.rollNumber = req.body.rollNumber.trim();
+		if (req.body.email) req.body.email = req.body.email.toLowerCase().trim();
+		if (req.body.rollNumber) req.body.rollNumber = req.body.rollNumber.toLowerCase().trim();
 		isArray = false;
 		findQuery = { _id: ObjectId(tuitionId), students: { $not: { $elemMatch: { email: req.body.email, rollNumber: req.body.rollNumber } } } };
 		const _id = new ObjectId();
