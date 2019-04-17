@@ -1037,6 +1037,13 @@ route.put('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 		}).catch(err => console.error(err));
 });
 
+route.delete('/:tuitionId/course/:courseId/batch/all', (req, res) => {
+	const { tuitionId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { 'courses.$[].batches': [] })
+		.then(() => res.send([])).catch(err => console.error(err));
+});
+
 route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
 
