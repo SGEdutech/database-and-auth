@@ -469,8 +469,8 @@ route.post('/:tuitionId/student', (req, res) => {
 			const _id = new ObjectId();
 			studentToBeAdded._id = _id;
 			idsOfAddedStudents.push(_id.toString());
-			emailsOfStudentToBeAdded.push(studentToBeAdded.email.trim());
-			rollNumberOfStudentsToBeAdded.push(studentToBeAdded.rollNumber.trim());
+			emailsOfStudentToBeAdded.push(studentToBeAdded.email);
+			rollNumberOfStudentsToBeAdded.push(studentToBeAdded.rollNumber);
 		});
 		findQuery = { _id: ObjectId(tuitionId), students: { $not: { $elemMatch: { email: { $in: emailsOfStudentToBeAdded }, rollNumber: { $in: rollNumberOfStudentsToBeAdded } } } } };
 		// Checking of email and roll number are duplicate when in production to avoid error in undefined values
