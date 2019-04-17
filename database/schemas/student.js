@@ -26,9 +26,9 @@ const PaymentSchema = new Schema({
 });
 
 const StudentSchema = new Schema({
-	rollNumber: { type: String, lowercase: true, required },
-	name: { type: String, lowercase: true, required },
-	email: { type: String, lowercase: true, required },
+	rollNumber: { type: String, lowercase: true, trim: true, required },
+	name: { type: String, lowercase: true, trim: true, required },
+	email: { type: String, lowercase: true, trim: true, required },
 	address: String,
 	contactNumber: String,
 	payments: [PaymentSchema]
