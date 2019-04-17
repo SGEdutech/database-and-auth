@@ -1539,8 +1539,14 @@ route.post('/:tuitionId/discount', (req, res) => {
 	const _id = new ObjectId();
 	req.body._id = _id;
 
-	Tuition.findByIdAndUpdate(tuitionId, { $push: { discounts: req.body } }, { new: true })
-		.then(tuition => res.send(_.find(tuition.discounts, { _id })))
+	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), discounts: { $not: { $elemMatch: { code: req.body.code } } } }, { $push: { discounts: req.body } }, { new: true })
+		.then(tuition => {
+			if (Boolean(tuition) === false) {
+				console.error('A discount with this code has already been added');
+				return;
+			}
+			res.send(_.find(tuition.discounts, { _id }));
+		})
 		.catch(err => console.error(err));
 });
 
