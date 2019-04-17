@@ -1560,7 +1560,7 @@ route.post('/:tuitionId/discount', (req, res) => {
 	const { tuitionId } = req.params;
 	const _id = new ObjectId();
 	req.body._id = _id;
-	if (req.body.code) req.body.code = req.body.code.trim();
+	if (req.body.code) req.body.code = req.body.code.toLowerCase().trim();
 
 	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), discounts: { $not: { $elemMatch: { code: req.body.code } } } }, { $push: { discounts: req.body } }, { new: true })
 		.then(tuition => {
