@@ -399,6 +399,17 @@ route.get('/student/claimed', (req, res) => {
 	]).then(students => res.send(students)).catch(err => console.error(err));
 });
 
+route.get('/:tuitionId/student/all', (req, res) => {
+	const { tuitionId } = req.params;
+
+	Tuition.aggregate([
+		{ $match: { _id: ObjectId(tuitionId) } },
+		{ $project: { students: 1 } },
+		{ $unwind: '$students' },
+		{ $replaceRoot: { newRoot: '$students' } }
+	]).then(data => res.send(data)).catch(err => console.error(err));
+});
+
 route.get('/:tuitionId/student', (req, res) => {
 	if (req.query._id === undefined) throw new Error('Student id not peovided');
 	const { tuitionId } = req.params;
