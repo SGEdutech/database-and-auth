@@ -12,7 +12,7 @@ const ScheduleSchema = new Schema({
 });
 
 const BatchSchema = new Schema({
-	code: { type: String, lowercase: true, required },
+	code: { type: String, lowercase: true, trim: true, required },
 	description: String,
 	students: [Schema.Types.ObjectId],
 	schedules: [ScheduleSchema]

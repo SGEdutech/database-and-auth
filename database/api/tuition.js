@@ -997,6 +997,7 @@ route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 	const { tuitionId, courseId } = req.params;
 	const _id = new ObjectId();
 	req.body._id = _id;
+	if (req.body.code) req.body.code = req.body.code.trim();
 
 	if (typeof req.body.students === 'string') req.body.students = [req.body.students];
 
@@ -1050,6 +1051,7 @@ route.delete('/:tuitionId/course/:courseId/batch/:batchId', (req, res) => {
 		}).catch(err => console.error(err));
 });
 
+// Student
 route.post('/:tuitionId/course/:courseId/batch/:batchId/student', (req, res) => {
 	const { tuitionId, courseId, batchId } = req.params;
 	// Can't think of a better name
