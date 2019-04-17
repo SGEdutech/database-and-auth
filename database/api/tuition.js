@@ -918,6 +918,15 @@ route.put('/:tuitionId/course/:courseId', (req, res) => {
 		}).catch(err => console.error(err));
 });
 
+route.delete('/:tuitionId/course/all', (req, res) => {
+	const { tuitionId } = req.params;
+
+	Tuition.findByIdAndUpdate(tuitionId, { courses: [] })
+		.then(() => {
+			res.send([]);
+		}).catch(err => console.error(err));
+});
+
 route.delete('/:tuitionId/course/:courseId', (req, res) => {
 	const { tuitionId, courseId } = req.params;
 
