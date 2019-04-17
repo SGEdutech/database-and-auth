@@ -440,6 +440,7 @@ route.post('/:tuitionId/student', (req, res) => {
 	let isArray;
 	const idsOfAddedStudents = [];
 	let idOfStudentToBeAdded;
+	let findQuery;
 	let updateQuery;
 	let options;
 	const studentToBatchMap = {};
@@ -455,6 +456,7 @@ route.post('/:tuitionId/student', (req, res) => {
 			emailsOfStudentToBeAdded.push(studentToBeAdded.email);
 			rollNumberOfStudentsToBeAdded.push(studentToBeAdded.rollNumber);
 		});
+		findQuery = { _id: ObjectId(tuitionId), students: { $not: { $elemMatch: { email: { $in: emailsOfStudentToBeAdded }, rollNumber: { $in: rollNumberOfStudentsToBeAdded } } } } };
 		// Checking of email and roll number are duplicate when in production to avoid error in undefined values
 		if (isProd) {
 			const areEmtriesDuplicate = emailsOfStudentToBeAdded.length !== new Set(emailsOfStudentToBeAdded).size ||
@@ -496,6 +498,7 @@ route.post('/:tuitionId/student', (req, res) => {
 		options = { arrayFilters: arrayFilterConfig, new: true };
 	} else {
 		isArray = false;
+		findQuery = { _id: ObjectId(tuitionId), students: { $not: { $elemMatch: { email: req.body.email, rollNumber: req.body.rollNumber } } } };
 		const _id = new ObjectId();
 		idOfStudentToBeAdded = _id;
 		req.body._id = _id;
@@ -516,9 +519,13 @@ route.post('/:tuitionId/student', (req, res) => {
 		}
 	}
 
-	Tuition.findByIdAndUpdate(tuitionId, updateQuery, options)
+	Tuition.findOneAndUpdate(findQuery, updateQuery, options)
 		.then(tuition => {
 			// FIXME: Make email templates file
+			if (Boolean(tuition) === false) {
+				console.error('Roll number or email is duplicate');
+				return;
+			}
 			const emailTemplate = `<p>${tuition.name} has added you in their study monitor. Login in to <a href="https://eduatlas.com">Eduatlas</a> to get updates and notifications from your institute.</p>
 			<p>To login or signup for FREE click here <a href="https://eduatlas.com">Eduatlas</a></p>`;
 			if (isArray) {
