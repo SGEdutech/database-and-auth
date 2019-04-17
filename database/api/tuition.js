@@ -446,13 +446,24 @@ route.post('/:tuitionId/student', (req, res) => {
 
 	if (Array.isArray(req.body.students)) {
 		isArray = true;
-		const emailsOfStudentAdded = [];
+		const emailsOfStudentToBeAdded = [];
+		const rollNumberOfStudentsToBeAdded = [];
 		req.body.students.forEach(studentToBeAdded => {
 			const _id = new ObjectId();
 			studentToBeAdded._id = _id;
 			idsOfAddedStudents.push(_id.toString());
-			emailsOfStudentAdded.push(studentToBeAdded.email);
+			emailsOfStudentToBeAdded.push(studentToBeAdded.email);
+			rollNumberOfStudentsToBeAdded.push(studentToBeAdded.rollNumber);
 		});
+		// Checking of email and roll number are duplicate when in production to avoid error in undefined values
+		if (isProd) {
+			const areEmtriesDuplicate = emailsOfStudentToBeAdded.length !== new Set(emailsOfStudentToBeAdded).size ||
+				rollNumberOfStudentsToBeAdded.length !== new Set(rollNumberOfStudentsToBeAdded).size;
+			if (areEmtriesDuplicate) {
+				console.error('One or more email or roll number of entries provided is repeated');
+				return;
+			}
+		}
 		let courseAndBatchIds = [];
 		req.body.students.forEach(student => {
 			if (Boolean(student.batchInfo) === false) return;
@@ -481,7 +492,7 @@ route.post('/:tuitionId/student', (req, res) => {
 			}
 			pushQuery[`courses.$[pre${studentBatchInfo.courseId}].batches.$[pre${studentBatchInfo.batchId}].students`] = { $each: [student._id] };
 		});
-		updateQuery = { $push: pushQuery, $pull: { requests: { email: { $in: emailsOfStudentAdded } } } };
+		updateQuery = { $push: pushQuery, $pull: { requests: { email: { $in: emailsOfStudentToBeAdded } } } };
 		options = { arrayFilters: arrayFilterConfig, new: true };
 	} else {
 		isArray = false;
