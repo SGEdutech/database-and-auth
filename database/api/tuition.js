@@ -1575,11 +1575,18 @@ route.post('/:tuitionId/discount', (req, res) => {
 
 route.put('/:tuitionId/discount/:discountId', (req, res) => {
 	const { tuitionId, discountId } = req.params;
+	if (req.body.code) req.body.code = req.body.code.toLowerCase().trim();
+	const searchQuery = req.body.code ? { _id: ObjectId(tuitionId), discounts: { $elemMatch: { _id: ObjectId(discountId) }, $not: { $elemMatch: { _id: { $ne: ObjectId(discountId) }, code: req.body.code } } } } : { _id: ObjectId(tuitionId), discounts: { $elemMatch: { _id: ObjectId(discountId) } } };
 	prependToObjKey(req.body, 'discounts.$.');
 
-	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), discounts: { $elemMatch: { _id: ObjectId(discountId) } } }, req.body, { new: true })
-		.then(tuition => res.send(_.find(tuition.discounts, { _id: ObjectId(discountId) })))
-		.catch(err => console.error(err));
+	Tuition.findOneAndUpdate(searchQuery, req.body, { new: true })
+		.then(tuition => {
+			if (Boolean(tuition) === false) {
+				console.error('A discount with this code already exists');
+				return;
+			}
+			res.send(_.find(tuition.discounts, { _id: ObjectId(discountId) }));
+		}).catch(err => console.error(err));
 });
 
 route.delete('/:tuitionId/discount/all', (req, res) => {
