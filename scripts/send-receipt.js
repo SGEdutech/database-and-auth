@@ -41,7 +41,7 @@ async function sendReceipt(mail, docDef) {
 		const pdfDocument = printer.createPdfKitDocument(docDef);
 		const pdfBuffer = await getDoc(pdfDocument);
 		// console.log(pdfBuffer);
-		await sendMail(mail, 'Reciept', 'PFA', { content: pdfBuffer, filename: 'reciept.pdf', contentType: 'application/pdf' })
+		await sendMail(mail, 'Receipt', 'PFA', { content: pdfBuffer, filename: 'reciept.pdf', contentType: 'application/pdf' })
 		return new Promise(resolve => resolve());
 	} catch (err) {
 		return new Promise((resolve, reject) => reject(err));
