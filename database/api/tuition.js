@@ -475,9 +475,9 @@ route.post('/:tuitionId/student', (req, res) => {
 		findQuery = { _id: ObjectId(tuitionId), students: { $not: { $elemMatch: { email: { $in: emailsOfStudentToBeAdded }, rollNumber: { $in: rollNumberOfStudentsToBeAdded } } } } };
 		// Checking of email and roll number are duplicate when in production to avoid error in undefined values
 		if (isProd) {
-			const areEmtriesDuplicate = emailsOfStudentToBeAdded.length !== new Set(emailsOfStudentToBeAdded).size ||
+			const areEntriesDuplicate = emailsOfStudentToBeAdded.length !== new Set(emailsOfStudentToBeAdded).size ||
 				rollNumberOfStudentsToBeAdded.length !== new Set(rollNumberOfStudentsToBeAdded).size;
-			if (areEmtriesDuplicate) {
+			if (areEntriesDuplicate) {
 				console.error('One or more email or roll number of entries provided is repeated');
 				return;
 			}
