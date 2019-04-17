@@ -1000,8 +1000,12 @@ route.post('/:tuitionId/course/:courseId/batch', (req, res) => {
 
 	if (typeof req.body.students === 'string') req.body.students = [req.body.students];
 
-	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, { $push: { 'courses.$.batches': req.body } }, { new: true })
+	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId, 'courses.batches': { $not: { $elemMatch: { code: req.body.code } } } }, { $push: { 'courses.$.batches': req.body } }, { new: true })
 		.then(tuition => {
+			if (Boolean(tuition) === false) {
+				console.error('A batch with same code already exists');
+				return;
+			}
 			const course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			let batch = _.find(course.batches, { _id });
 			// Type of batch is mongoose docs not vanilla object
