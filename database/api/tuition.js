@@ -914,11 +914,16 @@ route.post('/:tuitionId/course', (req, res) => {
 
 route.put('/:tuitionId/course/:courseId', (req, res) => {
 	const { tuitionId, courseId } = req.params;
+	const searchQuery = req.body.code ? { '_id': tuitionId, 'courses._id': courseId, 'courses': { $not: { $elemMatch: { _id: { $ne: ObjectId(courseId) }, code: req.body.code } } } } : { '_id': tuitionId, 'courses._id': courseId };
 
 	prependToObjKey(req.body, 'courses.$.');
 
-	Tuition.findOneAndUpdate({ '_id': tuitionId, 'courses._id': courseId }, req.body, { new: true })
+	Tuition.findOneAndUpdate(searchQuery, req.body, { new: true })
 		.then(tuition => {
+			if (Boolean(tuition) === false) {
+				console.error('Tuition with this code already exists');
+				return;
+			}
 			let course = _.find(tuition.courses, { _id: ObjectId(courseId) });
 			course = course.toObject();
 			course.numberOfBatches = course.batches.length;
