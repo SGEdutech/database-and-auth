@@ -569,14 +569,27 @@ route.post('/:tuitionId/student', (req, res) => {
 
 route.put('/:tuitionId/student/:studentId', (req, res) => {
 	const { tuitionId, studentId } = req.params;
+	if (req.body.email) req.body.email = req.body.email.toLowerCase().trim();
+	if (req.body.rollNumber) req.body.rollNumber = req.body.rollNumber.toLowerCase().trim();
 
-	prependToObjKey(req.body, 'students.$.');
-	if (req.body['students.$.email']) {
-		req.body['$pull'] = { requests: { email: req.body['students.$.email'] } };
-	}
+	const notElemMatchQuery = { $elemMatch: { _id: { $ne: ObjectId(studentId) }, $or: [] } };
+	if (req.body.email) notElemMatchQuery.$elemMatch.$or.push({ email: req.body.email });
+	if (req.body.rollNumber) notElemMatchQuery.$elemMatch.$or.push({ rollNumber: req.body.rollNumber });
+	const searchQuery = { _id: ObjectId(tuitionId), students: { $elemMatch: { _id: ObjectId(studentId) }, $not: notElemMatchQuery } };
+	// Deleting not query as it being empty will throw an error
+	if (Boolean(req.body.email) === false && Boolean(req.body.rollNumber) === false) delete searchQuery.students.$not;
+	const updateQuery = req.body;
+	prependToObjKey(updateQuery, 'students.$.');
+	if (updateQuery['students.$.email']) updateQuery['$pull'] = { requests: { email: updateQuery['students.$.email'] } };
 
-	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), students: { $elemMatch: { _id: ObjectId(studentId) } } }, req.body, { new: true })
-		.then(tuition => res.send(_.find(tuition.students, { _id: ObjectId(studentId) })))
+	Tuition.findOneAndUpdate(searchQuery, req.body, { new: true })
+		.then(tuition => {
+			if (Boolean(tuition) === false) {
+				console.error('A student with same roll number or email already exists');
+				return;
+			}
+			res.send(_.find(tuition.students, { _id: ObjectId(studentId) }));
+		})
 		.catch(err => console.error(err));
 });
 
@@ -923,7 +936,7 @@ route.put('/:tuitionId/course/:courseId', (req, res) => {
 	Tuition.findOneAndUpdate(searchQuery, req.body, { new: true })
 		.then(tuition => {
 			if (Boolean(tuition) === false) {
-				console.error('Tuition with this code already exists');
+				console.error('A course with this code already exists');
 				return;
 			}
 			let course = _.find(tuition.courses, { _id: ObjectId(courseId) });
