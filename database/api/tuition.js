@@ -1629,7 +1629,6 @@ route.post('/:tuitionId/mail', (req, res) => {
 // Resources
 route.get('/:tuitionId/resource/all', (req, res) => {
 	const { tuitionId } = req.params;
-	console.log('yoooooooooooooooo');
 	Tuition.findById(tuitionId).select('resources')
 		.then(tuition => res.send(tuition.resources))
 		.catch(err => console.error(err));
@@ -1699,12 +1698,28 @@ route.post('/:tuitionId/resource', (req, res) => {
 });
 
 route.put('/:tuitionId/resource/:resourceId', (req, res) => {
+	if (req.body.type) throw new Error('Resource type change not allowed');
 	const { tuitionId, resourceId } = req.params;
+	let searchQuery;
+
+	if (req.body.title) {
+		searchQuery = { '_id': ObjectId(tuitionId), 'resources._id': resourceId, 'resources': { $not: { $elemMatch: { _id: { $ne: ObjectId(resourceId) }, title: req.body.title } } } };
+	} else if (req.body.ytUrl) {
+		searchQuery = { '_id': ObjectId(tuitionId), 'resources._id': resourceId, 'resources': { $not: { $elemMatch: { _id: { $ne: ObjectId(resourceId) }, ytUrl: req.body.ytUrl } } } };
+	} else {
+		searchQuery = { '_id': ObjectId(tuitionId), 'resources._id': resourceId };
+	}
 
 	prependToObjKey(req.body, 'resources.$.');
 
-	Tuition.findOneAndUpdate({ '_id': tuitionId, 'resources._id': resourceId }, req.body, { new: true })
-		.then(tuition => res.send(_.find(tuition.resources, { _id: ObjectId(resourceId) })))
+	Tuition.findOneAndUpdate(searchQuery, req.body, { new: true })
+		.then(tuition => {
+			if (Boolean(tuition) === false) {
+				console.error('Title or ytUrl have values which has already been added');
+				return;
+			}
+			res.send(_.find(tuition.resources, { _id: ObjectId(resourceId) }));
+		})
 		.catch(err => console.error(err));
 });
 
