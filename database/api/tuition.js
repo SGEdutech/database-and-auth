@@ -1629,6 +1629,7 @@ route.post('/:tuitionId/mail', (req, res) => {
 // Resources
 route.get('/:tuitionId/resource/all', (req, res) => {
 	const { tuitionId } = req.params;
+	console.log('yoooooooooooooooo');
 	Tuition.findById(tuitionId).select('resources')
 		.then(tuition => res.send(tuition.resources))
 		.catch(err => console.error(err));
@@ -1661,24 +1662,36 @@ route.get('/:tuitionId/resource', (req, res) => {
 
 // FIXME: Memory leak if someone sends files with different input name
 // FIXME: Unwanted parameters in req.body
+// Title and ytUrl are intended to be unique
 route.post('/:tuitionId/resource', (req, res) => {
 	const { tuitionId } = req.params;
+	let searchParameters;
 
-	// Cordova sends data in json
+	// Cordova sends data in JSON
 	if (req.body.dataInJson) req.body = JSON.parse(req.body.dataInJson);
 
 	const _id = new ObjectId();
 	req.body._id = _id;
 
-	if (req.body.type !== 'video') {
-		if (req.files.length === 0) throw new Error('No rosource found');
-		req.body.path = req.files[0].path;
+	if (req.body.type === 'video') {
+		// Manual validations
+		if (isProd && Boolean(req.body.ytUrl) === false) throw new Error('Youtube link not provided');
+		searchParameters = { '_id': ObjectId(tuitionId), 'resources.9': { $exists: false }, 'resources': { $not: { $elemMatch: { ytUrl: req.body.ytUrl } } } };
+	} else {
+		if (isProd) {
+			// Manual validations
+			if (req.files.length === 0) throw new Error('No rosource found');
+			if (Boolean(req.body.title) === false) throw new Error('Title not provided');
+		}
+		// req.files might be undefined in dev env
+		if (req.files) req.body.path = req.files[0].path;
+		searchParameters = { '_id': ObjectId(tuitionId), 'resources.9': { $exists: false }, 'resources': { $not: { $elemMatch: { title: req.body.title } } } };
 	}
 
-	Tuition.findOneAndUpdate({ '_id': ObjectId(tuitionId), 'resources.9': { $exists: false } }, { $push: { resources: req.body } }, { new: true })
+	Tuition.findOneAndUpdate(searchParameters, { $push: { resources: req.body } }, { new: true })
 		.then(tuition => {
 			if (tuition === null) {
-				console.error('Resource maxed out');
+				console.error('Resource maxed out or some entry is duplicate');
 				return;
 			}
 			res.send(_.find(tuition.resources, { _id }));
