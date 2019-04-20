@@ -19,7 +19,7 @@ const sendMail = require('../../scripts/send-mail');
 const sendreceipt = require('../../scripts/send-receipt');
 const getAddStudentEmailTemplate = require('../../scripts/get-add-student-email-template');
 const { isProd } = require('../../config.json');
-
+console.log(getAddStudentEmailTemplate);
 function titleCase(str) {
 	const splitStr = str.toLowerCase().split(' ');
 	splitStr.forEach((word, index) => splitStr[index] = splitStr[index].charAt(0).toUpperCase() + splitStr[index].substring(1));

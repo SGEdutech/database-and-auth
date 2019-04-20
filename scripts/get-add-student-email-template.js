@@ -52,4 +52,4 @@ function getAddStudentEmailTemplate(instituteName) {
 	`;
 }
 
-module.export = getAddStudentEmailTemplate;
+module.exports = getAddStudentEmailTemplate;
