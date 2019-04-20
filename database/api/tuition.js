@@ -17,6 +17,7 @@ const promotedSearchDbFunctions = new DbAPIClass(PromotedSearch);
 const promotedRelatedDbFunctions = new DbAPIClass(PromotedRelated);
 const sendMail = require('../../scripts/send-mail');
 const sendreceipt = require('../../scripts/send-receipt');
+const getAddStudentEmailTemplate = require('../../scripts/get-add-student-email-template');
 const { isProd } = require('../../config.json');
 
 function titleCase(str) {
@@ -545,8 +546,6 @@ route.post('/:tuitionId/student', (req, res) => {
 				console.error('Roll number or email is duplicate');
 				return;
 			}
-			const emailTemplate = `<p>${tuition.name} has added you in their study monitor. Login in to <a href="https://eduatlas.com">Eduatlas</a> to get updates and notifications from your institute.</p>
-			<p>To login or signup for FREE click here <a href="https://eduatlas.com">Eduatlas</a></p>`;
 			if (isArray) {
 				let studentsAdded = tuition.students.filter(student => idsOfAddedStudents.indexOf(student._id.toString()) !== -1);
 				studentsAdded = studentsAdded.map(student => student.toObject());
@@ -562,6 +561,7 @@ route.post('/:tuitionId/student', (req, res) => {
 				res.send(studentAdded);
 				if (isProd === false) return;
 				const studentEmail = studentAdded.email;
+				const emailTemplate = getAddStudentEmailTemplate(tuition.name);
 				sendMail(studentEmail, 'Add: Study Monitor', emailTemplate);
 			}
 		}).catch(err => console.error(err));
