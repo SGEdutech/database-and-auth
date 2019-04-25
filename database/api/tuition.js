@@ -146,7 +146,7 @@ route.get('/multiple', (req, res) => {
 route.get('/search', async (req, res) => {
 	try {
 		const opts = req.query.opts && JSON.parse(req.query.opts);
-		const { demands = 0, limit = 0, skip = 0 } = opts;
+		const { demands = 0, limit = 0, page = 1 } = opts;
 		const searchRegex = new RegExp(req.query.search || '', 'i');
 		const locationRegex = new RegExp(req.query.location, 'i');
 		const databaseQuery = req.query.location ? {
@@ -161,7 +161,7 @@ route.get('/search', async (req, res) => {
 				] }
 			]
 		} : { name: searchRegex };
-		const searchData = await Tuition.find(databaseQuery, demands, { limit, skip });
+		const searchData = await Tuition.paginate(databaseQuery, { limit, select: demands, page });
 		res.send(searchData);
 	} catch (error) {
 		console.error(error);

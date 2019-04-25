@@ -25,6 +25,7 @@
     "lodash": "^4.17.11",
     "memory-cache": "^0.2.0",
     "mongoose": "^5.2.12",
+    "mongoose-paginate": "^5.0.3",
     "mongoose-sequence": "^4.0.1",
     "mongoose-transactions": "^1.1.1",
     "mongoose-unique-array": "^0.2.0",

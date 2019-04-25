@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
 const {
 	ReviewSchema,
@@ -103,6 +104,8 @@ const TuitionSchema = new Schema({
 // TuitionSchema.path('email').validate(isValidEmail, 'Email ID not valid');
 
 // TuitionSchema.path('website').validate(isValidWebsite, 'Website link not valid');
+
+TuitionSchema.plugin(mongoosePaginate);
 
 const Tuition = mongoose.model('tuition', TuitionSchema);
 
