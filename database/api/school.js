@@ -35,10 +35,10 @@ function getPromotedData(queryObject) {
 
 	return new Promise((resolve, reject) => {
 		promotedDbFunction.getMultipleData({ category: 'school' }, { limit: demandedAdvertisements }).then(promotedInfos => {
-				const promotedListingIdArr = [];
-				promotedInfos.forEach(promotedInfo => promotedListingIdArr.push(promotedInfo.listingId));
-				return schoolDbFunctions.getDataFromMultipleIds(promotedListingIdArr, queryObject)
-			})
+			const promotedListingIdArr = [];
+			promotedInfos.forEach(promotedInfo => promotedListingIdArr.push(promotedInfo.listingId));
+			return schoolDbFunctions.getDataFromMultipleIds(promotedListingIdArr, queryObject)
+		})
 			.then(data => resolve(data)).catch(err => reject(err));
 	});
 }
@@ -94,56 +94,39 @@ route.get('/', (req, res) => {
 	delete queryObject.incrementView;
 
 	schoolDbFunctions.getSpecificData(req.query, {
-			incrementView,
-			homeAdvertisement,
-			searchAdvertisement,
-			relatedAdvertisement
-		}).then(data => res.send(data))
+		incrementView,
+		homeAdvertisement,
+		searchAdvertisement,
+		relatedAdvertisement
+	}).then(data => res.send(data))
 		.catch(err => console.error(err));
 });
 
-route.get('/search', (req, res) => {
-	const queryObject = req.query;
-	const demands = queryObject.demands || '';
-	const skip = parseInt(queryObject.skip, 10) || 0;
-	const limit = parseInt(queryObject.limit, 10) || 0;
-	const isAdvertisementRequested = areAdvertisementsRequested(queryObject);
-	const incrementHits = queryObject.incrementHits || true;
-	const advertisementInfoObject = {
-		homeAdvertisement: queryObject.homeAdvertisement,
-		searchAdvertisement: queryObject.searchAdvertisement,
-		relatedAdvertisement: queryObject.relatedAdvertisement
-	};
-
-	delete queryObject.demands;
-	delete queryObject.skip;
-	delete queryObject.limit;
-	delete queryObject.sortBy;
-	delete queryObject.homeAdvertisement;
-	delete queryObject.searchAdvertisement;
-	delete queryObject.relatedAdvertisement;
-	delete queryObject.incrementHits;
-
-	const searchCriteria = {};
-	const queryKeys = Object.keys(queryObject);
-	queryKeys.forEach(key => {
-		const value = JSON.parse(queryObject[key]);
-		value.search = escapeRegex(value.search); // Sanitize Regex
-		const regexString = value.fullTextSearch ? `^${value.search}$` : value.search;
-		searchCriteria[key] = new RegExp(regexString);
-	});
-
-	const poorDataPromise = schoolDbFunctions.getMultipleData(searchCriteria, { demands, skip, limit, incrementHits });
-
-	if (isAdvertisementRequested === false) {
-		poorDataPromise.then(data => res.send(data)).catch(err => console.error(err));
-		return;
+route.get('/search', async (req, res) => {
+	try {
+		const opts = req.query.opts && JSON.parse(req.query.opts);
+		const { demands = 0, limit = 0, page = 1 } = opts;
+		const searchRegex = new RegExp(req.query.search || '', 'i');
+		const locationRegex = new RegExp(req.query.location, 'i');
+		const databaseQuery = req.query.location ? {
+			$and: [
+				{ name: searchRegex },
+				{
+					$or: [
+						{ addressLine1: locationRegex },
+						{ addressLine2: locationRegex },
+						{ city: locationRegex },
+						{ district: locationRegex },
+						{ state: locationRegex }
+					]
+				}
+			]
+		} : { name: searchRegex };
+		const searchData = await School.paginate(databaseQuery, { limit, select: demands, page });
+		res.send(searchData);
+	} catch (error) {
+		console.error(error);
 	}
-
-	const promotedDataPromise = getPromotedData(advertisementInfoObject);
-
-	Promise.all([promotedDataPromise, poorDataPromise]).then(dataArr => res.send(dataArr[0].concat(dataArr[1])))
-		.catch(err => console.error(err));
 });
 
 route.get('/super-admin', (req, res) => {
