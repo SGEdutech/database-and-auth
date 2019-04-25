@@ -145,10 +145,23 @@ route.get('/multiple', (req, res) => {
 
 route.get('/search', async (req, res) => {
 	try {
-		const opts = JSON.parse(req.query.opts);
+		const opts = req.query.opts && JSON.parse(req.query.opts);
 		const { demands = 0, limit = 0, skip = 0 } = opts;
 		const searchRegex = new RegExp(req.query.search || '', 'i');
-		const searchData = Tuition.find({ name: searchRegex }, demands, { limit, skip });
+		const locationRegex = new RegExp(req.query.location, 'i');
+		const databaseQuery = req.query.location ? {
+			$and: [
+				{ name: searchRegex },
+				{ $or: [
+					{ addressLine1: locationRegex },
+					{ addressLine2: locationRegex },
+					{ city: locationRegex },
+					{ district: locationRegex },
+					{ state: locationRegex }
+				] }
+			]
+		} : { name: searchRegex };
+		const searchData = await Tuition.find(databaseQuery, demands, { limit, skip });
 		res.send(searchData);
 	} catch (error) {
 		console.error(error);
