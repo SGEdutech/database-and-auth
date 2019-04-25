@@ -19,7 +19,7 @@ const sendMail = require('../../scripts/send-mail');
 const sendreceipt = require('../../scripts/send-receipt');
 const getAddStudentEmailTemplate = require('../../scripts/get-add-student-email-template');
 const { isProd } = require('../../config.json');
-console.log(getAddStudentEmailTemplate);
+
 function titleCase(str) {
 	const splitStr = str.toLowerCase().split(' ');
 	splitStr.forEach((word, index) => splitStr[index] = splitStr[index].charAt(0).toUpperCase() + splitStr[index].substring(1));
@@ -143,53 +143,16 @@ route.get('/multiple', (req, res) => {
 		.catch(err => console.error(err));
 });
 
-route.get('/search', (req, res) => {
-	const queryObject = req.query;
-	const demands = queryObject.demands || '';
-	const skip = parseInt(queryObject.skip, 10) || 0;
-	const limit = parseInt(queryObject.limit, 10) || 0;
-	const isAdvertisementRequested = areAdvertisementsRequested(queryObject);
-	const incrementHits = queryObject.incrementHits || true;
-	const advertisementInfoObject = {
-		homeAdvertisement: queryObject.homeAdvertisement,
-		searchAdvertisement: queryObject.searchAdvertisement,
-		relatedAdvertisement: queryObject.relatedAdvertisement
-	};
-
-	delete queryObject.demands;
-	delete queryObject.skip;
-	delete queryObject.limit;
-	delete queryObject.sortBy;
-	delete queryObject.homeAdvertisement;
-	delete queryObject.searchAdvertisement;
-	delete queryObject.relatedAdvertisement;
-	delete queryObject.incrementHits;
-
-	const searchCriteria = {};
-	const queryKeys = Object.keys(queryObject);
-	queryKeys.forEach(key => {
-		const value = JSON.parse(queryObject[key]);
-		value.search = escapeRegex(value.search); // Sanitize Regex
-		const regexString = value.fullTextSearch ? `^${value.search}$` : value.search;
-		searchCriteria[key] = new RegExp(regexString, 'i');
-	});
-
-	const poorDataPromise = tuitionDbFunctions.getMultipleData(searchCriteria, {
-		demands,
-		skip,
-		limit,
-		incrementHits
-	});
-
-	if (isAdvertisementRequested === false) {
-		poorDataPromise.then(data => res.send(data)).catch(err => console.error(err));
-		return;
+route.get('/search', async (req, res) => {
+	try {
+		const opts = JSON.parse(req.query.opts);
+		const { demands = 0, limit = 0, skip = 0 } = opts;
+		const searchRegex = new RegExp(req.query.search || '', 'i');
+		const searchData = Tuition.find({ name: searchRegex }, demands, { limit, skip });
+		res.send(searchData);
+	} catch (error) {
+		console.error(error);
 	}
-
-	const promotedDataPromise = getPromotedData(advertisementInfoObject);
-
-	Promise.all([promotedDataPromise, poorDataPromise]).then(dataArr => res.send(dataArr[0].concat(dataArr[1])))
-		.catch(err => console.error(err));
 });
 
 // Opimise
