@@ -23,7 +23,8 @@ const ReviewSchema = new Schema({
 	likes: { type: Number, default: 0 },
 	rating: { type: Number, required },
 	owner: Schema.Types.ObjectId,
-	description: String
+	description: String,
+	createdAt: { type: Date, default: Date.now }
 });
 
 const GallerySchema = new Schema({
