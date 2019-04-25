@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate');
 const Schema = mongoose.Schema;
 
 const secondarySchemas = require('../secondary-schemas');
@@ -41,6 +42,8 @@ const EventSchema = new Schema({
 	claimedBy: String,
 	updatedOn: { type: Date, default: Date.now }
 });
+
+SchoolSchema.plugin(mongoosePaginate);
 
 const Event = mongoose.model('event', EventSchema);
 
