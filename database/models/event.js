@@ -43,7 +43,7 @@ const EventSchema = new Schema({
 	updatedOn: { type: Date, default: Date.now }
 });
 
-SchoolSchema.plugin(mongoosePaginate);
+EventSchema.plugin(mongoosePaginate);
 
 const Event = mongoose.model('event', EventSchema);
 
