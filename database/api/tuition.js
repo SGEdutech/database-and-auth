@@ -152,13 +152,15 @@ route.get('/search', async (req, res) => {
 		const databaseQuery = req.query.location ? {
 			$and: [
 				{ name: searchRegex },
-				{ $or: [
-					{ addressLine1: locationRegex },
-					{ addressLine2: locationRegex },
-					{ city: locationRegex },
-					{ district: locationRegex },
-					{ state: locationRegex }
-				] }
+				{
+					$or: [
+						{ addressLine1: locationRegex },
+						{ addressLine2: locationRegex },
+						{ city: locationRegex },
+						{ district: locationRegex },
+						{ state: locationRegex }
+					]
+				}
 			]
 		} : { name: searchRegex };
 		const searchData = await Tuition.paginate(databaseQuery, { limit, select: demands, page });
@@ -1454,10 +1456,8 @@ route.post('/:tuitionId/lead/:leadId/comment', (req, res) => {
 	prependToObjKey(req.body, 'leads.$.');
 
 	Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), leads: { $elemMatch: { _id: ObjectId(leadId) } } }, { $push: { 'leads.$.comments': comment }, $set: req.body }, { new: true })
-		.then(tuition => {
-			const leads = _.find(tuition.leads, { _id: ObjectId(leadId) });
-			res.send(_.find(leads.comments, { _id }));
-		}).catch(err => console.error(err));
+		.then(tuition => res.send(_.find(tuition.leads, { _id: ObjectId(leadId) })))
+		.catch(err => console.error(err));
 });
 
 route.put('/:tuitionId/lead/:leadId/comment/:commentId', (req, res) => {
