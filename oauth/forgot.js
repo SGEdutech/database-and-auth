@@ -41,7 +41,7 @@ route.get('/request-password-reset/:token', (req, res) => {
 		res.send('Your token has either expired or never been requested');
 		return;
 	}
-	res.redirect(`/reset-password.html?${req.params.token}`);
+	res.redirect(`/reset-password/${req.params.token}`);
 });
 
 route.post('/change-password', (req, res) => {
