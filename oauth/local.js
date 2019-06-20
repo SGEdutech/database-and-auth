@@ -35,10 +35,10 @@ passport.use(new LocalStrategy((username, password, done) => {
 					done('Wrong password');
 				} else {
 					console.log('successful local login');
+					//below line will pass user to serialize user phase
+					done(null, user._id);
 				}
 			}
-			//below line will pass user to serialize user phase
-			done(null, user._id);
 		}).catch(err => done(err));
 }));
 
