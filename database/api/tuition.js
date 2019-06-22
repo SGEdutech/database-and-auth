@@ -151,18 +151,25 @@ route.get('/search', async (req, res) => {
 		const locationRegex = new RegExp(req.query.location, 'i');
 		const databaseQuery = req.query.location ? {
 			$and: [
-				{ name: searchRegex },
+				{
+					$or: [
+						{ name: searchRegex },
+						{ meta: searchRegex }
+					]
+				},
 				{
 					$or: [
 						{ addressLine1: locationRegex },
 						{ addressLine2: locationRegex },
 						{ city: locationRegex },
 						{ district: locationRegex },
-						{ state: locationRegex }
+						{ state: locationRegex },
+						{ meta: locationRegex }
+
 					]
 				}
 			]
-		} : { name: searchRegex };
+		} : { name: searchRegex, meta: searchRegex };
 		const searchData = await Tuition.paginate(databaseQuery, { limit, select: demands, page });
 		res.send(searchData);
 	} catch (error) {
@@ -173,7 +180,6 @@ route.get('/search', async (req, res) => {
 // Opimise
 route.get('/relevent', async (req, res) => {
 	try {
-		// Optimise!
 		const search = req.query.search || '';
 		const location = req.query.location || '';
 		const searchWordsRegexArr = search.split(' ').map(word => new RegExp(word, 'i'));
