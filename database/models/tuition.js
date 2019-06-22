@@ -77,6 +77,7 @@ const TuitionSchema = new Schema({
 	receiptConfigPinCode: String,
 	receiptConfigGstNumber: String,
 	requests: [RequestSchema],
+	meta: [String],
 	leads: [LeadsSchema],
 	signedBy: String,
 	claimedBy: String,
