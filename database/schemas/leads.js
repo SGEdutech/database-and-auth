@@ -16,6 +16,8 @@ const LeadsSchema = new Schema({
 	status: { type: String, enum: ['active', 'closed', 'enrolled'], default: 'active' },
 	nextFollowUp: Date,
 	courseId: Schema.Types.ObjectId,
+	leadStrength: { type: String, enum: ['hot', 'cold', 'warm'] },
+	source: String,
 	createdAt: { type: Date, default: Date.now }
 });
 
