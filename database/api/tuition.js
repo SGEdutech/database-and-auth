@@ -169,7 +169,7 @@ route.get('/search', async (req, res) => {
 					]
 				}
 			]
-		} : { name: searchRegex, meta: searchRegex };
+		} : { $or: [{ name: searchRegex }, { meta: searchRegex }] };
 		const searchData = await Tuition.paginate(databaseQuery, { limit, select: demands, page });
 		res.send(searchData);
 	} catch (error) {
