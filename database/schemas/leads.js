@@ -17,7 +17,7 @@ const LeadsSchema = new Schema({
 	nextFollowUp: Date,
 	courseId: Schema.Types.ObjectId,
 	leadStrength: { type: String, enum: ['hot', 'cold', 'warm'] },
-	source: String,
+	source: { type: String, enum: ['eduatlas.com', 'school campaign', 'pamphlets', 'facebook', 'walkin', 'sulekha', 'justdial', 'urbanpro', 'siksha', 'google maps', 'other'] },
 	createdAt: { type: Date, default: Date.now }
 });
 
