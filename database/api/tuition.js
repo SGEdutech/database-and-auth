@@ -1420,6 +1420,28 @@ route.get('/:tuitionId/lead', (req, res) => {
 		.then(tuition => res.send(tuition.leads)).catch(err => console.error(err));
 });
 
+route.post('/:tuitionId/lead/multiple', async (req, res) => {
+	try {
+		const { tuitionId } = req.params;
+		const { leads } = req.body;
+		if (Array.isArray(leads) === false) throw new Error('Leads array not provided');
+
+		const leadsAddedIds = [];
+
+		leads.forEach(lead => {
+			const _id = new ObjectId();
+			lead._id = _id;
+			leadsAddedIds.push(_id);
+		});
+
+		const tuition = await Tuition.findByIdAndUpdate(tuitionId, { $push: { leads: { $each: leads } } }, { new: true })
+		const leadsAdded = tuition.leads.filter(lead => Boolean(leadsAddedIds.find(leadAddedId => leadAddedId.toString() === lead._id.toString())));
+		res.send(leadsAdded);
+	} catch (error) {
+		console.error(error);
+	}
+});
+
 route.post('/:tuitionId/lead', (req, res) => {
 	const { tuitionId } = req.params;
 
