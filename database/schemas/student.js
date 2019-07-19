@@ -31,7 +31,9 @@ const StudentSchema = new Schema({
 	email: { type: String, lowercase: true, trim: true, required },
 	address: String,
 	contactNumber: String,
-	payments: [PaymentSchema]
+	payments: [PaymentSchema],
+	parentName: { type: String, lowercase: true, trim: true },
+	parentPhone: { type: String, lowercase: true, trim: true }
 });
 
 module.exports = StudentSchema;
