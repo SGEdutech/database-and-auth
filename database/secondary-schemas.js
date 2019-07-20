@@ -87,7 +87,9 @@ const ResourceSchema = new Schema({
 
 const RequestSchema = new Schema({
 	name: { type: String, required },
-	email: { type: String, required }
+	email: { type: String, required },
+	phone: { type: String }
+	// change phone to required
 });
 
 exports = module.exports = {
