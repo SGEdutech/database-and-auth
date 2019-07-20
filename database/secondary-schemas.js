@@ -27,6 +27,11 @@ const ReviewSchema = new Schema({
 	createdAt: { type: Date, default: Date.now }
 });
 
+const RoleSchema = new Schema({
+	type: { type: String, enum: ['teacher'], required },
+	email: { type: String, required }
+});
+
 const GallerySchema = new Schema({
 	imageName: { type: String, required },
 	img_path: { type: String, required },
@@ -90,6 +95,7 @@ exports = module.exports = {
 	ReviewsOwnedSchema,
 	ImportantDateSchema,
 	ReviewSchema,
+	RoleSchema,
 	GallerySchema,
 	FacilitiesAndBraggingSchema,
 	TeamSchema,

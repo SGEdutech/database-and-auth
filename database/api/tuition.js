@@ -950,6 +950,7 @@ route.delete('/:tuitionId/course/:courseId', (req, res) => {
 
 	Tuition.findByIdAndUpdate(tuitionId, { $pull: { courses: { _id: courseId } } })
 		.then(tuition => {
+			// FIXME
 			let course = res.send(_.find(tuition.courses, { _id: ObjectId(courseId) }));
 			course = course.toObject();
 			course.numberOfBatches = course.batches.length;
@@ -1817,6 +1818,55 @@ route.delete('/:tuitionId/test/:testId', async (req, res) => {
 		const { testId, tuitionId } = req.params;
 		const oldTuition = await Tuition.findByIdAndUpdate(tuitionId, { $pull: { tests: { _id: ObjectId(testId) } } });
 		res.send(_.find(oldTuition.tests, { _id: ObjectId(testId) }));
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.get('/:tuitionId/role/all', async (req, res) => {
+	try {
+		const { tuitionId } = req.params;
+		const { roles } = await Tuition.findById(tuitionId);
+		res.send(roles);
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.post('/:tuitionId/role', async (req, res) => {
+	try {
+		const { tuitionId } = req.params;
+		const _id = new ObjectId();
+		req.body._id = _id;
+		req.body.email = req.body.email.toLowerCase().trim();
+
+		const tuition = await Tuition.findOneAndUpdate({ _id: ObjectId(tuitionId), roles: { $not: { $elemMatch: { email: req.body.email } } } }, { $push: { roles: req.body } }, { new: true });
+		if (Boolean(tuition) === false) {
+			console.error('A role with this email already exists');
+			return;
+		}
+		const role = _.find(tuition.roles, { _id });
+		res.send(role);
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.delete('/:tuitionId/role/all', async (req, res) => {
+	try {
+		const { tuitionId } = req.params;
+		await Tuition.findByIdAndUpdate(tuitionId, { roles: [] });
+		res.send([]);
+	} catch (error) {
+		console.error(error);
+	}
+});
+
+route.delete('/:tuitionId/role/:roleId', async (req, res) => {
+	try {
+		const { tuitionId, roleId } = req.params;
+		const { roles } = await Tuition.findByIdAndUpdate(tuitionId, { $pull: { roles: { _id: roleId } } });
+		res.send(_.find(roles, { _id: ObjectId(roleId) }));
 	} catch (error) {
 		console.error(error);
 	}

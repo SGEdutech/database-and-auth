@@ -9,6 +9,7 @@ const {
 	CoursesOfferedSchema,
 	DiscountSchema,
 	ResourceSchema,
+	RoleSchema,
 	GallerySchema,
 	RequestSchema
 } = require('../secondary-schemas');
@@ -79,6 +80,7 @@ const TuitionSchema = new Schema({
 	requests: [RequestSchema],
 	meta: [String],
 	leads: [LeadsSchema],
+	roles: [RoleSchema],
 	signedBy: String,
 	claimedBy: String,
 	updatedOn: { type: Date, default: Date.now }
