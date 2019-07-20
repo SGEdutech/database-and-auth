@@ -28,7 +28,7 @@ const ReviewSchema = new Schema({
 });
 
 const RoleSchema = new Schema({
-	type: { type: String, enum: ['teacher'], required },
+	type: { type: String, enum: ['teacher', 'centre manager', 'counselor'], required },
 	email: { type: String, required }
 });
 
