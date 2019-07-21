@@ -251,6 +251,17 @@ route.get('/:tuitionId/dashboard', async (req, res) => {
 							receiptConfigState: 1,
 							receiptConfigPinCode: 1,
 							receiptConfigGstNumber: 1,
+							name: 1,
+							city: 1,
+							state: 1,
+							addressLine1: 1,
+							addressLine2: 1,
+							pin: 1,
+							primaryNumber: 1,
+							secondaryNumber: 1,
+							email: 1,
+							category: 1,
+							meta: 1,
 							_id: 0
 						}
 					}
